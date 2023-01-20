@@ -42,9 +42,9 @@ export function useStats() {
       const raw = rawInput.length / 5 / (newElapsedTime / 60);
       const wpm = wpmInput.length / 5 / (newElapsedTime / 60);
 
-      currentStats.raw = currentRaw;
+      currentStats.raw = raw;
       currentStats.wpm = wpm;
-      stats.raw.push(raw);
+      stats.raw.push(currentRaw);
       stats.wpm.push(wpm);
       stats.characters.push(characters);
       stats.errors.push(errors);
