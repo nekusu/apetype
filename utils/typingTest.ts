@@ -36,7 +36,6 @@ export interface TypingTestValues {
   startTime: number;
   elapsedTime: number;
   isTestRunning: boolean;
-  isTestFinished: boolean;
 }
 
 export const initialValues: TypingTestValues = {
@@ -59,7 +58,6 @@ export const initialValues: TypingTestValues = {
   startTime: 0,
   elapsedTime: 0,
   isTestRunning: false,
-  isTestFinished: false,
 };
 
 export function getRandomWords(count: number, language: Language, lastWord?: string) {

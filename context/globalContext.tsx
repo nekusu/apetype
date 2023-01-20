@@ -7,6 +7,7 @@ export interface GlobalValues {
   testId?: string;
   capsLock: boolean;
   isUserTyping: boolean;
+  isTestFinished: boolean;
   modalOpen: boolean;
 }
 

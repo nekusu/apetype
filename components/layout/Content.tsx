@@ -20,6 +20,7 @@ export default function Content({ children }: ContentProps) {
   const [globalValues, setGlobalValues] = useImmer<GlobalValues>({
     capsLock: false,
     isUserTyping: false,
+    isTestFinished: false,
     modalOpen: false,
   });
   const [settings, _setSettings] = useLocalStorage<Settings>({
@@ -38,6 +39,7 @@ export default function Content({ children }: ContentProps) {
     setGlobalValues((draft) => {
       draft.testId = crypto.randomUUID();
       draft.isUserTyping = false;
+      draft.isTestFinished = false;
     });
   }, [setGlobalValues]);
 
