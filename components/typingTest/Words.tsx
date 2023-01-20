@@ -15,7 +15,7 @@ import { RiCursorFill } from 'react-icons/ri';
 import { Caret, Word } from '.';
 
 export default function Words() {
-  const { modalOpen, setGlobalValues, restartTest } = useGlobal();
+  const { isTestFinished, modalOpen, setGlobalValues } = useGlobal();
   const {
     mode,
     time,
@@ -55,10 +55,14 @@ export default function Words() {
   const handleInput = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (!isTestRunning) setValues((draft) => void (draft.isTestRunning = true));
     const { value } = event.target;
-    wordsCollection.update(value);
+    if (!isTestFinished) wordsCollection.update(value);
     setGlobalValues((draft) => void (draft.isUserTyping = true));
     clearIdle();
     startIdle();
+  };
+  const finishTest = () => {
+    setValues((draft) => void (draft.isTestRunning = false));
+    setGlobalValues((draft) => void (draft.isTestFinished = true));
   };
 
   useDidMount(() => {
@@ -69,7 +73,6 @@ export default function Words() {
     if (wordIndex > highestWordIndex.current) {
       if (mode === 'time' || words.length < (wordAmount || Infinity)) wordsCollection.add(1);
       highestWordIndex.current = wordIndex;
-      console.log(words.length);
     }
   }, [wordIndex]);
   useWindowEvent('keyup', (event) => {
@@ -78,6 +81,7 @@ export default function Words() {
       focusWords();
     }
   });
+
   return (
     <div
       className='relative leading-none'
@@ -95,7 +99,7 @@ export default function Words() {
           e.target.value = value;
           focusWords();
         }}
-        onKeyDown={getHotkeyHandler([[!time && isTestRunning ? 'shift+Enter' : '', restartTest]])}
+        onKeyDown={getHotkeyHandler([[!time && isTestRunning ? 'shift+Enter' : '', finishTest]])}
         ref={inputRef}
         value={inputValue}
       />

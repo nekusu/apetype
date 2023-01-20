@@ -8,7 +8,7 @@ import { useSettings } from 'context/settingsContext';
 import { AnimatePresence } from 'framer-motion';
 
 export default function Home() {
-  const { language, testId, isUserTyping, modalOpen, restartTest } = useGlobal();
+  const { language, testId, isUserTyping, isTestFinished, modalOpen, restartTest } = useGlobal();
   const { mode, time, words, quickRestart } = useSettings();
 
   useDidUpdate(() => {
@@ -31,7 +31,7 @@ export default function Home() {
   return (
     <Transition className='relative grid w-full grid-rows-[1fr_auto_1.25fr] gap-3'>
       <AnimatePresence>
-        {!isUserTyping && <Settings key='settings' />}
+        {!isUserTyping && !isTestFinished && <Settings key='settings' />}
         <AnimatePresence mode='wait'>
           <Test key={testId} />
         </AnimatePresence>

@@ -11,10 +11,10 @@ import { useStats } from 'hooks/useStats';
 import { accuracy as acc } from 'utils/typingTest';
 
 export default function Stats() {
-  const { restartTest } = useGlobal();
+  const { setGlobalValues } = useGlobal();
   const { mode, time, words, timerProgressStyle, statsColor, statsOpacity, fontSize } =
     useSettings();
-  const { wordIndex, currentStats, timer, isTestRunning } = useTypingTest();
+  const { wordIndex, currentStats, timer, isTestRunning, setValues } = useTypingTest();
   const { wpm, characters, errors } = currentStats;
   const stats = useStats();
   const accuracy = acc(characters, errors);
@@ -24,7 +24,11 @@ export default function Stats() {
   useDidUpdate(() => {
     const timeFinished = mode === 'time' && time > 0 && timer <= 0;
     const wordsFinished = mode === 'words' && words > 0 && wordIndex >= words;
-    if (timeFinished || wordsFinished) restartTest();
+    if (timeFinished || wordsFinished) {
+      if (mode !== 'time') stats.update();
+      setValues((draft) => void (draft.isTestRunning = false));
+      setGlobalValues((draft) => void (draft.isTestFinished = true));
+    }
   }, [timer, wordIndex]);
 
   return (

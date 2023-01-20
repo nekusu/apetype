@@ -36,7 +36,6 @@ export interface TypingTestValues {
   startTime: number;
   elapsedTime: number;
   isTestRunning: boolean;
-  isTestFinished: boolean;
 }
 
 export const initialValues: TypingTestValues = {
@@ -59,7 +58,6 @@ export const initialValues: TypingTestValues = {
   startTime: 0,
   elapsedTime: 0,
   isTestRunning: false,
-  isTestFinished: false,
 };
 
 export function getRandomWords(count: number, language: Language, lastWord?: string) {
@@ -84,4 +82,22 @@ export function parseWords(words: string[]): Word[] {
 
 export function accuracy(characters: number, errors: number) {
   return Math.max((1 - errors / characters) * 100, 0);
+}
+
+export function mean(numbers: number[]) {
+  return numbers.reduce((a, b) => a + b, 0) / numbers.length;
+}
+
+export function standardDeviation(numbers: number[]) {
+  const avg = mean(numbers);
+  return Math.sqrt(numbers.reduce((a, b) => a + Math.pow(b - avg, 2), 0) / numbers.length);
+}
+
+export function coefficientOfVariation(numbers: number[]) {
+  return standardDeviation(numbers) / mean(numbers);
+}
+
+export function consistency(numbers: number[]) {
+  const cov = coefficientOfVariation(numbers);
+  return 100 * (1 - Math.tanh(cov + Math.pow(cov, 3) / 3 + Math.pow(cov, 5) / 5));
 }

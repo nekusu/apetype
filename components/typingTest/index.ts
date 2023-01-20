@@ -1,5 +1,8 @@
 export { default as Caret } from './Caret';
+export { default as Chart } from './Chart';
+export { default as ChartTooltip } from './ChartTooltip';
 export { default as Letter } from './Letter';
+export { default as Result } from './Result';
 export { default as Settings } from './Settings';
 export { default as Stats } from './Stats';
 export { default as Test } from './Test';
