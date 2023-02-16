@@ -1,7 +1,7 @@
 'use client';
 
 import { FloatingPortal } from '@floating-ui/react';
-import { useHotkeys, useScrollLock } from '@mantine/hooks';
+import { useFocusTrap, useHotkeys, useScrollLock } from '@mantine/hooks';
 import clsx from 'clsx';
 import { AnimatePresence, HTMLMotionProps } from 'framer-motion';
 import { MouseEvent, useEffect } from 'react';
@@ -18,6 +18,7 @@ export interface ModalProps extends HTMLMotionProps<'div'> {
   onClose: () => void;
   overflow?: 'inside' | 'outside';
   target?: HTMLElement | null;
+  trapFocus?: boolean;
 }
 
 export default function Modal({
@@ -32,9 +33,11 @@ export default function Modal({
   onClose,
   overflow = 'inside',
   target,
+  trapFocus = true,
   ...props
 }: ModalProps) {
   const [, setScrollLocked] = useScrollLock();
+  const focusTrapRef = useFocusTrap(trapFocus && open);
 
   const handleEscapePress = () => {
     if (closeOnEscape) onClose();
@@ -63,6 +66,7 @@ export default function Modal({
             onClick={handleOutsideClick}
           >
             <Transition
+              ref={focusTrapRef}
               className={clsx([
                 'relative rounded-lg bg-bg p-6 shadow-2xl transition-colors',
                 overflow === 'inside' && 'max-h-full overflow-y-auto',

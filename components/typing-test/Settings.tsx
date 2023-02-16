@@ -4,7 +4,7 @@ import { useDidUpdate, useDisclosure } from '@mantine/hooks';
 import { Button, Divider, Input, Key, Modal, Text, Transition } from 'components/core';
 import { useGlobal } from 'context/globalContext';
 import { useSettings } from 'context/settingsContext';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { IconType } from 'react-icons';
 import { RiInputMethodFill, RiTimeFill, RiToolsFill } from 'react-icons/ri';
 import { settingsList } from 'utils/settings';
@@ -34,7 +34,6 @@ export default function Settings() {
   const { mode, setSettings } = settings;
   const [modalOpen, modalHandler] = useDisclosure(false);
   const [customAmount, setCustomAmount] = useState(settings[mode]);
-  const inputRef = useRef<HTMLInputElement>(null);
   const customActive = !settingsList[mode].options
     .map(({ value }) => value)
     .includes(settings[mode]);
@@ -47,10 +46,7 @@ export default function Settings() {
     setGlobalValues((draft) => void (draft.modalOpen = modalOpen));
   }, [modalOpen]);
   useDidUpdate(() => {
-    if (modalOpen) {
-      setCustomAmount(settings[mode]);
-      inputRef.current?.focus();
-    }
+    if (modalOpen) setCustomAmount(settings[mode]);
   }, [modalOpen, mode, settings]);
 
   return (
@@ -110,7 +106,6 @@ export default function Settings() {
             </Text>
           )}
           <Input
-            ref={inputRef}
             type='number'
             icon={<Icon />}
             min={0}

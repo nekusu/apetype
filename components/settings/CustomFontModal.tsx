@@ -2,7 +2,7 @@
 
 import { Button, Input, Modal, Text } from 'components/core';
 import { useSettings } from 'context/settingsContext';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 export interface CustomFontModalProps {
   modalOpen: boolean;
@@ -12,13 +12,9 @@ export interface CustomFontModalProps {
 export default function CustomFontModal({ modalOpen, onClose }: CustomFontModalProps) {
   const { setSettings } = useSettings();
   const [customFont, setCustomFont] = useState('');
-  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (modalOpen) {
-      setCustomFont('');
-      inputRef.current?.focus();
-    }
+    if (modalOpen) setCustomFont('');
   }, [modalOpen]);
 
   return (
@@ -35,7 +31,6 @@ export default function CustomFontModal({ modalOpen, onClose }: CustomFontModalP
           Custom font
         </Text>
         <Input
-          ref={inputRef}
           type='text'
           placeholder='Font name'
           value={customFont}
