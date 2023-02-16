@@ -1,15 +1,19 @@
 'use client';
 
+import { useDisclosure } from '@mantine/hooks';
 import clsx from 'clsx';
 import { Button, Key, Text, Transition } from 'components/core';
-import { Setting } from 'components/settings';
+import { CustomFontModal, Setting } from 'components/settings';
 import { useSettings } from 'context/settingsContext';
 import { useRef } from 'react';
 import { categories, Settings, settingsList } from 'utils/settings';
 
+const customSettings: (keyof Settings)[] = ['fontFamily'];
+
 export default function Page() {
   const settings = useSettings();
   const { quickRestart, setSettings } = settings;
+  const [customFontModalOpen, customFontModalHandler] = useDisclosure(false);
   const listRef = useRef<HTMLDivElement>(null);
   const scrollToCategory = (index: number) => {
     listRef.current?.children[index].scrollIntoView({
@@ -17,6 +21,66 @@ export default function Page() {
       block: 'start',
     });
   };
+
+  const settingsComponents = Object.entries(settingsList).reduce(
+    (components, [key, { command, description, options }]) => {
+      if (customSettings.includes(key as keyof Settings)) return components;
+      components[key as keyof Settings] = (
+        <Setting key={key} title={command} description={description} options={options}>
+          {options.map((option) => (
+            <Button
+              key={option.value as string}
+              active={settings[key as keyof Settings] === option.value}
+              className='!w-full'
+              onClick={() =>
+                setSettings((draft) => void (draft[key as keyof Settings] = option.value as never))
+              }
+              variant='filled'
+            >
+              {option.alt ?? (option.value as string)}
+            </Button>
+          ))}
+        </Setting>
+      );
+      return components;
+    },
+    {} as Record<keyof Settings, JSX.Element>
+  );
+  {
+    const { command, description, options } = settingsList.fontFamily;
+    const isCustomFont = !options.map(({ value }) => value).includes(settings.fontFamily);
+
+    settingsComponents.fontFamily = (
+      <Setting
+        key='fontFamily'
+        title={command}
+        description={description}
+        options={options}
+        gridColumns={4}
+      >
+        {options.map((option) => (
+          <Button
+            key={option.value}
+            active={settings.fontFamily === option.value}
+            className='!w-full'
+            onClick={() => setSettings((draft) => void (draft.fontFamily = option.value as never))}
+            variant='filled'
+            style={{ fontFamily: `var(${option.value})` }}
+          >
+            {option.alt}
+          </Button>
+        ))}
+        <Button
+          active={isCustomFont}
+          className='!w-full'
+          onClick={customFontModalHandler.open}
+          variant='filled'
+        >
+          custom {isCustomFont && `(${settings.fontFamily})`}
+        </Button>
+      </Setting>
+    );
+  }
 
   return (
     <Transition className='relative w-full cursor-default'>
@@ -46,21 +110,12 @@ export default function Page() {
               </Text>
               {Object.entries(settingsList)
                 .filter(([, setting]) => setting.category === category)
-                .map(([key, { command, description, options }]) => (
-                  <Setting
-                    key={key}
-                    id={key as keyof Settings}
-                    value={settings[key as keyof Settings]}
-                    title={command}
-                    description={description}
-                    options={options}
-                    setSettings={setSettings}
-                  />
-                ))}
+                .map(([key]) => settingsComponents[key as keyof Settings])}
             </div>
           ))}
         </div>
       </div>
+      <CustomFontModal modalOpen={customFontModalOpen} onClose={customFontModalHandler.close} />
     </Transition>
   );
 }
