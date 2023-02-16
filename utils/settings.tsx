@@ -16,6 +16,7 @@ export type StatsOpacity = 0.25 | 0.5 | 0.75 | 1;
 export type SmoothLineScroll = boolean;
 export type ShowDecimalPlaces = boolean;
 export type FontSize = 1 | 1.25 | 1.5 | 2 | 3 | 4;
+export type FontFamily = string;
 export type PageWidth = '1000px' | '1250px' | '1500px' | '2000px' | '100%';
 export type FlipTestColors = boolean;
 export type ColorfulMode = boolean;
@@ -36,6 +37,7 @@ export interface Settings {
   smoothLineScroll: SmoothLineScroll;
   showDecimalPlaces: ShowDecimalPlaces;
   fontSize: FontSize;
+  fontFamily: FontFamily;
   pageWidth: PageWidth;
   flipTestColors: FlipTestColors;
   colorfulMode: ColorfulMode;
@@ -212,6 +214,26 @@ export const settingsList = {
       { value: 4 },
     ],
   }),
+  fontFamily: create<FontFamily>({
+    command: 'font family',
+    category: 'appearance',
+    options: [
+      { alt: 'Fira Code', value: '--font-fira-code' },
+      { alt: 'Inconsolata', value: '--font-inconsolata' },
+      { alt: 'JetBrains Mono', value: '--font-jetbrains-mono' },
+      { alt: 'Lato', value: '--font-lato' },
+      { alt: 'Lexend Deca', value: '--font-lexend-deca' },
+      { alt: 'Montserrat', value: '--font-montserrat' },
+      { alt: 'Nunito', value: '--font-nunito' },
+      { alt: 'Oxygen', value: '--font-oxygen' },
+      { alt: 'Roboto', value: '--font-roboto' },
+      { alt: 'Roboto Mono', value: '--font-roboto-mono' },
+      { alt: 'Source Code Pro', value: '--font-source-code-pro' },
+      { alt: 'Ubuntu', value: '--font-ubuntu' },
+      { alt: 'Ubuntu Mono', value: '--font-ubuntu-mono' },
+    ],
+    custom: true,
+  }),
   pageWidth: create<PageWidth>({
     command: 'page width',
     category: 'appearance',
@@ -264,6 +286,7 @@ export const defaultSettings: Settings = {
   smoothLineScroll: true,
   showDecimalPlaces: false,
   fontSize: 1.5,
+  fontFamily: '--font-lexend-deca',
   pageWidth: '1250px',
   flipTestColors: false,
   colorfulMode: true,

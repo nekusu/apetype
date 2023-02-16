@@ -6,7 +6,7 @@ import { SettingsProvider } from 'context/settingsContext';
 import { AnimatePresence } from 'framer-motion';
 import { useLanguage } from 'hooks/useLanguage';
 import produce, { freeze } from 'immer';
-import { ReactNode, useCallback } from 'react';
+import { ReactNode, useCallback, useEffect } from 'react';
 import { DraftFunction, Updater, useImmer } from 'use-immer';
 import { defaultSettings, Settings } from 'utils/settings';
 import { Footer, Header } from '.';
@@ -43,6 +43,13 @@ export default function Content({ children }: ContentProps) {
     });
   }, [setGlobalValues]);
 
+  useEffect(() => {
+    const fontFamily = settings.fontFamily;
+    document.documentElement.style.setProperty(
+      '--font',
+      fontFamily.startsWith('--') ? `var(${fontFamily})` : fontFamily
+    );
+  }, [settings.fontFamily]);
   useWindowEvent('keydown', (event) => {
     setGlobalValues((draft) => void (draft.capsLock = event.getModifierState('CapsLock')));
   });
