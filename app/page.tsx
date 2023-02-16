@@ -2,7 +2,7 @@
 
 import { useDidUpdate, useWindowEvent } from '@mantine/hooks';
 import { Transition } from 'components/core';
-import { Settings, Test, Tips } from 'components/typingTest';
+import { Settings, Test, Tips } from 'components/typing-test';
 import { useGlobal } from 'context/globalContext';
 import { useSettings } from 'context/settingsContext';
 import { AnimatePresence } from 'framer-motion';
