@@ -1,5 +1,5 @@
-import clsx from 'clsx';
 import { DetailedHTMLProps, forwardRef, HTMLAttributes } from 'react';
+import { twMerge } from 'tailwind-merge';
 import { createPolymorphicComponent, PolymorphicComponentProps } from 'utils/polymorphicComponent';
 import Dynamic from './Dynamic';
 
@@ -14,7 +14,7 @@ const Text = forwardRef<HTMLDivElement, PolymorphicComponentProps<'div', TextPro
 ) {
   return (
     <Dynamic
-      className={clsx([
+      className={twMerge([
         `text-left text-base transition`,
         dimmed ? 'text-sub' : `text-text`,
         className,

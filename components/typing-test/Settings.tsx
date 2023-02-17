@@ -116,7 +116,7 @@ export default function Settings() {
             You can start an infinite test by inputting 0. To stop the test, use <Key>shift</Key> +{' '}
             <Key>enter</Key>
           </Text>
-          <Button className='!w-full' type='submit' variant='filled'>
+          <Button className='w-full' type='submit' variant='filled'>
             ok
           </Button>
         </form>

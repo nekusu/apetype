@@ -1,9 +1,9 @@
 'use client';
 
-import clsx from 'clsx';
 import { useGlobal } from 'context/globalContext';
 import { motion, useAnimation } from 'framer-motion';
 import { useEffect } from 'react';
+import { twJoin } from 'tailwind-merge';
 
 const PATH_PROPS = {
   variants: {
@@ -41,7 +41,7 @@ export default function LogoIcon() {
       fill='none'
       strokeWidth='18'
       strokeLinecap='round'
-      className={clsx(['transition-colors', isUserTyping ? 'stroke-sub' : 'stroke-main'])}
+      className={twJoin(['transition-colors', isUserTyping ? 'stroke-sub' : 'stroke-main'])}
     >
       <motion.path d='M123.961 49.6772H126.685' {...PATH_PROPS} />
       <motion.path d='M162.102 49.6772L202.968 49.6772' {...PATH_PROPS} />

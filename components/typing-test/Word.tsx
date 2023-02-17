@@ -1,7 +1,7 @@
 'use client';
 
-import clsx from 'clsx';
 import { forwardRef, memo, MutableRefObject, useMemo } from 'react';
+import { twJoin } from 'tailwind-merge';
 import { Settings } from 'utils/settings';
 import { Letter as LetterType } from 'utils/typingTest';
 import Letter from './Letter';
@@ -30,7 +30,7 @@ const Word = forwardRef<HTMLDivElement, WordProps>(function Word(
 
   return (
     <div
-      className={clsx([
+      className={twJoin([
         'm-[.25em] flex border-b-2',
         error ? 'border-colorful-error' : 'border-transparent',
       ])}

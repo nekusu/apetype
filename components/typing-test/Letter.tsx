@@ -1,7 +1,7 @@
 'use client';
 
-import clsx from 'clsx';
 import { forwardRef, memo, useMemo } from 'react';
+import { twJoin } from 'tailwind-merge';
 import { Settings } from 'utils/settings';
 import { Letter as LetterType } from 'utils/typingTest';
 
@@ -29,7 +29,7 @@ const Letter = forwardRef<HTMLSpanElement, LetterProps>(function Letter(
 
   return (
     <span
-      className={clsx([
+      className={twJoin([
         'relative inline-block',
         hideExtraLetters && status === 'extra' ? 'hidden' : color,
       ])}

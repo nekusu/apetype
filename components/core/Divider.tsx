@@ -1,5 +1,5 @@
-import clsx from 'clsx';
 import { DetailedHTMLProps, forwardRef, HTMLAttributes } from 'react';
+import { twMerge } from 'tailwind-merge';
 
 export interface DividerProps
   extends DetailedHTMLProps<HTMLAttributes<HTMLDivElement>, HTMLDivElement> {
@@ -12,7 +12,7 @@ const Divider = forwardRef<HTMLDivElement, DividerProps>(function Divider(
 ) {
   return (
     <div
-      className={clsx([
+      className={twMerge([
         'self-stretch rounded bg-bg transition',
         orientation === 'vertical' ? 'my-2 w-1' : 'mx-2 h-1',
         className,

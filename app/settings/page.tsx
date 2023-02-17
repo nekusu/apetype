@@ -1,11 +1,11 @@
 'use client';
 
 import { useDisclosure } from '@mantine/hooks';
-import clsx from 'clsx';
 import { Button, Key, Text, Transition } from 'components/core';
 import { CustomFontModal, Setting } from 'components/settings';
 import { useSettings } from 'context/settingsContext';
 import { useRef } from 'react';
+import { twJoin } from 'tailwind-merge';
 import { categories, Settings, settingsList } from 'utils/settings';
 
 const customSettings: (keyof Settings)[] = ['fontFamily'];
@@ -31,7 +31,7 @@ export default function Page() {
             <Button
               key={option.value as string}
               active={settings[key as keyof Settings] === option.value}
-              className='!w-full'
+              className='w-full'
               onClick={() =>
                 setSettings((draft) => void (draft[key as keyof Settings] = option.value as never))
               }
@@ -62,7 +62,7 @@ export default function Page() {
           <Button
             key={option.value}
             active={settings.fontFamily === option.value}
-            className='!w-full'
+            className='w-full'
             onClick={() => setSettings((draft) => void (draft.fontFamily = option.value as never))}
             variant='filled'
             style={{ fontFamily: `var(${option.value})` }}
@@ -72,7 +72,7 @@ export default function Page() {
         ))}
         <Button
           active={isCustomFont}
-          className='!w-full'
+          className='w-full'
           onClick={customFontModalHandler.open}
           variant='filled'
         >
@@ -100,9 +100,9 @@ export default function Page() {
           {categories.map((category) => (
             <div key={category} className='flex flex-col gap-5'>
               <Text
-                className={clsx([
-                  '!text-[28px] leading-none',
-                  category === 'danger zone' ? '!text-error' : '!text-main',
+                className={twJoin([
+                  'text-[28px] leading-none',
+                  category === 'danger zone' ? 'text-error' : 'text-main',
                 ])}
                 component='h2'
               >

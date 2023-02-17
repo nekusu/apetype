@@ -1,5 +1,5 @@
-import clsx from 'clsx';
 import { ButtonHTMLAttributes, DetailedHTMLProps, forwardRef } from 'react';
+import { twMerge } from 'tailwind-merge';
 import { createPolymorphicComponent, PolymorphicComponentProps } from 'utils/polymorphicComponent';
 import Dynamic from './Dynamic';
 
@@ -14,7 +14,7 @@ const Button = forwardRef<HTMLButtonElement, PolymorphicComponentProps<'button',
     return (
       <Dynamic
         component='button'
-        className={clsx([
+        className={twMerge([
           'flex w-max cursor-pointer select-none items-center justify-center gap-1.5 rounded-lg p-2 text-center text-base leading-tight outline-none transition',
           variant === 'filled'
             ? 'bg-sub-alt text-text outline-offset-[-2px] hover:bg-text hover:text-bg focus:outline-2 focus:outline-text active:scale-[.925]'

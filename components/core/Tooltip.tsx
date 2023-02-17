@@ -11,9 +11,9 @@ import {
   useInteractions,
 } from '@floating-ui/react';
 import { useMergedRef } from '@mantine/hooks';
-import clsx from 'clsx';
 import { AnimatePresence, HTMLMotionProps } from 'framer-motion';
 import { cloneElement, forwardRef, ReactNode, useState } from 'react';
+import { twMerge } from 'tailwind-merge';
 import Transition from './Transition';
 
 export interface TooltipProps extends HTMLMotionProps<'div'> {
@@ -23,7 +23,7 @@ export interface TooltipProps extends HTMLMotionProps<'div'> {
 }
 
 const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(function Tooltip(
-  { children, className, label, offset = 4, placement = 'bottom', ...props },
+  { children, className, label, offset = 4, style, placement = 'bottom', ...props },
   ref
 ) {
   const [open, setOpen] = useState(false);
@@ -44,7 +44,7 @@ const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(function Tooltip(
       <AnimatePresence>
         {open && (
           <Transition
-            className={clsx([
+            className={twMerge([
               'pointer-events-none rounded-lg bg-sub-alt py-2 px-3 text-center text-sm leading-tight text-text shadow-md transition',
               className,
             ])}
@@ -54,6 +54,7 @@ const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(function Tooltip(
               top: y ?? 0,
               left: x ?? 0,
               width: 'max-content',
+              ...style,
             }}
             {...getFloatingProps()}
             {...props}

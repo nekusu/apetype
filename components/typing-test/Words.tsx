@@ -1,7 +1,6 @@
 'use client';
 
 import { getHotkeyHandler, useDidUpdate, useTimeout, useWindowEvent } from '@mantine/hooks';
-import clsx from 'clsx';
 import { Transition } from 'components/core';
 import { useGlobal } from 'context/globalContext';
 import { useSettings } from 'context/settingsContext';
@@ -12,6 +11,7 @@ import { useLineScroll } from 'hooks/useLineScroll';
 import { useWords } from 'hooks/useWords';
 import { useMemo, useRef, useState } from 'react';
 import { RiCursorFill } from 'react-icons/ri';
+import { twJoin } from 'tailwind-merge';
 import { Caret, Word } from '.';
 
 export default function Words() {
@@ -104,7 +104,7 @@ export default function Words() {
         value={inputValue}
       />
       <div
-        className={clsx([
+        className={twJoin([
           'relative mx-[-.25em] flex max-h-full flex-wrap overflow-hidden transition duration-200',
           isBlurred && 'opacity-40 blur',
         ])}

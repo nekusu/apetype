@@ -1,10 +1,10 @@
 'use client';
 
 import { ChartTypeRegistry, TooltipModel } from 'chart.js';
-import clsx from 'clsx';
 import { Text } from 'components/core';
 import { motion } from 'framer-motion';
 import { memo } from 'react';
+import { twJoin } from 'tailwind-merge';
 
 export interface ChartTooltipProps {
   position: { top: number; left: number };
@@ -15,7 +15,7 @@ export interface ChartTooltipProps {
 function ChartTooltip({ position, data, disabled }: ChartTooltipProps) {
   return (
     <motion.div
-      className={clsx([
+      className={twJoin([
         'pointer-events-none absolute rounded-lg bg-sub-alt py-2.5 px-3 shadow-md transition',
         disabled ? 'opacity-0' : 'opacity-100',
       ])}

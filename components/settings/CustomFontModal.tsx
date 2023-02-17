@@ -39,7 +39,7 @@ export default function CustomFontModal({ modalOpen, onClose }: CustomFontModalP
         <Text className='text-sm' dimmed>
           Make sure you have the font installed on your device before applying
         </Text>
-        <Button className='!w-full' type='submit' variant='filled' disabled={!customFont.length}>
+        <Button className='w-full' type='submit' variant='filled' disabled={!customFont.length}>
           apply
         </Button>
       </form>

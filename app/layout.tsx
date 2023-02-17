@@ -13,8 +13,8 @@ import {
   Ubuntu,
   Ubuntu_Mono,
 } from '@next/font/google';
-import clsx from 'clsx';
 import { Content } from 'components/layout';
+import { twJoin } from 'tailwind-merge';
 import './globals.css';
 
 const firaCode = Fira_Code({ variable: '--font-fira-code', subsets: ['latin'] });
@@ -62,7 +62,7 @@ const fonts = [
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang='en' className={clsx(fonts.map((font) => font.variable))}>
+    <html lang='en' className={twJoin(fonts.map((font) => font.variable))}>
       <head />
       <body className='bg-bg font transition-colors'>
         <div className='flex justify-center'>

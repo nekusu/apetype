@@ -2,9 +2,9 @@
 
 import { FloatingPortal } from '@floating-ui/react';
 import { useFocusTrap, useHotkeys, useScrollLock } from '@mantine/hooks';
-import clsx from 'clsx';
 import { AnimatePresence, HTMLMotionProps } from 'framer-motion';
 import { MouseEvent, useEffect } from 'react';
+import { twMerge } from 'tailwind-merge';
 import Transition from './Transition';
 
 export interface ModalProps extends HTMLMotionProps<'div'> {
@@ -56,7 +56,7 @@ export default function Modal({
       <AnimatePresence>
         {open && (
           <Transition
-            className={clsx([
+            className={twMerge([
               'inset-0 z-50 flex h-full w-full justify-center bg-black/50 py-16 px-8 backdrop-blur-[2.5px]',
               centered ? 'items-center' : 'items-start',
               overflow === 'outside' && 'overflow-y-auto',
@@ -67,7 +67,7 @@ export default function Modal({
           >
             <Transition
               ref={focusTrapRef}
-              className={clsx([
+              className={twMerge([
                 'relative rounded-lg bg-bg p-6 shadow-2xl transition-colors',
                 overflow === 'inside' && 'max-h-full overflow-y-auto',
                 className,

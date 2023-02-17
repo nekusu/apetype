@@ -1,10 +1,10 @@
 'use client';
 
-import clsx from 'clsx';
 import { useGlobal } from 'context/globalContext';
 import { useSettings } from 'context/settingsContext';
 import { motion } from 'framer-motion';
 import { CSSProperties } from 'react';
+import { twJoin } from 'tailwind-merge';
 
 export interface CaretProps {
   width: CSSProperties['width'];
@@ -28,7 +28,7 @@ export default function Caret({ width = '.5em', x, y }: CaretProps) {
           default: { ease: 'linear', duration: smoothCaret ? 0.1 : 0 },
         },
       }}
-      className={clsx([
+      className={twJoin([
         'absolute rounded-[.1em]',
         caretStyle === 'outline' ? 'border-[.05em] border-caret bg-transparent' : 'bg-caret',
         caretStyle === 'underline' ? 'mt-[1.1em] h-[.1em]' : 'mt-[-.075em] h-[1.2em]',
