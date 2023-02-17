@@ -14,7 +14,6 @@ specifiers:
   '@typescript-eslint/parser': ^5.47.1
   autoprefixer: ^10.4.13
   chart.js: ^4.2.0
-  clsx: ^1.2.1
   eslint: ^8.30.0
   eslint-config-next: ^13.1.1
   eslint-config-prettier: ^8.5.0
@@ -31,6 +30,7 @@ specifiers:
   react-icons: ^4.7.1
   release-it: ^15.6.0
   swr: ^2.0.0
+  tailwind-merge: ^1.9.1
   tailwindcss: ^3.2.4
   typescript: ^4.9.4
   use-immer: ^0.8.1
@@ -40,7 +40,6 @@ dependencies:
   '@mantine/hooks': 5.9.5_react@18.2.0
   '@next/font': 13.1.1
   chart.js: 4.2.0
-  clsx: 1.2.1
   framer-motion: 8.0.2_biqbaboplfbrettd7655fr4n2y
   immer: 9.0.17
   next: 13.1.1_biqbaboplfbrettd7655fr4n2y
@@ -49,6 +48,7 @@ dependencies:
   react-dom: 18.2.0_react@18.2.0
   react-icons: 4.7.1_react@18.2.0
   swr: 2.0.0_react@18.2.0
+  tailwind-merge: 1.9.1
   use-immer: 0.8.1_immer@9.0.17+react@18.2.0
 
 devDependencies:
@@ -1492,11 +1492,6 @@ packages:
     resolution: {integrity: sha512-JQHZ2QMW6l3aH/j6xCqQThY/9OH4D/9ls34cgkUBiEeocRTU04tHfKPBsUK1PqZCUQM7GiA0IIXJSuXHI64Kbg==}
     engines: {node: '>=0.8'}
     dev: true
-
-  /clsx/1.2.1:
-    resolution: {integrity: sha512-EcR6r5a8bj6pu3ycsa/E/cKVGuTgZJZdsyUYHOksG/UHIiKfjxzRxYJpyVBwYaQeOvghal9fcc4PidlgzugAQg==}
-    engines: {node: '>=6'}
-    dev: false
 
   /color-convert/1.9.3:
     resolution: {integrity: sha512-QfAUtd+vFdAtFQcC8CCyYt1fYWxSqAiK2cSD6zDB8N3cpsEBAvRxp9zOGg6G/SHHJYAT88/az/IuDGALsNVbGg==}
@@ -5087,6 +5082,10 @@ packages:
 
   /tabbable/6.0.1:
     resolution: {integrity: sha512-SYJSIgeyXW7EuX1ytdneO5e8jip42oHWg9xl/o3oTYhmXusZVgiA+VlPvjIN+kHii9v90AmzTZEBcsEvuAY+TA==}
+    dev: false
+
+  /tailwind-merge/1.9.1:
+    resolution: {integrity: sha512-ED9MkiUHlmfh58EC1xHRqXcH1IQyRtmDP0AmXlugYkP2tvfu7ejtjFEHJLJt93mQ7ZJkcqSIgm9M394bq5vOJg==}
     dev: false
 
   /tailwindcss/3.2.4_postcss@8.4.20:
