@@ -79,8 +79,8 @@ export default function CommandLine({ defaultCommand, open, onClose }: CommandLi
     isUsingKeyboard.current = true;
   };
   const setSetting = (value: string | number | boolean) => {
-    if (!setting?.key || !value) return;
-    value = typeof value === 'string' && isNaN(+value) ? value : +value;
+    if (!setting?.key || value === '') return;
+    value = typeof value === 'boolean' || isNaN(+value) ? value : +value;
     setSettings((draft) => void (draft[setting.key] = value as never));
     setInputValue('');
   };
