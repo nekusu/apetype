@@ -9,6 +9,8 @@ on:
 jobs:
   Deploy-Production:
     runs-on: ubuntu-latest
+    permissions:
+      deployments: write
     steps:
       - name: Start Production Deployment
         uses: bobheadxi/deployments@v1
