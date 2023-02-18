@@ -6,9 +6,9 @@ import { CustomFontModal, Setting } from 'components/settings';
 import { useSettings } from 'context/settingsContext';
 import { useRef } from 'react';
 import { twJoin } from 'tailwind-merge';
-import { categories, Settings, settingsList } from 'utils/settings';
+import { categories, settingsEntries, SettingsKey, settingsList } from 'utils/settings';
 
-const customSettings: (keyof Settings)[] = ['fontFamily'];
+const customSettings: SettingsKey[] = ['fontFamily'];
 
 export default function Page() {
   const settings = useSettings();
@@ -22,19 +22,17 @@ export default function Page() {
     });
   };
 
-  const settingsComponents = Object.entries(settingsList).reduce(
+  const settingsComponents = settingsEntries.reduce(
     (components, [key, { command, description, options }]) => {
-      if (customSettings.includes(key as keyof Settings)) return components;
-      components[key as keyof Settings] = (
+      if (customSettings.includes(key)) return components;
+      components[key] = (
         <Setting key={key} title={command} description={description} options={options}>
           {options.map((option) => (
             <Button
               key={option.value as string}
-              active={settings[key as keyof Settings] === option.value}
+              active={settings[key] === option.value}
               className='w-full'
-              onClick={() =>
-                setSettings((draft) => void (draft[key as keyof Settings] = option.value as never))
-              }
+              onClick={() => setSettings((draft) => void (draft[key] = option.value as never))}
               variant='filled'
             >
               {option.alt ?? (option.value as string)}
@@ -44,7 +42,7 @@ export default function Page() {
       );
       return components;
     },
-    {} as Record<keyof Settings, JSX.Element>
+    {} as Record<SettingsKey, JSX.Element>
   );
   {
     const { command, description, options } = settingsList.fontFamily;
@@ -108,9 +106,9 @@ export default function Page() {
               >
                 {category}
               </Text>
-              {Object.entries(settingsList)
+              {settingsEntries
                 .filter(([, setting]) => setting.category === category)
-                .map(([key]) => settingsComponents[key as keyof Settings])}
+                .map(([key]) => settingsComponents[key])}
             </div>
           ))}
         </div>

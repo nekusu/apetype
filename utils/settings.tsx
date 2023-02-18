@@ -59,6 +59,11 @@ export interface SettingParams<T> {
   custom?: boolean;
 }
 
+export type SettingsKey = keyof Settings;
+export type SettingsEntries = [SettingsKey, SettingParams<SettingsKey>][];
+export type SettingsKeys = SettingsKey[];
+export type SettingsValues = SettingParams<SettingsKey>[];
+
 const BOOLEAN_OPTIONS = [
   { alt: 'off', value: false },
   { alt: 'on', value: true },
@@ -269,6 +274,10 @@ export const settingsList = {
     options: BOOLEAN_OPTIONS,
   }),
 };
+
+export const settingsEntries = Object.entries(settingsList) as SettingsEntries;
+export const settingsKeys = Object.keys(settingsList) as SettingsKeys;
+export const settingsValues = Object.values(settingsList) as SettingsValues;
 
 export const defaultSettings: Settings = {
   mode: 'time',
