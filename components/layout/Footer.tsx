@@ -21,7 +21,7 @@ export default function Footer() {
           </Button>
         </Flex>
         <Flex className='gap-1'>
-          <Tooltip label='See changelog' offset={10}>
+          <Tooltip label='See changelog' offset={8} placement='left'>
             <Button
               className='p-0 text-sm'
               component='a'

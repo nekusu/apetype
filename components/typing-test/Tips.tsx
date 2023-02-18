@@ -1,13 +1,13 @@
 'use client';
 
-import { Key, Text, Transition } from 'components/core';
+import { Key, Text } from 'components/core';
 import { useSettings } from 'context/settingsContext';
 
 export default function Tips() {
   const { time, quickRestart } = useSettings();
 
   return (
-    <Transition className='row-start-3 row-end-4 flex select-none flex-col items-center justify-end gap-1.5 self-end justify-self-center'>
+    <div className='flex select-none flex-col items-center gap-1.5'>
       {!time && (
         <Text className='text-xs' dimmed>
           <Key>shift</Key> + <Key>enter</Key> - stop test
@@ -26,6 +26,6 @@ export default function Tips() {
       <Text className='text-xs' dimmed>
         <Key>{quickRestart === 'esc' ? 'tab' : 'esc'}</Key> - command line
       </Text>
-    </Transition>
+    </div>
   );
 }
