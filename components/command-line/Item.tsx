@@ -2,11 +2,13 @@
 
 import { Key } from 'components/core';
 import { HTMLMotionProps, motion } from 'framer-motion';
+import { ReactNode } from 'react';
 import { RiCheckLine } from 'react-icons/ri';
 import { twJoin, twMerge } from 'tailwind-merge';
 
 export interface ItemProps extends HTMLMotionProps<'div'> {
   active?: boolean;
+  children?: ReactNode;
   label?: string;
   selected?: boolean;
 }
