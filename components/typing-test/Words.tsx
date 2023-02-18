@@ -33,7 +33,7 @@ export default function Words() {
   const wrapperHeight = useMemo(() => fontSize * 26 * 3, [fontSize]);
   const { wordsetRef } = useLineScroll(wrapperHeight, wordRef.current);
   const [isFocused, setIsFocused] = useState(false);
-  const [isBlurred, setIsBlurred] = useState(false);
+  const [isBlurred, setIsBlurred] = useState(modalOpen);
   const { start: startBlur, clear: clearBlur } = useTimeout(() => setIsBlurred(true), 1000);
   const { start: startIdle, clear: clearIdle } = useTimeout(
     () => setGlobalValues((draft) => void (draft.isUserTyping = false)),
@@ -67,7 +67,7 @@ export default function Words() {
 
   useDidMount(() => {
     wordsCollection.add(mode === 'words' && wordAmount ? wordAmount : 100);
-    focusWords();
+    if (!modalOpen) focusWords();
   });
   useDidUpdate(() => {
     if (wordIndex > highestWordIndex.current) {
