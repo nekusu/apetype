@@ -18,6 +18,7 @@ specifiers:
   eslint-config-next: ^13.1.1
   eslint-config-prettier: ^8.5.0
   framer-motion: ^8.0.2
+  fuse.js: ^6.6.2
   husky: ^8.0.2
   immer: ^9.0.17
   next: ^13.1.1
@@ -41,6 +42,7 @@ dependencies:
   '@next/font': 13.1.1
   chart.js: 4.2.0
   framer-motion: 8.0.2_biqbaboplfbrettd7655fr4n2y
+  fuse.js: 6.6.2
   immer: 9.0.17
   next: 13.1.1_biqbaboplfbrettd7655fr4n2y
   react: 18.2.0
@@ -2650,6 +2652,11 @@ packages:
   /functions-have-names/1.2.3:
     resolution: {integrity: sha512-xckBUXyTIqT97tq2x2AMb+g163b5JFysYk0x4qxNFwbfQkmNZoiRHb6sPzI9/QV33WeuvVYBUIiD4NzNIyqaRQ==}
     dev: true
+
+  /fuse.js/6.6.2:
+    resolution: {integrity: sha512-cJaJkxCCxC8qIIcPBF9yGxY0W/tVZS3uEISDxhYIdtk8OL93pe+6Zj7LjCqVV4dzbqcriOZ+kQ/NE4RXZHsIGA==}
+    engines: {node: '>=10'}
+    dev: false
 
   /get-caller-file/2.0.5:
     resolution: {integrity: sha512-DyFP3BM/3YHTQOCUL/w0OZHR0lpKeGrxotcHWcqNEdnltqFwXVfhEBQ94eIo34AfQpo0rGki4cyIiftY06h2Fg==}

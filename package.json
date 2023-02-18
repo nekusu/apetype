@@ -16,6 +16,7 @@
     "@next/font": "^13.1.1",
     "chart.js": "^4.2.0",
     "framer-motion": "^8.0.2",
+    "fuse.js": "^6.6.2",
     "immer": "^9.0.17",
     "next": "^13.1.1",
     "react": "^18.2.0",
