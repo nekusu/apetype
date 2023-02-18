@@ -13,6 +13,11 @@ export interface GlobalValues {
 
 interface GlobalContext extends GlobalValues {
   setGlobalValues: Updater<GlobalValues>;
+  commandLineHandler: {
+    open: (command?: string) => void;
+    close: () => void;
+    toggle: () => void;
+  };
   restartTest: () => void;
 }
 

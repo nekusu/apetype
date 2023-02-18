@@ -11,6 +11,17 @@
     -moz-appearance: textfield !important;
     appearance: none;
   }
+
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: theme('colors.main');
+    border-radius: theme('borderRadius.md');
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: theme('colors.text');
+  }
 }
 
 :root {
