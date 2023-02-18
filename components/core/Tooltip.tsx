@@ -17,13 +17,14 @@ import { twMerge } from 'tailwind-merge';
 import Transition from './Transition';
 
 export interface TooltipProps extends HTMLMotionProps<'div'> {
+  disabled?: boolean;
   label: ReactNode;
   offset?: number;
   placement?: Placement;
 }
 
 const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(function Tooltip(
-  { children, className, label, offset = 4, style, placement = 'bottom', ...props },
+  { children, className, disabled, label, offset = 4, style, placement = 'bottom', ...props },
   ref
 ) {
   const [open, setOpen] = useState(false);
@@ -42,7 +43,7 @@ const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(function Tooltip(
     <>
       {cloneElement(children as JSX.Element, getReferenceProps({ ref: reference }))}
       <AnimatePresence>
-        {open && (
+        {open && !disabled && (
           <Transition
             className={twMerge([
               'pointer-events-none rounded-lg bg-sub-alt py-2 px-3 text-center text-sm leading-tight text-text shadow-md transition',
