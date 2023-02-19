@@ -1,9 +1,9 @@
-import { HTMLMotionProps, motion } from 'framer-motion';
+import { HTMLMotionProps, motion, Variants } from 'framer-motion';
 import { forwardRef } from 'react';
 
-const DEFAULT_VARIANTS = {
-  hidden: { opacity: 0 },
-  visible: { opacity: 1 },
+const DEFAULT_VARIANTS: Variants = {
+  hidden: { opacity: 0, pointerEvents: 'none' },
+  visible: { opacity: 1, pointerEvents: 'auto' },
 };
 
 const Transition = forwardRef<HTMLDivElement, HTMLMotionProps<'div'>>(function Transition(
