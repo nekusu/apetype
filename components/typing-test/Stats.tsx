@@ -8,16 +8,28 @@ import { useSettings } from 'context/settingsContext';
 import { useTypingTest } from 'context/typingTestContext';
 import { motion } from 'framer-motion';
 import { useStats } from 'hooks/useStats';
+import { twJoin } from 'tailwind-merge';
 import { accuracy as acc } from 'utils/typingTest';
 
 export default function Stats() {
   const { setGlobalValues } = useGlobal();
-  const { mode, time, words, timerProgressStyle, statsColor, statsOpacity, fontSize } =
-    useSettings();
+  const {
+    mode,
+    time,
+    words,
+    timerProgressStyle,
+    statsColor,
+    statsOpacity,
+    fontSize,
+    liveWpm,
+    liveAccuracy,
+    timerProgress,
+  } = useSettings();
   const { wordIndex, currentStats, timer, isTestRunning, setValues } = useTypingTest();
   const { wpm, characters, errors } = currentStats;
   const stats = useStats();
   const accuracy = acc(characters, errors);
+
   useDidUpdate(() => {
     if (isTestRunning) stats.start();
   }, [isTestRunning]);
@@ -44,7 +56,7 @@ export default function Stats() {
               fontSize: `${fontSize}rem`,
             }}
           >
-            {['text', 'both'].includes(timerProgressStyle) && (
+            {timerProgress && ['text', 'both'].includes(timerProgressStyle) && (
               <div>
                 {mode === 'time' ? (
                   Math.abs(timer)
@@ -56,22 +68,29 @@ export default function Stats() {
                 )}
               </div>
             )}
-            <div>{Math.floor(wpm)}</div>
-            <div>{Math.floor(accuracy)}%</div>
+            {liveWpm && <div>{Math.floor(wpm)}</div>}
+            {liveAccuracy && <div>{Math.floor(accuracy)}%</div>}
           </motion.div>
         </Transition>
       )}
       <FloatingPortal>
-        {isTestRunning && ['bar', 'both'].includes(timerProgressStyle) && (
+        {isTestRunning && (
           <motion.div
-            className='fixed inset-x-0 top-0 h-2 transition-colors'
+            className={twJoin([
+              'fixed inset-x-0 top-0 h-2 transition-colors',
+              (!timerProgress || !['bar', 'both'].includes(timerProgressStyle) || time === 0) &&
+                '!bg-transparent',
+            ])}
             style={{ background: `var(--${statsColor}-color)`, opacity: statsOpacity }}
-            initial={{ width: mode === 'time' ? '100%' : 0 }}
+            initial={{ width: mode === 'time' && time !== 0 ? '100%' : 0 }}
             animate={{
-              width: mode === 'words' ? `${(wordIndex / words) * 100}%` : 0,
+              width:
+                mode === 'words'
+                  ? `${(wordIndex / words) * 100}%`
+                  : `${((timer - 1) / time) * 100}%`,
               transition: {
                 width: {
-                  duration: mode === 'time' ? time : 0.25,
+                  duration: mode === 'time' ? 1 : 0.25,
                   ease: mode === 'time' ? 'linear' : 'easeInOut',
                 },
               },

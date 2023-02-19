@@ -1,6 +1,7 @@
 'use client';
 
 import { Key } from 'components/core';
+import { useSettings } from 'context/settingsContext';
 import { HTMLMotionProps, motion } from 'framer-motion';
 import { ReactNode } from 'react';
 import { RiCheckLine } from 'react-icons/ri';
@@ -21,6 +22,8 @@ export default function Item({
   selected,
   ...props
 }: ItemProps) {
+  const { keyTips } = useSettings();
+
   return (
     <motion.div
       className={twMerge([
@@ -34,7 +37,7 @@ export default function Item({
       {...props}
     >
       <div className='flex-1'>{label}</div>
-      {active && !selected && (
+      {keyTips && active && !selected && (
         <div className='flex items-center gap-1 text-xs'>
           select
           <Key className={twJoin(['bg-bg', selected ? 'text-text' : 'text-main'])}>enter</Key>

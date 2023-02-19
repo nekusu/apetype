@@ -20,7 +20,7 @@ export default function Test() {
     commandLineHandler,
     restartTest,
   } = useGlobal();
-  const { quickRestart, language } = useSettings();
+  const { quickRestart, language, capsLockWarning } = useSettings();
   const [values, setValues] = useImmer(initialValues);
 
   useEffect(() => {
@@ -65,11 +65,12 @@ export default function Test() {
                   </Transition>
                 )}
               </AnimatePresence>
-              {capsLock && (
+              {capsLockWarning && capsLock && (
                 <Button
                   active
                   className='absolute inset-x-0 -top-16 mx-auto py-3 px-3.5'
                   variant='filled'
+                  onClick={() => commandLineHandler.open('caps lock warning')}
                 >
                   <RiLockFill />
                   Caps Lock
