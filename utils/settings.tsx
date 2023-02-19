@@ -5,6 +5,7 @@ export type Mode = 'time' | 'words';
 export type Time = number;
 export type Words = number;
 export type QuickRestart = false | 'tab' | 'esc';
+export type Language = string;
 export type QuickEnd = boolean;
 export type IndicateTypos = false | 'below' | 'replace';
 export type HideExtraLetters = boolean;
@@ -26,6 +27,7 @@ export interface Settings {
   time: Time;
   words: Words;
   quickRestart: QuickRestart;
+  language: Language;
   quickEnd: QuickEnd;
   indicateTypos: IndicateTypos;
   hideExtraLetters: HideExtraLetters;
@@ -114,6 +116,12 @@ export const settingsList = {
       { alt: 'tab', value: 'tab' },
       { alt: 'esc', value: 'esc' },
     ],
+  }),
+  language: create<Language>({
+    command: 'language',
+    category: 'behavior',
+    description: <>Change in which language you want to type.</>,
+    options: [],
   }),
   quickEnd: create<QuickEnd>({
     command: 'quick end',
@@ -284,6 +292,7 @@ export const defaultSettings: Settings = {
   time: 60,
   words: 50,
   quickRestart: 'tab',
+  language: 'english',
   quickEnd: true,
   indicateTypos: 'replace',
   hideExtraLetters: false,
