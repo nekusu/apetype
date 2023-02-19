@@ -60,13 +60,22 @@ const fonts = [
   ubuntuMono,
 ];
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+async function getLanguages() {
+  const res = await fetch(
+    'https://raw.githubusercontent.com/monkeytypegame/monkeytype/master/frontend/static/languages/_list.json'
+  );
+  return (await res.json()) as string[];
+}
+
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const languages = await getLanguages();
+
   return (
     <html lang='en' className={twJoin(fonts.map((font) => font.variable))}>
       <head />
       <body className='bg-bg font transition-colors'>
         <div className='flex justify-center'>
-          <Content>{children}</Content>
+          <Content languages={languages}>{children}</Content>
         </div>
       </body>
     </html>

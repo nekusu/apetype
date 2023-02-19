@@ -5,27 +5,28 @@ import { CommandLine } from 'components/command-line';
 import { GlobalProvider, GlobalValues } from 'context/globalContext';
 import { SettingsProvider } from 'context/settingsContext';
 import { AnimatePresence } from 'framer-motion';
+import { useDidMount } from 'hooks/useDidMount';
 import { useLanguage } from 'hooks/useLanguage';
 import produce, { freeze } from 'immer';
 import { ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
 import { DraftFunction, Updater, useImmer } from 'use-immer';
-import { defaultSettings, Settings } from 'utils/settings';
+import { defaultSettings, Settings, settingsList } from 'utils/settings';
 import { Footer, Header } from '.';
 
 interface ContentProps {
   children: ReactNode;
+  languages: string[];
 }
 
-export default function Content({ children }: ContentProps) {
-  const { language } = useLanguage('english');
+export default function Content({ children, languages }: ContentProps) {
   const [globalValues, setGlobalValues] = useImmer<GlobalValues>({
     capsLock: false,
     isUserTyping: false,
     isTestFinished: false,
     modalOpen: false,
   });
-  const [defaultCommand, setDefaultCommand] = useState<string | undefined>();
   const [commandLineOpen, _commandLineHandler] = useDisclosure(false);
+  const [defaultCommand, setDefaultCommand] = useState<string | undefined>();
   const [settings, _setSettings] = useLocalStorage<Settings>({
     key: 'settings',
     defaultValue: freeze(defaultSettings),
@@ -37,6 +38,7 @@ export default function Content({ children }: ContentProps) {
     },
     [_setSettings]
   );
+  const { language } = useLanguage(settings.language);
 
   const restartTest = useCallback(() => {
     setGlobalValues((draft) => {
@@ -54,16 +56,22 @@ export default function Content({ children }: ContentProps) {
       },
       close: () => {
         setGlobalValues((draft) => void (draft.modalOpen = false));
+        setDefaultCommand(undefined);
         _commandLineHandler.close();
       },
       toggle: () => {
         setGlobalValues((draft) => void (draft.modalOpen = !draft.modalOpen));
+        if (commandLineOpen) setDefaultCommand(undefined);
         _commandLineHandler.toggle();
       },
     }),
-    [_commandLineHandler, setGlobalValues]
+    [_commandLineHandler, commandLineOpen, setGlobalValues]
   );
 
+  useDidMount(() => {
+    _setSettings((currentSettings) => ({ ...defaultSettings, ...currentSettings }));
+    settingsList.language.options = languages.map((l) => ({ value: l.replaceAll('_', ' ') }));
+  });
   useEffect(() => {
     const fontFamily = settings.fontFamily;
     document.documentElement.style.setProperty(

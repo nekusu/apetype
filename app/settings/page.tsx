@@ -2,15 +2,22 @@
 
 import { useDisclosure } from '@mantine/hooks';
 import { Button, Key, Text, Transition } from 'components/core';
+import { ButtonProps } from 'components/core/Button';
 import { CustomFontModal, Setting } from 'components/settings';
+import { useGlobal } from 'context/globalContext';
 import { useSettings } from 'context/settingsContext';
 import { useRef } from 'react';
 import { twJoin } from 'tailwind-merge';
 import { categories, settingsEntries, SettingsKey, settingsList } from 'utils/settings';
 
-const customSettings: SettingsKey[] = ['fontFamily'];
+const CUSTOM_SETTINGS: SettingsKey[] = ['fontFamily'];
+const COMMON_BUTTON_PROPS: Omit<ButtonProps, 'ref'> = {
+  className: 'w-full',
+  variant: 'filled',
+};
 
 export default function Page() {
+  const { commandLineHandler } = useGlobal();
   const settings = useSettings();
   const { quickRestart, setSettings } = settings;
   const [customFontModalOpen, customFontModalHandler] = useDisclosure(false);
@@ -24,20 +31,25 @@ export default function Page() {
 
   const settingsComponents = settingsEntries.reduce(
     (components, [key, { command, description, options }]) => {
-      if (customSettings.includes(key)) return components;
+      if (CUSTOM_SETTINGS.includes(key)) return components;
       components[key] = (
         <Setting key={key} title={command} description={description} options={options}>
-          {options.map((option) => (
-            <Button
-              key={option.value as string}
-              active={settings[key] === option.value}
-              className='w-full'
-              onClick={() => setSettings((draft) => void (draft[key] = option.value as never))}
-              variant='filled'
-            >
-              {option.alt ?? (option.value as string)}
+          {options.length < 16 ? (
+            options.map((option) => (
+              <Button
+                key={option.alt ?? option.value}
+                active={settings[key] === option.value}
+                onClick={() => setSettings((draft) => void (draft[key] = option.value as never))}
+                {...COMMON_BUTTON_PROPS}
+              >
+                {option.alt ?? option.value}
+              </Button>
+            ))
+          ) : (
+            <Button onClick={() => commandLineHandler.open(command)} {...COMMON_BUTTON_PROPS}>
+              {settings[key]}
             </Button>
-          ))}
+          )}
         </Setting>
       );
       return components;
@@ -60,19 +72,17 @@ export default function Page() {
           <Button
             key={option.value}
             active={settings.fontFamily === option.value}
-            className='w-full'
             onClick={() => setSettings((draft) => void (draft.fontFamily = option.value as never))}
-            variant='filled'
             style={{ fontFamily: `var(${option.value})` }}
+            {...COMMON_BUTTON_PROPS}
           >
             {option.alt}
           </Button>
         ))}
         <Button
           active={isCustomFont}
-          className='w-full'
           onClick={customFontModalHandler.open}
-          variant='filled'
+          {...COMMON_BUTTON_PROPS}
         >
           custom {isCustomFont && `(${settings.fontFamily})`}
         </Button>
