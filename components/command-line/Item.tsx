@@ -24,9 +24,9 @@ export default function Item({
   return (
     <motion.div
       className={twMerge([
-        'flex h-9 cursor-pointer items-center gap-2 px-4 text-sm transition-colors duration-100 hover:duration-[0]',
-        active && selected ? 'bg-text' : active ? 'bg-main' : 'bg-transparent',
-        active ? 'text-bg' : selected ? 'text-text' : 'text-sub',
+        'flex h-9 cursor-pointer items-center gap-2 px-4 text-sm',
+        active ? 'bg-main text-bg' : selected ? 'text-text' : 'bg-transparent text-sub',
+        active && selected && 'bg-text',
         className,
       ])}
       layoutId={label}

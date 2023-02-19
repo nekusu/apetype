@@ -29,6 +29,7 @@ specifiers:
   react-chartjs-2: ^5.2.0
   react-dom: ^18.2.0
   react-icons: ^4.7.1
+  react-viewport-list: 7.0.0-beta.3
   release-it: ^15.6.0
   swr: ^2.0.3
   tailwind-merge: ^1.9.1
@@ -49,6 +50,7 @@ dependencies:
   react-chartjs-2: 5.2.0_t5yjg6ab35jnsudnh2qdighszm
   react-dom: 18.2.0_react@18.2.0
   react-icons: 4.7.1_react@18.2.0
+  react-viewport-list: 7.0.0-beta.3_react@18.2.0
   swr: 2.0.3_react@18.2.0
   tailwind-merge: 1.9.1
   use-immer: 0.8.1_immer@9.0.19+react@18.2.0
@@ -4504,6 +4506,14 @@ packages:
   /react-is/16.13.1:
     resolution: {integrity: sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ==}
     dev: true
+
+  /react-viewport-list/7.0.0-beta.3_react@18.2.0:
+    resolution: {integrity: sha512-sgoA37YHTs835XV2OoWgeG2VWOH7chHQRpl4x+j0j+ixf7utaJ91nc3cYqqoSrE8xwReSGs4d/imB5Kwm7QowQ==}
+    peerDependencies:
+      react: '>=17.0.0'
+    dependencies:
+      react: 18.2.0
+    dev: false
 
   /react/18.2.0:
     resolution: {integrity: sha512-/3IjMdb2L9QbBdWiW5e3P2/npwMBaU9mHCSCUzNln0ZCYbcfTsGbTJrU/kGemdH2IWmB2ioZ+zkxtmq6g09fGQ==}
