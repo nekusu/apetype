@@ -1,12 +1,12 @@
 'use client';
 
-import { useInputState } from '@mantine/hooks';
+import { useInputState, useIsomorphicEffect } from '@mantine/hooks';
 import { Button, Key, Modal, Tooltip, Transition } from 'components/core';
 import { useSettings } from 'context/settingsContext';
 import { motion } from 'framer-motion';
 import Fuse from 'fuse.js';
 import { useFocusLock } from 'hooks/useFocusLock';
-import { ReactNode, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { ReactNode, useEffect, useMemo, useRef, useState } from 'react';
 import { RiArrowDownLine, RiArrowUpLine, RiQuestionLine, RiTerminalLine } from 'react-icons/ri';
 import { ViewportList, ViewportListRef } from 'react-viewport-list';
 import { SettingParams, settingsEntries, SettingsKey, settingsValues } from 'utils/settings';
@@ -101,24 +101,22 @@ export default function CommandLine({ defaultCommand, open, onClose }: CommandLi
     } else setCommand(items.settings[index].command);
   };
 
-  useLayoutEffect(() => {
+  useIsomorphicEffect(() => {
     if (open) {
       setInputValue('');
       setCommand(defaultCommand);
       setIndex(selectedIndex);
     } else isUsingKeyboard.current = true;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
   useEffect(() => {
     isUsingKeyboard.current = true;
     setIndex(inputValue ? 0 : selectedIndex);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [inputValue]);
-  useLayoutEffect(() => {
+  useIsomorphicEffect(() => {
     isUsingKeyboard.current = true;
     setInputValue('');
     setIndex(selectedIndex);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [setting]);
   useEffect(() => {
     if (isUsingKeyboard.current) listRef.current?.scrollToIndex({ index });
