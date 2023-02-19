@@ -11,7 +11,7 @@
     "prepare": "husky install"
   },
   "dependencies": {
-    "@floating-ui/react": "^0.15.1",
+    "@floating-ui/react": "^0.19.2",
     "@mantine/hooks": "^5.10.4",
     "@next/font": "^13.1.6",
     "chart.js": "^4.2.1",
