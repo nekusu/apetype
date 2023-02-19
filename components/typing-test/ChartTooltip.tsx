@@ -12,14 +12,15 @@ export interface ChartTooltipProps {
   disabled: boolean;
 }
 
-function ChartTooltip({ position, data, disabled }: ChartTooltipProps) {
+function ChartTooltip({ position: { top, left }, data, disabled }: ChartTooltipProps) {
   return (
     <motion.div
       className={twJoin([
         'pointer-events-none absolute rounded-lg bg-sub-alt py-2.5 px-3 shadow-md transition',
         disabled ? 'opacity-0' : 'opacity-100',
       ])}
-      animate={{ top: position?.top, left: position?.left }}
+      animate={{ top, left }}
+      transition={{ ease: 'easeOut', duration: 0.2 }}
     >
       {data && (
         <>
