@@ -58,8 +58,9 @@ export default function CommandLine({ defaultCommand, open, onClose }: CommandLi
     return { settings: _settings, options: _options };
   }, [fuseOptions, inputValue, setting]);
 
-  let selectedIndex =
-    setting?.options.findIndex(({ value }) => value === settings[setting.key]) ?? 0;
+  let selectedIndex = setting
+    ? items.options.findIndex(({ value }) => value === settings[setting.key])
+    : 0;
   const customSelected = selectedIndex === -1;
   selectedIndex = selectedIndex === -1 ? items.options.length : selectedIndex;
   const itemCount =
