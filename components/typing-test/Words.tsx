@@ -53,9 +53,10 @@ export default function Words() {
     setIsFocused(false);
   };
   const handleInput = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (!isTestRunning) setValues((draft) => void (draft.isTestRunning = true));
+    if (isTestFinished) return;
     const { value } = event.target;
-    if (!isTestFinished) wordsCollection.update(value);
+    if (!isTestRunning) setValues((draft) => void (draft.isTestRunning = true));
+    wordsCollection.update(value);
     setGlobalValues((draft) => void (draft.isUserTyping = true));
     clearIdle();
     startIdle();
