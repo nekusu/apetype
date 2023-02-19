@@ -196,7 +196,12 @@ export default function CommandLine({ defaultCommand, open, onClose }: CommandLi
         onMouseMove={() => (isUsingKeyboard.current = false)}
       >
         {setting ? (
-          <ViewportList ref={listRef} viewportRef={viewportRef} items={items.options}>
+          <ViewportList
+            ref={listRef}
+            viewportRef={viewportRef}
+            items={items.options}
+            initialIndex={selectedIndex}
+          >
             {({ alt, value }, i) => (
               <Item
                 key={alt ?? value}
