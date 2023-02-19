@@ -23,6 +23,7 @@
     "react-chartjs-2": "^5.2.0",
     "react-dom": "^18.2.0",
     "react-icons": "^4.7.1",
+    "react-viewport-list": "7.0.0-beta.3",
     "swr": "^2.0.3",
     "tailwind-merge": "^1.9.1",
     "use-immer": "^0.8.1"
