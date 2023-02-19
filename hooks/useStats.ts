@@ -57,6 +57,9 @@ export function useStats() {
     return interval.stop;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+  useEffect(() => {
+    setValues((draft) => void (draft.timer = mode === 'time' ? time : 0));
+  }, [mode, setValues, time]);
 
   return { start, update };
 }
