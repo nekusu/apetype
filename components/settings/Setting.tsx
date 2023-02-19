@@ -13,7 +13,7 @@ function Setting<T>({ children, title, description, options, gridColumns }: Sett
   return (
     <div
       className='grid auto-rows-auto gap-x-5 gap-y-1.5'
-      style={{ gridTemplateColumns: gridColumns ? '1fr' : '2fr 1fr' }}
+      style={{ gridTemplateColumns: gridColumns ? '1fr' : '2fr 1.2fr' }}
     >
       <Text className='col-span-full text-lg' component='h3'>
         {title}

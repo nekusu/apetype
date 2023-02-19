@@ -9,7 +9,7 @@ export interface InputProps
 }
 
 const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
-  { className, icon, iconClassName, wrapperClassName, ...props },
+  { className, icon, iconClassName, type = 'text', wrapperClassName, ...props },
   ref
 ) {
   return (
@@ -36,6 +36,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
           className,
         ])}
         ref={ref}
+        type={type}
         {...props}
       />
     </div>

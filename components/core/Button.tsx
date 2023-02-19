@@ -10,7 +10,7 @@ export interface ButtonProps
 }
 
 const Button = forwardRef<HTMLButtonElement, PolymorphicComponentProps<'button', ButtonProps>>(
-  function Button({ active = false, className, variant = 'text', ...props }, ref) {
+  function Button({ active = false, className, type = 'button', variant = 'text', ...props }, ref) {
     return (
       <Dynamic
         component='button'
@@ -25,6 +25,7 @@ const Button = forwardRef<HTMLButtonElement, PolymorphicComponentProps<'button',
           variant === 'text' && active && 'text-main',
           className,
         ])}
+        type={type}
         ref={ref}
         {...props}
       />

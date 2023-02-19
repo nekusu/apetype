@@ -1,8 +1,9 @@
 'use client';
 
+import { useDidUpdate, useInputState } from '@mantine/hooks';
 import { Button, Input, Modal, Text } from 'components/core';
+import { useGlobal } from 'context/globalContext';
 import { useSettings } from 'context/settingsContext';
-import { useEffect, useState } from 'react';
 
 export interface CustomFontModalProps {
   modalOpen: boolean;
@@ -10,10 +11,12 @@ export interface CustomFontModalProps {
 }
 
 export default function CustomFontModal({ modalOpen, onClose }: CustomFontModalProps) {
+  const { setGlobalValues } = useGlobal();
   const { setSettings } = useSettings();
-  const [customFont, setCustomFont] = useState('');
+  const [customFont, setCustomFont] = useInputState('');
 
-  useEffect(() => {
+  useDidUpdate(() => {
+    setGlobalValues((draft) => void (draft.modalOpen = modalOpen));
     if (modalOpen) setCustomFont('');
   }, [modalOpen]);
 
@@ -30,12 +33,7 @@ export default function CustomFontModal({ modalOpen, onClose }: CustomFontModalP
         <Text className='text-2xl' component='h3'>
           Custom font
         </Text>
-        <Input
-          type='text'
-          placeholder='Font name'
-          value={customFont}
-          onChange={({ target: { value } }) => setCustomFont(value)}
-        />
+        <Input placeholder='Font name' value={customFont} onChange={setCustomFont} />
         <Text className='text-sm' dimmed>
           Make sure you have the font installed on your device before applying
         </Text>
