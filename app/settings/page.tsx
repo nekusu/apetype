@@ -6,7 +6,8 @@ import { ButtonProps } from 'components/core/Button';
 import { CustomFontModal, Setting } from 'components/settings';
 import { useGlobal } from 'context/globalContext';
 import { useSettings } from 'context/settingsContext';
-import { useRef } from 'react';
+import { motion } from 'framer-motion';
+import { useSettingCategory } from 'hooks/useSettingCategory';
 import { twJoin } from 'tailwind-merge';
 import { categories, settingsEntries, SettingsKey, settingsList } from 'utils/settings';
 
@@ -20,14 +21,8 @@ export default function Page() {
   const { commandLineHandler } = useGlobal();
   const settings = useSettings();
   const { quickRestart, keyTips, setSettings } = settings;
+  const { listRef, currentCategory, scrollToCategory } = useSettingCategory();
   const [customFontModalOpen, customFontModalHandler] = useDisclosure(false);
-  const listRef = useRef<HTMLDivElement>(null);
-  const scrollToCategory = (index: number) => {
-    listRef.current?.children[index].scrollIntoView({
-      behavior: 'smooth',
-      block: 'start',
-    });
-  };
 
   const settingsComponents = settingsEntries.reduce(
     (components, [key, { command, description, options }]) => {
@@ -92,26 +87,40 @@ export default function Page() {
 
   return (
     <Transition className='relative w-full cursor-default'>
-      <div className='absolute grid h-full w-full grid-cols-[auto_1fr] grid-rows-[auto_1fr] gap-x-5'>
-        {keyTips && (
-          <Text className='col-span-full pb-5' dimmed>
-            pro tip: you can also change all these settings quickly using the command line (
-            <Key>{quickRestart === 'esc' ? 'tab' : 'esc'}</Key>)
-          </Text>
-        )}
-        <div className='flex max-h-full max-w-[128px] flex-col gap-3 overflow-y-auto overflow-x-hidden pr-5'>
-          {categories.map((category, index) => (
-            <Button key={category} className='px-0 py-1' onClick={() => scrollToCategory(index)}>
+      <div className='absolute grid h-full w-full grid-cols-[auto_1fr] grid-rows-[1fr_auto] gap-x-5'>
+        <div className='relative flex max-h-full flex-col gap-3 overflow-y-auto overflow-x-hidden py-1 pr-2.5'>
+          {categories.map((category) => (
+            <Button
+              key={category}
+              className={twJoin([
+                'group relative -my-0.5 py-1.5 px-0',
+                currentCategory === category
+                  ? 'text-sub-alt hover:text-sub-alt focus:text-sub-alt'
+                  : 'focus:text-sub',
+              ])}
+              component={motion.button}
+              animate={{ marginLeft: currentCategory === category ? 10 : 0 }}
+              id={`${category.replaceAll(' ', '-')}-button`}
+              onClick={() => scrollToCategory(category)}
+            >
+              {currentCategory === category && (
+                <motion.div
+                  className='absolute -z-10 box-content h-full w-full bg-main px-2.5 transition-colors group-hover:bg-text'
+                  layoutId='navigation-box'
+                  style={{ borderRadius: 8 }}
+                  transition={{ duration: 0.15 }}
+                />
+              )}
               {category}
             </Button>
           ))}
         </div>
-        <div className='flex max-h-full flex-col gap-10 overflow-y-auto' ref={listRef}>
+        <div className='flex max-h-full flex-col gap-9 overflow-auto' ref={listRef}>
           {categories.map((category) => (
-            <div key={category} className='flex flex-col gap-5'>
+            <div key={category} className='flex flex-col gap-5' id={category.replaceAll(' ', '-')}>
               <Text
                 className={twJoin([
-                  'text-[28px] leading-none',
+                  'pt-1 text-[28px] leading-none',
                   category === 'danger zone' ? 'text-error' : 'text-main',
                 ])}
                 component='h2'
@@ -124,6 +133,12 @@ export default function Page() {
             </div>
           ))}
         </div>
+        {keyTips && (
+          <Text className='col-span-full justify-self-end pt-4' dimmed>
+            pro tip: you can also change all these settings quickly using the command line (
+            <Key>{quickRestart === 'esc' ? 'tab' : 'esc'}</Key>)
+          </Text>
+        )}
       </div>
       <CustomFontModal modalOpen={customFontModalOpen} onClose={customFontModalHandler.close} />
     </Transition>

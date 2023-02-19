@@ -72,10 +72,8 @@ export default function Modal({
                 overflow === 'inside' && 'max-h-full overflow-y-auto',
                 className,
               ])}
-              variants={{
-                hidden: { y: 10 },
-                visible: { y: 0 },
-              }}
+              variants={{ hidden: { scale: 0.95 }, visible: { scale: 1 } }}
+              transition={{ type: 'spring', bounce: 0.6 }}
               {...props}
             />
           </Transition>
