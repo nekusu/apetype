@@ -18,7 +18,7 @@ export default function Home() {
     commandLineHandler,
     restartTest,
   } = useGlobal();
-  const { mode, time, words, quickRestart } = useSettings();
+  const { mode, time, words, quickRestart, keyTips } = useSettings();
 
   useDidUpdate(() => {
     if (language) restartTest();
@@ -43,7 +43,7 @@ export default function Home() {
         </AnimatePresence>
         {!isUserTyping && (
           <Transition key='bottom' className='row-start-3 row-end-4 h-min self-end'>
-            <Tips key='tips' />
+            {keyTips && <Tips key='tips' />}
             <Tooltip label='Open command line' offset={8} placement='left'>
               <Button
                 className='absolute right-0 bottom-0 rounded-[50%] p-2.5'

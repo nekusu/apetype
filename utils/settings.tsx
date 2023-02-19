@@ -21,6 +21,12 @@ export type FontFamily = string;
 export type PageWidth = '1000px' | '1250px' | '1500px' | '2000px' | '100%';
 export type FlipTestColors = boolean;
 export type ColorfulMode = boolean;
+export type LiveWpm = boolean;
+export type LiveAccuracy = boolean;
+export type TimerProgress = boolean;
+export type KeyTips = boolean;
+export type OutOfFocusWarning = boolean;
+export type CapsLockWarning = boolean;
 
 export interface Settings {
   mode: Mode;
@@ -43,6 +49,12 @@ export interface Settings {
   pageWidth: PageWidth;
   flipTestColors: FlipTestColors;
   colorfulMode: ColorfulMode;
+  liveWpm: LiveWpm;
+  liveAccuracy: LiveAccuracy;
+  timerProgress: TimerProgress;
+  keyTips: KeyTips;
+  outOfFocusWarning: OutOfFocusWarning;
+  capsLockWarning: CapsLockWarning;
 }
 
 export interface SettingParams<T> {
@@ -66,9 +78,13 @@ export type SettingsEntries = [SettingsKey, SettingParams<SettingsKey>][];
 export type SettingsKeys = SettingsKey[];
 export type SettingsValues = SettingParams<SettingsKey>[];
 
-const BOOLEAN_OPTIONS = [
+const OFF_ON_OPTIONS = [
   { alt: 'off', value: false },
   { alt: 'on', value: true },
+];
+const HIDE_SHOW_OPTIONS = [
+  { alt: 'hide', value: false },
+  { alt: 'show', value: true },
 ];
 
 function create<T>(params: SettingParams<T>) {
@@ -133,7 +149,7 @@ export const settingsList = {
         confirm the last incorrect entry with a space.
       </>
     ),
-    options: BOOLEAN_OPTIONS,
+    options: OFF_ON_OPTIONS,
   }),
   indicateTypos: create<IndicateTypos>({
     command: 'indicate typos',
@@ -159,13 +175,13 @@ export const settingsList = {
         but might feel a bit confusing when you press a key and nothing happens.
       </>
     ),
-    options: BOOLEAN_OPTIONS,
+    options: OFF_ON_OPTIONS,
   }),
   smoothCaret: create<SmoothCaret>({
     command: 'smooth caret',
     category: 'caret',
     description: <>When enabled, the caret will move smoothly between letters and words.</>,
-    options: BOOLEAN_OPTIONS,
+    options: OFF_ON_OPTIONS,
   }),
   caretStyle: create<CaretStyle>({
     command: 'caret style',
@@ -206,13 +222,13 @@ export const settingsList = {
     command: 'smooth line scroll',
     category: 'appearance',
     description: <>When enabled, the line transition will be animated.</>,
-    options: BOOLEAN_OPTIONS,
+    options: OFF_ON_OPTIONS,
   }),
   showDecimalPlaces: create<ShowDecimalPlaces>({
     command: 'show decimal places',
     category: 'appearance',
     description: <>Always shows decimal places for values on the result page.</>,
-    options: BOOLEAN_OPTIONS,
+    options: OFF_ON_OPTIONS,
   }),
   fontSize: create<FontSize>({
     command: 'font size',
@@ -268,7 +284,7 @@ export const settingsList = {
         flipped and the future text will be brighter than the already typed text.
       </>
     ),
-    options: BOOLEAN_OPTIONS,
+    options: OFF_ON_OPTIONS,
   }),
   colorfulMode: create<ColorfulMode>({
     command: 'colorful mode',
@@ -279,7 +295,48 @@ export const settingsList = {
         website more colorful.
       </>
     ),
-    options: BOOLEAN_OPTIONS,
+    options: OFF_ON_OPTIONS,
+  }),
+  liveWpm: create<LiveWpm>({
+    command: 'live wpm',
+    category: 'hide elements',
+    description: <>Displays a live WPM speed during the test. Updates once every second.</>,
+    options: HIDE_SHOW_OPTIONS,
+  }),
+  liveAccuracy: create<LiveAccuracy>({
+    command: 'live accuracy',
+    category: 'hide elements',
+    description: <>Displays live accuracy during the test.</>,
+    options: HIDE_SHOW_OPTIONS,
+  }),
+  timerProgress: create<TimerProgress>({
+    command: 'timer/progress',
+    category: 'hide elements',
+    description: <>Displays a live timer for timed tests and progress for words/custom tests.</>,
+    options: HIDE_SHOW_OPTIONS,
+  }),
+  keyTips: create<KeyTips>({
+    command: 'key tips',
+    category: 'hide elements',
+    description: <>Shows keybind tips throughout the website.</>,
+    options: HIDE_SHOW_OPTIONS,
+  }),
+  outOfFocusWarning: create<OutOfFocusWarning>({
+    command: 'out of focus warning',
+    category: 'hide elements',
+    description: (
+      <>
+        Shows an out of focus reminder after 1 second of being &apos;out of focus&apos; (not being
+        able to type).
+      </>
+    ),
+    options: HIDE_SHOW_OPTIONS,
+  }),
+  capsLockWarning: create<CapsLockWarning>({
+    command: 'caps lock warning',
+    category: 'hide elements',
+    description: <>Displays a warning when caps lock is on.</>,
+    options: HIDE_SHOW_OPTIONS,
   }),
 };
 
@@ -308,4 +365,10 @@ export const defaultSettings: Settings = {
   pageWidth: '1250px',
   flipTestColors: false,
   colorfulMode: true,
+  liveWpm: true,
+  liveAccuracy: true,
+  timerProgress: true,
+  keyTips: true,
+  outOfFocusWarning: true,
+  capsLockWarning: true,
 };

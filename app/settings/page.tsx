@@ -19,7 +19,7 @@ const COMMON_BUTTON_PROPS: Omit<ButtonProps, 'ref'> = {
 export default function Page() {
   const { commandLineHandler } = useGlobal();
   const settings = useSettings();
-  const { quickRestart, setSettings } = settings;
+  const { quickRestart, keyTips, setSettings } = settings;
   const [customFontModalOpen, customFontModalHandler] = useDisclosure(false);
   const listRef = useRef<HTMLDivElement>(null);
   const scrollToCategory = (index: number) => {
@@ -93,10 +93,12 @@ export default function Page() {
   return (
     <Transition className='relative w-full cursor-default'>
       <div className='absolute grid h-full w-full grid-cols-[auto_1fr] grid-rows-[auto_1fr] gap-x-5'>
-        <Text className='col-span-full pb-5' dimmed>
-          pro tip: you can also change all these settings quickly using the command line (
-          <Key>{quickRestart === 'esc' ? 'tab' : 'esc'}</Key>)
-        </Text>
+        {keyTips && (
+          <Text className='col-span-full pb-5' dimmed>
+            pro tip: you can also change all these settings quickly using the command line (
+            <Key>{quickRestart === 'esc' ? 'tab' : 'esc'}</Key>)
+          </Text>
+        )}
         <div className='flex max-h-full max-w-[128px] flex-col gap-3 overflow-y-auto overflow-x-hidden pr-5'>
           {categories.map((category, index) => (
             <Button key={category} className='px-0 py-1' onClick={() => scrollToCategory(index)}>

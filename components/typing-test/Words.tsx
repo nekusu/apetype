@@ -26,6 +26,7 @@ export default function Words() {
     flipTestColors,
     colorfulMode,
     fontSize,
+    outOfFocusWarning,
   } = useSettings();
   const { words, wordIndex, inputValue, isTestRunning, setValues } = useTypingTest();
   const wordsCollection = useWords();
@@ -107,7 +108,7 @@ export default function Words() {
       <div
         className={twJoin([
           'relative mx-[-.25em] flex max-h-full flex-wrap overflow-hidden transition duration-200',
-          isBlurred && 'opacity-40 blur',
+          outOfFocusWarning && isBlurred && 'opacity-40 blur',
         ])}
         ref={wordsetRef}
       >
@@ -128,7 +129,7 @@ export default function Words() {
           />
         ))}
       </div>
-      {isBlurred && (
+      {outOfFocusWarning && isBlurred && (
         <Transition className='absolute inset-0 flex cursor-pointer items-center justify-center gap-1.5 text-base text-text transition-colors'>
           <RiCursorFill />
           Click or press any key to focus

@@ -30,7 +30,7 @@ const DescriptionTooltip = ({ description }: { description: ReactNode }) => (
 
 export default function CommandLine({ defaultCommand, open, onClose }: CommandLineProps) {
   const settings = useSettings();
-  const { quickRestart, setSettings } = settings;
+  const { quickRestart, keyTips, setSettings } = settings;
   const [inputValue, setInputValue] = useInputState('');
   const [index, setIndex] = useState(0);
   const [command, setCommand] = useState<string | null | undefined>(defaultCommand);
@@ -166,21 +166,23 @@ export default function CommandLine({ defaultCommand, open, onClose }: CommandLi
           />
         </motion.form>
         {items.settings.length || items.options.length || setting?.custom ? (
-          <motion.div
-            className='flex cursor-default items-center gap-1 text-xs text-sub'
-            layout
-            transition={{ duration: 0.15 }}
-          >
-            navigate
-            <Key className='py-0.5'>
-              <RiArrowUpLine />
-            </Key>
-            <Key className='py-0.5'>
-              <RiArrowDownLine />
-            </Key>
-            <Key>home</Key>
-            <Key>end</Key>
-          </motion.div>
+          keyTips && (
+            <motion.div
+              className='flex cursor-default items-center gap-1 text-xs text-sub'
+              layout
+              transition={{ duration: 0.15 }}
+            >
+              navigate
+              <Key className='py-0.5'>
+                <RiArrowUpLine />
+              </Key>
+              <Key className='py-0.5'>
+                <RiArrowDownLine />
+              </Key>
+              <Key>home</Key>
+              <Key>end</Key>
+            </motion.div>
+          )
         ) : (
           <div className='cursor-default text-sm text-sub'>nothing found</div>
         )}
