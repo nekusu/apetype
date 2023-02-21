@@ -9,13 +9,13 @@ import { useFocusLock } from 'hooks/useFocusLock';
 import { ReactNode, useEffect, useMemo, useRef, useState } from 'react';
 import { RiArrowDownLine, RiArrowUpLine, RiQuestionLine, RiTerminalLine } from 'react-icons/ri';
 import { ViewportList, ViewportListRef } from 'react-viewport-list';
-import { settingsEntries, settingsValues } from 'utils/settings';
+import { SettingId, settingsWithIds, SettingWithId } from 'utils/settings';
 import Item from './Item';
 
 export interface CommandLineProps {
   open: boolean;
   onClose: () => void;
-  defaultCommand?: string;
+  settingId?: SettingId;
 }
 
 const uf = new uFuzzy({ intraIns: 1, interChars: '.' });
@@ -27,45 +27,41 @@ const DescriptionTooltip = ({ description }: { description: ReactNode }) => (
   </Tooltip>
 );
 
-export default function CommandLine({ defaultCommand, open, onClose }: CommandLineProps) {
+export default function CommandLine({ settingId, open, onClose }: CommandLineProps) {
   const settings = useSettings();
   const { quickRestart, keyTips, setSettings } = settings;
-  const [inputValue, setInputValue] = useInputState('');
+  const [input, setInput] = useInputState('');
   const [index, setIndex] = useState(0);
-  const [command, setCommand] = useState<string | null | undefined>(defaultCommand);
+  const [setting, setSetting] = useState<SettingWithId | undefined>();
   const isUsingKeyboard = useRef(false);
   const focusLockRef = useFocusLock();
   const viewportRef = useRef<HTMLDivElement>(null);
   const listRef = useRef<ViewportListRef>(null);
 
-  const setting = useMemo(() => {
-    const [key, setting] = settingsEntries.find(([, s]) => s.command === command) ?? [];
-    return key && setting && { key, ...setting };
-  }, [command]);
   const items = useMemo(() => {
-    let settings = settingsValues;
+    let settings = settingsWithIds;
     let options = setting?.options ?? [];
     if (setting) {
       const haystack = setting.options.map(({ alt, value }) => `${alt ?? ''}¦${value}`);
-      const indexes = uf.filter(haystack, inputValue);
+      const indexes = uf.filter(haystack, input);
       const results = indexes.map((i) => setting.options[i]);
       options = results;
     } else {
-      const haystack = settingsValues.map(({ command }) => command);
-      const indexes = uf.filter(haystack, inputValue);
-      const results = indexes.map((i) => settingsValues[i]);
+      const haystack = settingsWithIds.map(({ command }) => command);
+      const indexes = uf.filter(haystack, input);
+      const results = indexes.map((i) => settingsWithIds[i]);
       settings = results;
     }
     return { settings, options };
-  }, [inputValue, setting]);
+  }, [input, setting]);
 
   let selectedIndex = setting
-    ? items.options.findIndex(({ value }) => value === settings[setting.key])
+    ? items.options.findIndex(({ value }) => value === settings[setting.id])
     : 0;
   const customSelected = selectedIndex === -1;
   selectedIndex = selectedIndex === -1 ? items.options.length : selectedIndex;
   const itemCount = setting
-    ? items.options.length + +!!(setting.custom && (customSelected || inputValue))
+    ? items.options.length + +!!(setting.custom && (customSelected || input))
     : items.settings.length;
 
   const hoverItem = (index: number) => {
@@ -84,40 +80,37 @@ export default function CommandLine({ defaultCommand, open, onClose }: CommandLi
     } else if (e.key === 'End') {
       e.preventDefault();
       setIndex(itemCount - 1);
-    } else if (e.key === 'Backspace' && !inputValue) {
-      setCommand(null);
+    } else if (e.key === 'Backspace' && !input) {
+      setSetting(undefined);
     }
     isUsingKeyboard.current = true;
   };
-  const setSetting = (value: string | number | boolean) => {
-    if (!setting?.key || value === '') return;
+  const saveSetting = (value: string | number | boolean) => {
+    if (!setting?.id || value === '') return;
     value = typeof value === 'boolean' || isNaN(+value) ? value : +value;
-    setSettings((draft) => void (draft[setting.key] = value as never));
-    setInputValue('');
+    setSettings((draft) => void (draft[setting.id] = value as never));
+    setInput('');
   };
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (setting) {
-      if (index < items.options.length) setSetting(items.options[index].value);
-      else if (setting.custom) setSetting(inputValue);
-    } else setCommand(items.settings[index].command);
+      if (setting.custom && index === itemCount) saveSetting(input);
+      else saveSetting(items.options[index].value);
+    } else setSetting(items.settings[index]);
   };
 
   useIsomorphicEffect(() => {
     if (open) {
-      setInputValue('');
-      setCommand(defaultCommand);
+      setSetting(settingsWithIds.find(({ id }) => id === settingId));
+      setInput('');
       setIndex(selectedIndex);
-    } else isUsingKeyboard.current = true;
+    }
   }, [open]);
   useEffect(() => {
-    isUsingKeyboard.current = true;
-    setIndex(inputValue ? 0 : selectedIndex);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [inputValue]);
+    setIndex(input ? 0 : selectedIndex);
+  }, [input, selectedIndex]);
   useIsomorphicEffect(() => {
-    isUsingKeyboard.current = true;
-    setInputValue('');
+    setInput('');
     setIndex(selectedIndex);
   }, [setting]);
   useEffect(() => {
@@ -135,15 +128,15 @@ export default function CommandLine({ defaultCommand, open, onClose }: CommandLi
         className='flex items-center gap-3 px-4 text-text transition-colors'
         onKeyDown={handleKeyDown}
       >
-        {command ? (
+        {setting?.command ? (
           <Button
             className='-ml-1 px-2.5 py-1.5 text-xs font-semibold'
             component={Transition}
             variant='filled'
             active
-            onClick={() => setCommand('')}
+            onClick={() => setSetting(undefined)}
           >
-            {command}
+            {setting.command}
           </Button>
         ) : (
           <RiTerminalLine className='text-main' />
@@ -158,10 +151,12 @@ export default function CommandLine({ defaultCommand, open, onClose }: CommandLi
             ref={focusLockRef}
             className='w-full bg-transparent py-3.5 text-text caret-caret outline-none transition-colors'
             min={0}
-            type={typeof setting?.options[0].value === 'number' ? 'number' : 'text'}
-            placeholder={`type ${command ? 'value' : 'command'}`}
-            value={inputValue}
-            onChange={setInputValue}
+            type={
+              setting?.custom && typeof setting.options[0].value === 'number' ? 'number' : 'text'
+            }
+            placeholder={`type ${setting ? 'value' : 'command'}`}
+            value={input}
+            onChange={setInput}
             data-autofocus
           />
         </motion.form>
@@ -206,38 +201,40 @@ export default function CommandLine({ defaultCommand, open, onClose }: CommandLi
               <Item
                 key={alt ?? value}
                 active={index === i}
-                label={command === 'caret style' ? value || alt : alt ?? value}
+                label={setting.command === 'caret style' ? value || alt : alt ?? value}
                 selected={selectedIndex === i}
-                style={{ fontFamily: command === 'font family' ? `var(${value})` : undefined }}
-                onClick={() => setSetting(value)}
+                style={{
+                  fontFamily: setting.command === 'font family' ? `var(${value})` : undefined,
+                }}
+                onClick={() => saveSetting(value)}
                 onMouseOver={() => hoverItem(i)}
               />
             )}
           </ViewportList>
         ) : (
           <ViewportList ref={listRef} viewportRef={viewportRef} items={items.settings}>
-            {({ command, description }, i) => (
+            {(setting, i) => (
               <Item
-                key={command}
+                key={setting.id}
                 active={index === i}
-                label={command}
-                onClick={() => setCommand(command)}
+                label={setting.command}
+                onClick={() => setSetting(setting)}
                 onMouseOver={() => hoverItem(i)}
               >
-                {description && <DescriptionTooltip description={description} />}
+                {setting.description && <DescriptionTooltip description={setting.description} />}
               </Item>
             )}
           </ViewportList>
         )}
-        {setting?.custom && (customSelected || inputValue) && (
+        {setting?.custom && (customSelected || input) && (
           <Item
             layoutId='custom'
             active={index === items.options.length}
             label={`custom ${
-              customSelected && !inputValue ? `(${settings[setting.key].toString()})` : ''
+              customSelected && !input ? `(${settings[setting.id].toString()})` : ''
             }`}
-            selected={customSelected && !inputValue}
-            onClick={() => setSetting(inputValue)}
+            selected={customSelected && !input}
+            onClick={() => saveSetting(input)}
             onMouseMove={() => hoverItem(items.options.length)}
           />
         )}

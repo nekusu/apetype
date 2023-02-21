@@ -1,4 +1,6 @@
 import { Key } from 'components/core';
+import produce from 'immer';
+import { WritableDraft } from 'immer/dist/internal';
 import { ReactNode } from 'react';
 
 export type Mode = 'time' | 'words';
@@ -73,10 +75,9 @@ export interface SettingParams<T> {
   custom?: boolean;
 }
 
-export type SettingsKey = keyof Settings;
-export type SettingsEntries = [SettingsKey, SettingParams<SettingsKey>][];
-export type SettingsKeys = SettingsKey[];
-export type SettingsValues = SettingParams<SettingsKey>[];
+export type SettingId = keyof Settings;
+export type SettingsValues = SettingParams<SettingId>[];
+export type SettingWithId = SettingParams<SettingId> & { id: SettingId };
 
 const OFF_ON_OPTIONS = [
   { alt: 'off', value: false },
@@ -102,7 +103,7 @@ export const categories = [
   'danger zone',
 ];
 
-export const settingsList = {
+export let settingsList = {
   mode: create<Mode>({
     command: 'mode',
     options: [{ value: 'time' }, { value: 'words' }],
@@ -340,9 +341,23 @@ export const settingsList = {
   }),
 };
 
-export const settingsEntries = Object.entries(settingsList) as SettingsEntries;
-export const settingsKeys = Object.keys(settingsList) as SettingsKeys;
-export const settingsValues = Object.values(settingsList) as SettingsValues;
+export let settingsIds: SettingId[] = [];
+export let settingsValues: SettingsValues = [];
+export let settingsWithIds: SettingWithId[] = [];
+
+function createSettingsVariations() {
+  settingsIds = Object.keys(settingsList) as SettingId[];
+  settingsValues = Object.values(settingsList) as SettingsValues;
+  settingsWithIds = Object.entries(settingsList).map(([id, setting]) => ({
+    id,
+    ...setting,
+  })) as SettingWithId[];
+}
+
+export function updateSettingsList(recipe: (draft: WritableDraft<typeof settingsList>) => void) {
+  settingsList = produce(settingsList, recipe);
+  createSettingsVariations();
+}
 
 export const defaultSettings: Settings = {
   mode: 'time',
@@ -372,3 +387,5 @@ export const defaultSettings: Settings = {
   outOfFocusWarning: true,
   capsLockWarning: true,
 };
+
+createSettingsVariations();

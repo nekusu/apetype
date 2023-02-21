@@ -9,9 +9,9 @@ import { useSettings } from 'context/settingsContext';
 import { motion } from 'framer-motion';
 import { useSettingCategory } from 'hooks/useSettingCategory';
 import { twJoin } from 'tailwind-merge';
-import { categories, settingsEntries, SettingsKey, settingsList } from 'utils/settings';
+import { categories, SettingId, settingsList, settingsWithIds } from 'utils/settings';
 
-const CUSTOM_SETTINGS: SettingsKey[] = ['fontFamily'];
+const CUSTOM_SETTINGS: SettingId[] = ['fontFamily'];
 const COMMON_BUTTON_PROPS: Omit<ButtonProps, 'ref'> = {
   className: 'w-full',
   variant: 'filled',
@@ -24,32 +24,32 @@ export default function Page() {
   const { listRef, currentCategory, scrollToCategory } = useSettingCategory();
   const [customFontModalOpen, customFontModalHandler] = useDisclosure(false);
 
-  const settingsComponents = settingsEntries.reduce(
-    (components, [key, { command, description, options }]) => {
-      if (CUSTOM_SETTINGS.includes(key)) return components;
-      components[key] = (
-        <Setting key={key} title={command} description={description} options={options}>
+  const settingsComponents = settingsWithIds.reduce(
+    (components, { id, command, description, options }) => {
+      if (CUSTOM_SETTINGS.includes(id)) return components;
+      components[id] = (
+        <Setting key={id} title={command} description={description} options={options}>
           {options.length < 16 ? (
             options.map((option) => (
               <Button
                 key={option.alt ?? option.value}
-                active={settings[key] === option.value}
-                onClick={() => setSettings((draft) => void (draft[key] = option.value as never))}
+                active={settings[id] === option.value}
+                onClick={() => setSettings((draft) => void (draft[id] = option.value as never))}
                 {...COMMON_BUTTON_PROPS}
               >
                 {option.alt ?? option.value}
               </Button>
             ))
           ) : (
-            <Button onClick={() => commandLineHandler.open(command)} {...COMMON_BUTTON_PROPS}>
-              {settings[key]}
+            <Button onClick={() => commandLineHandler.open(id)} {...COMMON_BUTTON_PROPS}>
+              {settings[id]}
             </Button>
           )}
         </Setting>
       );
       return components;
     },
-    {} as Record<SettingsKey, JSX.Element>
+    {} as Record<SettingId, JSX.Element>
   );
   {
     const { command, description, options } = settingsList.fontFamily;
@@ -127,9 +127,9 @@ export default function Page() {
               >
                 {category}
               </Text>
-              {settingsEntries
-                .filter(([, setting]) => setting.category === category)
-                .map(([key]) => settingsComponents[key])}
+              {settingsWithIds
+                .filter((setting) => setting.category === category)
+                .map(({ id }) => settingsComponents[id])}
             </div>
           ))}
         </div>

@@ -2,15 +2,16 @@
 
 import { useDisclosure, useLocalStorage, useWindowEvent } from '@mantine/hooks';
 import { CommandLine } from 'components/command-line';
-import { GlobalProvider, GlobalValues } from 'context/globalContext';
-import { SettingsProvider } from 'context/settingsContext';
+import { CommandLineProps } from 'components/command-line/CommandLine';
+import { GlobalContext, GlobalProvider, GlobalValues } from 'context/globalContext';
+import { SettingsContext, SettingsProvider } from 'context/settingsContext';
 import { AnimatePresence } from 'framer-motion';
 import { useDidMount } from 'hooks/useDidMount';
 import { useLanguage } from 'hooks/useLanguage';
 import produce, { freeze } from 'immer';
 import { ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
-import { DraftFunction, Updater, useImmer } from 'use-immer';
-import { defaultSettings, Settings, settingsList } from 'utils/settings';
+import { DraftFunction, useImmer } from 'use-immer';
+import { defaultSettings, Settings, updateSettingsList } from 'utils/settings';
 import { Footer, Header } from '.';
 
 interface ContentProps {
@@ -26,12 +27,12 @@ export default function Content({ children, languages }: ContentProps) {
     modalOpen: false,
   });
   const [commandLineOpen, _commandLineHandler] = useDisclosure(false);
-  const [defaultCommand, setDefaultCommand] = useState<string | undefined>();
+  const [settingId, setSettingId] = useState<CommandLineProps['settingId']>();
   const [settings, _setSettings] = useLocalStorage<Settings>({
     key: 'settings',
     defaultValue: freeze(defaultSettings),
   });
-  const setSettings: Updater<Settings> = useCallback(
+  const setSettings: SettingsContext['setSettings'] = useCallback(
     (updater: Settings | DraftFunction<Settings>) => {
       if (typeof updater === 'function') _setSettings(produce(updater));
       else _setSettings(freeze(updater));
@@ -47,21 +48,21 @@ export default function Content({ children, languages }: ContentProps) {
       draft.isTestFinished = false;
     });
   }, [setGlobalValues]);
-  const commandLineHandler = useMemo(
+  const commandLineHandler: GlobalContext['commandLineHandler'] = useMemo(
     () => ({
-      open: (command?: string) => {
+      open: (settingId) => {
         setGlobalValues((draft) => void (draft.modalOpen = true));
-        setDefaultCommand(command);
+        setSettingId(settingId);
         _commandLineHandler.open();
       },
       close: () => {
         setGlobalValues((draft) => void (draft.modalOpen = false));
-        setDefaultCommand(undefined);
+        setSettingId(undefined);
         _commandLineHandler.close();
       },
       toggle: () => {
         setGlobalValues((draft) => void (draft.modalOpen = !draft.modalOpen));
-        if (commandLineOpen) setDefaultCommand(undefined);
+        if (commandLineOpen) setSettingId(undefined);
         _commandLineHandler.toggle();
       },
     }),
@@ -70,7 +71,10 @@ export default function Content({ children, languages }: ContentProps) {
 
   useDidMount(() => {
     _setSettings((currentSettings) => ({ ...defaultSettings, ...currentSettings }));
-    settingsList.language.options = languages.map((l) => ({ value: l.replaceAll('_', ' ') }));
+    updateSettingsList(
+      (draft) =>
+        void (draft.language.options = languages.map((l) => ({ value: l.replaceAll('_', ' ') })))
+    );
   });
   useEffect(() => {
     const fontFamily = settings.fontFamily;
@@ -109,7 +113,7 @@ export default function Content({ children, languages }: ContentProps) {
         <CommandLine
           open={commandLineOpen}
           onClose={commandLineHandler.close}
-          defaultCommand={defaultCommand}
+          settingId={settingId}
         />
       </SettingsProvider>
     </GlobalProvider>

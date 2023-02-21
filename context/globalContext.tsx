@@ -1,3 +1,4 @@
+import { CommandLineProps } from 'components/command-line/CommandLine';
 import { createContext, ReactNode, useContext } from 'react';
 import { Updater } from 'use-immer';
 import { Language } from 'utils/typingTest';
@@ -11,10 +12,10 @@ export interface GlobalValues {
   modalOpen: boolean;
 }
 
-interface GlobalContext extends GlobalValues {
+export interface GlobalContext extends GlobalValues {
   setGlobalValues: Updater<GlobalValues>;
   commandLineHandler: {
-    open: (command?: string) => void;
+    open: (settingId?: CommandLineProps['settingId']) => void;
     close: () => void;
     toggle: () => void;
   };

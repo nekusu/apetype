@@ -2,15 +2,15 @@ import { createContext, ReactNode, useContext } from 'react';
 import { Updater } from 'use-immer';
 import { Settings } from 'utils/settings';
 
-interface SettingContext extends Settings {
+export interface SettingsContext extends Settings {
   setSettings: Updater<Settings>;
 }
 
-interface SettingsProviderProps extends SettingContext {
+interface SettingsProviderProps extends SettingsContext {
   children: ReactNode;
 }
 
-export const SettingsContext = createContext<SettingContext | null>(null);
+export const SettingsContext = createContext<SettingsContext | null>(null);
 
 export function SettingsProvider({ children, ...values }: SettingsProviderProps) {
   return <SettingsContext.Provider value={{ ...values }}>{children}</SettingsContext.Provider>;

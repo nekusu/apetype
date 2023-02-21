@@ -70,7 +70,7 @@ export default function Test() {
                   active
                   className='absolute inset-x-0 -top-16 mx-auto py-3 px-3.5'
                   variant='filled'
-                  onClick={() => commandLineHandler.open('caps lock warning')}
+                  onClick={() => commandLineHandler.open('capsLockWarning')}
                 >
                   <RiLockFill />
                   Caps Lock
