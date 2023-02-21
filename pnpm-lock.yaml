@@ -4,6 +4,7 @@ specifiers:
   '@commitlint/cli': ^17.4.4
   '@commitlint/config-conventional': ^17.4.4
   '@floating-ui/react': ^0.19.2
+  '@leeoniya/ufuzzy': ^1.0.2
   '@mantine/hooks': ^5.10.4
   '@next/font': ^13.1.6
   '@release-it/conventional-changelog': ^5.1.1
@@ -18,7 +19,6 @@ specifiers:
   eslint-config-next: ^13.1.6
   eslint-config-prettier: ^8.6.0
   framer-motion: ^9.0.4
-  fuse.js: ^6.6.2
   husky: ^8.0.3
   immer: ^9.0.19
   next: ^13.1.6
@@ -39,11 +39,11 @@ specifiers:
 
 dependencies:
   '@floating-ui/react': 0.19.2_zula6vjvt3wdocc4mwcxqa6nzi
+  '@leeoniya/ufuzzy': 1.0.2
   '@mantine/hooks': 5.10.4_react@18.2.0
   '@next/font': 13.1.6
   chart.js: 4.2.1
   framer-motion: 9.0.4_biqbaboplfbrettd7655fr4n2y
-  fuse.js: 6.6.2
   immer: 9.0.19
   next: 13.1.6_biqbaboplfbrettd7655fr4n2y
   react: 18.2.0
@@ -402,6 +402,10 @@ packages:
 
   /@kurkle/color/0.3.2:
     resolution: {integrity: sha512-fuscdXJ9G1qb7W8VdHi+IwRqij3lBkosAm4ydQtEmbY58OzHXqQhvlxqEkoz0yssNVn38bcpRWgA9PP+OGoisw==}
+    dev: false
+
+  /@leeoniya/ufuzzy/1.0.2:
+    resolution: {integrity: sha512-aqW3kkTvtGnBE6pvgZsSa89yvZPKCa+HPJDLfMZqfuh8LP1dAgzuN8XP9pH2CHN55PDnEqEe3x28AdvnkaUIIw==}
     dev: false
 
   /@mantine/hooks/5.10.4_react@18.2.0:
@@ -2636,11 +2640,6 @@ packages:
   /functions-have-names/1.2.3:
     resolution: {integrity: sha512-xckBUXyTIqT97tq2x2AMb+g163b5JFysYk0x4qxNFwbfQkmNZoiRHb6sPzI9/QV33WeuvVYBUIiD4NzNIyqaRQ==}
     dev: true
-
-  /fuse.js/6.6.2:
-    resolution: {integrity: sha512-cJaJkxCCxC8qIIcPBF9yGxY0W/tVZS3uEISDxhYIdtk8OL93pe+6Zj7LjCqVV4dzbqcriOZ+kQ/NE4RXZHsIGA==}
-    engines: {node: '>=10'}
-    dev: false
 
   /get-caller-file/2.0.5:
     resolution: {integrity: sha512-DyFP3BM/3YHTQOCUL/w0OZHR0lpKeGrxotcHWcqNEdnltqFwXVfhEBQ94eIo34AfQpo0rGki4cyIiftY06h2Fg==}

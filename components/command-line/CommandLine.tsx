@@ -1,15 +1,15 @@
 'use client';
 
+import uFuzzy from '@leeoniya/ufuzzy';
 import { useInputState, useIsomorphicEffect } from '@mantine/hooks';
 import { Button, Key, Modal, Tooltip, Transition } from 'components/core';
 import { useSettings } from 'context/settingsContext';
 import { motion } from 'framer-motion';
-import Fuse from 'fuse.js';
 import { useFocusLock } from 'hooks/useFocusLock';
 import { ReactNode, useEffect, useMemo, useRef, useState } from 'react';
 import { RiArrowDownLine, RiArrowUpLine, RiQuestionLine, RiTerminalLine } from 'react-icons/ri';
 import { ViewportList, ViewportListRef } from 'react-viewport-list';
-import { SettingParams, settingsEntries, SettingsKey, settingsValues } from 'utils/settings';
+import { settingsEntries, settingsValues } from 'utils/settings';
 import Item from './Item';
 
 export interface CommandLineProps {
@@ -18,8 +18,7 @@ export interface CommandLineProps {
   defaultCommand?: string;
 }
 
-const SEARCH_OPTIONS = { threshold: 0.4 };
-const fuseSettings = new Fuse(settingsValues, { keys: ['command'], ...SEARCH_OPTIONS });
+const uf = new uFuzzy({ intraIns: 1, interChars: '.' });
 const DescriptionTooltip = ({ description }: { description: ReactNode }) => (
   <Tooltip className='max-w-[65%] text-xs' label={description} placement='left'>
     <div className='cursor-help'>
@@ -39,33 +38,35 @@ export default function CommandLine({ defaultCommand, open, onClose }: CommandLi
   const viewportRef = useRef<HTMLDivElement>(null);
   const listRef = useRef<ViewportListRef>(null);
 
-  const { setting, fuseOptions } = useMemo(() => {
+  const setting = useMemo(() => {
     const [key, setting] = settingsEntries.find(([, s]) => s.command === command) ?? [];
-    const options = setting?.options;
-    const fuseOptions = options && new Fuse(options, { keys: ['alt', 'value'], ...SEARCH_OPTIONS });
-    return { setting: key && setting && { key, ...setting }, fuseOptions };
+    return key && setting && { key, ...setting };
   }, [command]);
   const items = useMemo(() => {
-    let _settings: typeof settingsValues = [];
-    let _options: SettingParams<SettingsKey>['options'] = [];
-    if (setting && fuseOptions) {
-      const results = fuseOptions.search(inputValue).map(({ item }) => item);
-      _options = results.length || inputValue ? results : setting.options;
+    let settings = settingsValues;
+    let options = setting?.options ?? [];
+    if (setting) {
+      const haystack = setting.options.map(({ alt, value }) => `${alt ?? ''}¦${value}`);
+      const indexes = uf.filter(haystack, inputValue);
+      const results = indexes.map((i) => setting.options[i]);
+      options = results;
     } else {
-      const results = fuseSettings.search(inputValue).map(({ item }) => item);
-      _settings = results.length || inputValue ? results : settingsValues;
+      const haystack = settingsValues.map(({ command }) => command);
+      const indexes = uf.filter(haystack, inputValue);
+      const results = indexes.map((i) => settingsValues[i]);
+      settings = results;
     }
-    return { settings: _settings, options: _options };
-  }, [fuseOptions, inputValue, setting]);
+    return { settings, options };
+  }, [inputValue, setting]);
 
   let selectedIndex = setting
     ? items.options.findIndex(({ value }) => value === settings[setting.key])
     : 0;
   const customSelected = selectedIndex === -1;
   selectedIndex = selectedIndex === -1 ? items.options.length : selectedIndex;
-  const itemCount =
-    items.options.length + +!!(setting?.custom && (customSelected || inputValue)) ||
-    items.settings.length;
+  const itemCount = setting
+    ? items.options.length + +!!(setting.custom && (customSelected || inputValue))
+    : items.settings.length;
 
   const hoverItem = (index: number) => {
     if (!isUsingKeyboard.current) setIndex(index);
