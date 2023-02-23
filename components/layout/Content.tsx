@@ -2,32 +2,43 @@
 
 import { useDisclosure, useLocalStorage, useWindowEvent } from '@mantine/hooks';
 import { CommandLine } from 'components/command-line';
-import { CommandLineProps } from 'components/command-line/CommandLine';
 import { GlobalContext, GlobalProvider, GlobalValues } from 'context/globalContext';
 import { SettingsContext, SettingsProvider } from 'context/settingsContext';
 import { AnimatePresence } from 'framer-motion';
 import { useDidMount } from 'hooks/useDidMount';
 import { useLanguage } from 'hooks/useLanguage';
+import { useTheme } from 'hooks/useTheme';
 import produce, { freeze } from 'immer';
 import { ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
 import { DraftFunction, useImmer } from 'use-immer';
-import { defaultSettings, Settings, updateSettingsList } from 'utils/settings';
+import {
+  defaultSettings,
+  SettingId,
+  Settings,
+  ThemeInfo,
+  updateSettingsList,
+} from 'utils/settings';
 import { Footer, Header } from '.';
 
 interface ContentProps {
   children: ReactNode;
   languages: string[];
+  themes: ThemeInfo[];
 }
 
-export default function Content({ children, languages }: ContentProps) {
+export default function Content({ children, languages, themes }: ContentProps) {
   const [globalValues, setGlobalValues] = useImmer<GlobalValues>({
+    themes: themes.reduce((themes, { name, ...rest }) => {
+      themes[name] = rest;
+      return themes;
+    }, {} as GlobalContext['themes']),
     capsLock: false,
     isUserTyping: false,
     isTestFinished: false,
     modalOpen: false,
   });
   const [commandLineOpen, _commandLineHandler] = useDisclosure(false);
-  const [settingId, setSettingId] = useState<CommandLineProps['settingId']>();
+  const [settingId, setSettingId] = useState<SettingId>();
   const [settings, _setSettings] = useLocalStorage<Settings>({
     key: 'settings',
     defaultValue: freeze(defaultSettings),
@@ -40,6 +51,7 @@ export default function Content({ children, languages }: ContentProps) {
     [_setSettings]
   );
   const { language } = useLanguage(settings.language);
+  const { isLoading } = useTheme(settings.theme);
 
   const restartTest = useCallback(() => {
     setGlobalValues((draft) => {
@@ -71,10 +83,10 @@ export default function Content({ children, languages }: ContentProps) {
 
   useDidMount(() => {
     _setSettings((currentSettings) => ({ ...defaultSettings, ...currentSettings }));
-    updateSettingsList(
-      (draft) =>
-        void (draft.language.options = languages.map((l) => ({ value: l.replaceAll('_', ' ') })))
-    );
+    updateSettingsList((draft) => {
+      draft.language.options = languages.map((language) => ({ value: language }));
+      draft.theme.options = themes.map(({ name }) => ({ value: name }));
+    });
   });
   useEffect(() => {
     const fontFamily = settings.fontFamily;
@@ -95,10 +107,11 @@ export default function Content({ children, languages }: ContentProps) {
 
   return (
     <GlobalProvider
-      setGlobalValues={setGlobalValues}
-      restartTest={restartTest}
-      commandLineHandler={commandLineHandler}
       language={language}
+      isThemeLoading={isLoading}
+      setGlobalValues={setGlobalValues}
+      commandLineHandler={commandLineHandler}
+      restartTest={restartTest}
       {...globalValues}
     >
       <SettingsProvider setSettings={setSettings} {...settings}>

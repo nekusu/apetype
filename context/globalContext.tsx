@@ -1,12 +1,14 @@
-import { CommandLineProps } from 'components/command-line/CommandLine';
 import { createContext, ReactNode, useContext } from 'react';
 import { Updater } from 'use-immer';
+import { SettingId, ThemeInfo } from 'utils/settings';
 import { Language } from 'utils/typingTest';
 
 export interface GlobalValues {
+  themes: Record<string, Omit<ThemeInfo, 'name'>>;
   language?: Language;
   testId?: string;
   capsLock: boolean;
+  isThemeLoading?: boolean;
   isUserTyping: boolean;
   isTestFinished: boolean;
   modalOpen: boolean;
@@ -15,7 +17,7 @@ export interface GlobalValues {
 export interface GlobalContext extends GlobalValues {
   setGlobalValues: Updater<GlobalValues>;
   commandLineHandler: {
-    open: (settingId?: CommandLineProps['settingId']) => void;
+    open: (settingId?: SettingId) => void;
     close: () => void;
     toggle: () => void;
   };

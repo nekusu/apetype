@@ -27,7 +27,7 @@ function Setting<T>({ children, title, description, options, gridColumns }: Sett
         className='grid items-center gap-2'
         style={{
           gridTemplateColumns: `repeat(${
-            options.length < 16 ? gridColumns || options.length : 1
+            gridColumns ? gridColumns : options.length < 16 ? options.length : 1
           }, 1fr)`,
         }}
       >
