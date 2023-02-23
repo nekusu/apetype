@@ -23,6 +23,7 @@ export type FontFamily = string;
 export type PageWidth = '1000px' | '1250px' | '1500px' | '2000px' | '100%';
 export type FlipTestColors = boolean;
 export type ColorfulMode = boolean;
+export type RandomizeTheme = boolean | 'light' | 'dark';
 export type Theme = string;
 export type LiveWpm = boolean;
 export type LiveAccuracy = boolean;
@@ -52,6 +53,7 @@ export interface Settings {
   pageWidth: PageWidth;
   flipTestColors: FlipTestColors;
   colorfulMode: ColorfulMode;
+  randomizeTheme: RandomizeTheme;
   theme: Theme;
   liveWpm: LiveWpm;
   liveAccuracy: LiveAccuracy;
@@ -308,6 +310,18 @@ export let settingsList = {
     ),
     options: OFF_ON_OPTIONS,
   }),
+  randomizeTheme: create<RandomizeTheme>({
+    command: 'randomize theme',
+    category: 'theme',
+    description: (
+      <>
+        After completing a test, the theme will be set to a random one. If set to &apos;light&apos;
+        or &apos;dark&apos;, only presets with light or dark background colors will be randomized,
+        respectively.
+      </>
+    ),
+    options: [...OFF_ON_OPTIONS, { value: 'light' }, { value: 'dark' }],
+  }),
   theme: create<Theme>({
     command: 'theme',
     category: 'theme',
@@ -395,6 +409,7 @@ export const defaultSettings: Settings = {
   pageWidth: '1250px',
   flipTestColors: false,
   colorfulMode: true,
+  randomizeTheme: false,
   theme: 'serika dark',
   liveWpm: true,
   liveAccuracy: true,
