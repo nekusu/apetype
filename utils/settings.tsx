@@ -23,6 +23,7 @@ export type FontFamily = string;
 export type PageWidth = '1000px' | '1250px' | '1500px' | '2000px' | '100%';
 export type FlipTestColors = boolean;
 export type ColorfulMode = boolean;
+export type Theme = string;
 export type LiveWpm = boolean;
 export type LiveAccuracy = boolean;
 export type TimerProgress = boolean;
@@ -51,6 +52,7 @@ export interface Settings {
   pageWidth: PageWidth;
   flipTestColors: FlipTestColors;
   colorfulMode: ColorfulMode;
+  theme: Theme;
   liveWpm: LiveWpm;
   liveAccuracy: LiveAccuracy;
   timerProgress: TimerProgress;
@@ -73,6 +75,14 @@ export interface SettingParams<T> {
   description?: ReactNode;
   options: { alt?: string; value: T }[];
   custom?: boolean;
+}
+
+export interface ThemeInfo {
+  name: string;
+  bgColor: string;
+  mainColor: string;
+  subColor: string;
+  textColor: string;
 }
 
 export type SettingId = keyof Settings;
@@ -298,6 +308,11 @@ export let settingsList = {
     ),
     options: OFF_ON_OPTIONS,
   }),
+  theme: create<Theme>({
+    command: 'theme',
+    category: 'theme',
+    options: [],
+  }),
   liveWpm: create<LiveWpm>({
     command: 'live wpm',
     category: 'hide elements',
@@ -380,6 +395,7 @@ export const defaultSettings: Settings = {
   pageWidth: '1250px',
   flipTestColors: false,
   colorfulMode: true,
+  theme: 'serika dark',
   liveWpm: true,
   liveAccuracy: true,
   timerProgress: true,

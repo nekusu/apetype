@@ -15,6 +15,8 @@ import {
 } from '@next/font/google';
 import { Content } from 'components/layout';
 import { twJoin } from 'tailwind-merge';
+import { STATIC_URL } from 'utils/monkeytype';
+import { ThemeInfo } from 'utils/settings';
 import './globals.css';
 
 const firaCode = Fira_Code({ variable: '--font-fira-code', subsets: ['latin'] });
@@ -61,21 +63,27 @@ const fonts = [
 ];
 
 async function getLanguages() {
-  const res = await fetch(
-    'https://raw.githubusercontent.com/monkeytypegame/monkeytype/master/frontend/static/languages/_list.json'
-  );
-  return (await res.json()) as string[];
+  const res = await fetch(`${STATIC_URL}/languages/_list.json`);
+  const languages = (await res.json()) as string[];
+  return languages.map((name) => name.replaceAll('_', ' '));
+}
+async function getThemes() {
+  const res = await fetch(`${STATIC_URL}/themes/_list.json`);
+  const themes = (await res.json()) as ThemeInfo[];
+  return themes
+    .sort((a, b) => a.name.localeCompare(b.name))
+    .map(({ name, ...rest }) => ({ name: name.replaceAll('_', ' '), ...rest }));
 }
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const languages = await getLanguages();
-
   return (
     <html lang='en' className={twJoin(fonts.map((font) => font.variable))}>
       <head />
       <body className='bg-bg font transition-colors'>
         <div className='flex justify-center'>
-          <Content languages={languages}>{children}</Content>
+          <Content languages={await getLanguages()} themes={await getThemes()}>
+            {children}
+          </Content>
         </div>
       </body>
     </html>
