@@ -10,7 +10,9 @@ import { useLanguage } from 'hooks/useLanguage';
 import { useTheme } from 'hooks/useTheme';
 import produce, { freeze } from 'immer';
 import { ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
+import tinycolor from 'tinycolor2';
 import { DraftFunction, useImmer } from 'use-immer';
+import { getRandomNumber } from 'utils/misc';
 import {
   defaultSettings,
   SettingId,
@@ -59,7 +61,20 @@ export default function Content({ children, languages, themes }: ContentProps) {
       draft.isUserTyping = false;
       draft.isTestFinished = false;
     });
-  }, [setGlobalValues]);
+    if (settings.randomizeTheme) {
+      let theme: ThemeInfo | undefined;
+      do theme = themes[getRandomNumber(themes.length)];
+      while (
+        !theme ||
+        (settings.randomizeTheme === 'light' && tinycolor(theme.bgColor).isDark()) ||
+        (settings.randomizeTheme === 'dark' && tinycolor(theme.bgColor).isLight()) ||
+        theme.name === settings.theme
+      );
+      setSettings((draft) => {
+        if (theme) draft.theme = theme.name;
+      });
+    }
+  }, [setGlobalValues, setSettings, settings.randomizeTheme, settings.theme, themes]);
   const commandLineHandler: GlobalContext['commandLineHandler'] = useMemo(
     () => ({
       open: (settingId) => {
