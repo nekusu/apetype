@@ -51,7 +51,7 @@ export default function Content({ children, languages, themes }: ContentProps) {
     [_setSettings]
   );
   const { language } = useLanguage(settings.language);
-  const { isLoading } = useTheme(settings.theme);
+  const { isLoading, previewTheme, clearPreview } = useTheme(settings.theme, { previewDelay: 100 });
 
   const restartTest = useCallback(() => {
     setGlobalValues((draft) => {
@@ -127,6 +127,8 @@ export default function Content({ children, languages, themes }: ContentProps) {
           open={commandLineOpen}
           onClose={commandLineHandler.close}
           settingId={settingId}
+          previewTheme={previewTheme}
+          clearPreview={clearPreview}
         />
       </SettingsProvider>
     </GlobalProvider>

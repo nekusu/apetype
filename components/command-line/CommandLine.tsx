@@ -3,11 +3,19 @@
 import uFuzzy from '@leeoniya/ufuzzy';
 import { useInputState, useIsomorphicEffect } from '@mantine/hooks';
 import { Button, Key, Modal, Tooltip, Transition } from 'components/core';
+import { ThemeBubbles } from 'components/settings';
+import { useGlobal } from 'context/globalContext';
 import { useSettings } from 'context/settingsContext';
 import { motion } from 'framer-motion';
 import { useFocusLock } from 'hooks/useFocusLock';
 import { ReactNode, useEffect, useMemo, useRef, useState } from 'react';
-import { RiArrowDownLine, RiArrowUpLine, RiQuestionLine, RiTerminalLine } from 'react-icons/ri';
+import {
+  RiArrowDownLine,
+  RiArrowUpLine,
+  RiLoaderLine,
+  RiQuestionLine,
+  RiTerminalLine,
+} from 'react-icons/ri';
 import { ViewportList, ViewportListRef } from 'react-viewport-list';
 import { SettingId, settingsWithIds, SettingWithId } from 'utils/settings';
 import Item from './Item';
@@ -16,6 +24,8 @@ export interface CommandLineProps {
   open: boolean;
   onClose: () => void;
   settingId?: SettingId;
+  previewTheme: (name: string) => void;
+  clearPreview: () => void;
 }
 
 const uf = new uFuzzy({ intraIns: 1, interChars: '.' });
@@ -27,13 +37,20 @@ const DescriptionTooltip = ({ description }: { description: ReactNode }) => (
   </Tooltip>
 );
 
-export default function CommandLine({ settingId, open, onClose }: CommandLineProps) {
+export default function CommandLine({
+  settingId,
+  open,
+  onClose,
+  previewTheme,
+  clearPreview,
+}: CommandLineProps) {
+  const { themes, isThemeLoading } = useGlobal();
   const settings = useSettings();
   const { quickRestart, keyTips, setSettings } = settings;
   const [input, setInput] = useInputState('');
   const [index, setIndex] = useState(0);
   const [setting, setSetting] = useState<SettingWithId | undefined>();
-  const isUsingKeyboard = useRef(false);
+  const isUsingKeyboard = useRef(true);
   const focusLockRef = useFocusLock();
   const viewportRef = useRef<HTMLDivElement>(null);
   const listRef = useRef<ViewportListRef>(null);
@@ -64,10 +81,8 @@ export default function CommandLine({ settingId, open, onClose }: CommandLinePro
     ? items.options.length + +!!(setting.custom && (customSelected || input))
     : items.settings.length;
 
-  const hoverItem = (index: number) => {
-    if (!isUsingKeyboard.current) setIndex(index);
-  };
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+  const hoverItem = (index: number) => !isUsingKeyboard.current && setIndex(index);
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLElement>) => {
     if ((quickRestart !== 'esc' && e.key === 'Tab') || e.key === 'ArrowDown') {
       e.preventDefault();
       setIndex((index) => (index + 1) % itemCount);
@@ -87,34 +102,38 @@ export default function CommandLine({ settingId, open, onClose }: CommandLinePro
   };
   const saveSetting = (value: string | number | boolean) => {
     if (!setting?.id || value === '') return;
-    value = typeof value === 'boolean' || isNaN(+value) ? value : +value;
     setSettings((draft) => void (draft[setting.id] = value as never));
     setInput('');
   };
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const select = (e?: React.FormEvent<HTMLFormElement>) => {
+    e?.preventDefault();
     if (setting) {
-      if (setting.custom && index === itemCount) saveSetting(input);
+      if (setting.custom && index === items.options.length)
+        saveSetting(isNaN(+input) ? input : +input);
       else saveSetting(items.options[index].value);
     } else setSetting(items.settings[index]);
   };
 
   useIsomorphicEffect(() => {
-    if (open) {
-      setSetting(settingsWithIds.find(({ id }) => id === settingId));
+    if (open) setSetting(settingsWithIds.find(({ id }) => id === settingId));
+    else {
+      clearPreview();
       setInput('');
-      setIndex(selectedIndex);
     }
   }, [open]);
-  useEffect(() => {
-    setIndex(input ? 0 : selectedIndex);
-  }, [input, selectedIndex]);
   useIsomorphicEffect(() => {
+    isUsingKeyboard.current = true;
+    clearPreview();
     setInput('');
     setIndex(selectedIndex);
   }, [setting]);
   useEffect(() => {
+    setIndex(input ? 0 : selectedIndex);
+  }, [input, selectedIndex]);
+  useEffect(() => {
     if (isUsingKeyboard.current) listRef.current?.scrollToIndex({ index });
+    if (setting?.id === 'theme') previewTheme(items.options[index].value);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [index]);
 
   return (
@@ -124,9 +143,10 @@ export default function CommandLine({ settingId, open, onClose }: CommandLinePro
       onClose={onClose}
       closeOnEscape={false}
     >
-      <div
+      <form
         className='flex items-center gap-3 px-4 text-text transition-colors'
         onKeyDown={handleKeyDown}
+        onSubmit={select}
       >
         {setting?.command ? (
           <Button
@@ -141,25 +161,18 @@ export default function CommandLine({ settingId, open, onClose }: CommandLinePro
         ) : (
           <RiTerminalLine className='text-main' />
         )}
-        <motion.form
-          className='flex-1'
+        <motion.input
+          ref={focusLockRef}
+          className='flex-1 bg-transparent py-3.5 text-text caret-caret outline-none transition-colors'
+          min={0}
+          type={setting?.custom && typeof setting.options[0].value === 'number' ? 'number' : 'text'}
+          placeholder={`type ${setting ? 'value' : 'command'}`}
+          value={input}
           layout='position'
           transition={{ duration: 0.15 }}
-          onSubmit={handleSubmit}
-        >
-          <input
-            ref={focusLockRef}
-            className='w-full bg-transparent py-3.5 text-text caret-caret outline-none transition-colors'
-            min={0}
-            type={
-              setting?.custom && typeof setting.options[0].value === 'number' ? 'number' : 'text'
-            }
-            placeholder={`type ${setting ? 'value' : 'command'}`}
-            value={input}
-            onChange={setInput}
-            data-autofocus
-          />
-        </motion.form>
+          onChange={setInput}
+          data-autofocus
+        />
         {items.settings.length || items.options.length || setting?.custom ? (
           keyTips && (
             <motion.div
@@ -182,10 +195,10 @@ export default function CommandLine({ settingId, open, onClose }: CommandLinePro
           <div className='cursor-default text-sm text-sub'>nothing found</div>
         )}
         {setting?.description && <DescriptionTooltip description={setting.description} />}
-      </div>
+      </form>
       <motion.div
         ref={viewportRef}
-        className='-mr-2 overflow-x-hidden overflow-y-scroll'
+        className='overflow-x-hidden overflow-y-scroll'
         animate={{ height: itemCount * 36 }}
         transition={{ ease: 'easeOut', duration: 0.2 }}
         onMouseMove={() => (isUsingKeyboard.current = false)}
@@ -197,19 +210,32 @@ export default function CommandLine({ settingId, open, onClose }: CommandLinePro
             items={items.options}
             initialIndex={selectedIndex}
           >
-            {({ alt, value }, i) => (
-              <Item
-                key={alt ?? value}
-                active={index === i}
-                label={setting.command === 'caret style' ? value || alt : alt ?? value}
-                selected={selectedIndex === i}
-                style={{
-                  fontFamily: setting.command === 'font family' ? `var(${value})` : undefined,
-                }}
-                onClick={() => saveSetting(value)}
-                onMouseOver={() => hoverItem(i)}
-              />
-            )}
+            {({ alt, value }, i) => {
+              const active = index === i;
+              const selected = selectedIndex === i;
+              return (
+                <Item
+                  key={alt ?? value}
+                  active={active}
+                  label={setting.id === 'caretStyle' ? value || alt : alt ?? value}
+                  selected={selected && (!isThemeLoading || !active)}
+                  style={{
+                    fontFamily: setting.id === 'fontFamily' ? `var(${value})` : undefined,
+                  }}
+                  onClick={() => select()}
+                  onMouseMove={() => hoverItem(i)}
+                >
+                  {setting.id === 'theme' && (
+                    <>
+                      {isThemeLoading && active && (
+                        <RiLoaderLine className='animate-spin' size={18} />
+                      )}
+                      {!selected && <ThemeBubbles withBackground {...themes[value]} />}
+                    </>
+                  )}
+                </Item>
+              );
+            }}
           </ViewportList>
         ) : (
           <ViewportList ref={listRef} viewportRef={viewportRef} items={items.settings}>
@@ -218,8 +244,8 @@ export default function CommandLine({ settingId, open, onClose }: CommandLinePro
                 key={setting.id}
                 active={index === i}
                 label={setting.command}
-                onClick={() => setSetting(setting)}
-                onMouseOver={() => hoverItem(i)}
+                onClick={() => select()}
+                onMouseMove={() => hoverItem(i)}
               >
                 {setting.description && <DescriptionTooltip description={setting.description} />}
               </Item>
@@ -234,7 +260,7 @@ export default function CommandLine({ settingId, open, onClose }: CommandLinePro
               customSelected && !input ? `(${settings[setting.id].toString()})` : ''
             }`}
             selected={customSelected && !input}
-            onClick={() => saveSetting(input)}
+            onClick={() => select()}
             onMouseMove={() => hoverItem(items.options.length)}
           />
         )}
