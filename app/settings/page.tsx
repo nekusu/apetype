@@ -1,18 +1,18 @@
 'use client';
 
-import { useDisclosure, useElementSize } from '@mantine/hooks';
-import { Button, Key, Text, Transition } from 'components/core';
+import { useDisclosure } from '@mantine/hooks';
+import { Button, Text, Transition } from 'components/core';
 import { ButtonProps } from 'components/core/Button';
 import { CustomFontModal, Setting, ThemeBubbles } from 'components/settings';
 import { useGlobal } from 'context/globalContext';
 import { useSettings } from 'context/settingsContext';
 import { motion } from 'framer-motion';
-import { useSettingCategory } from 'hooks/useSettingCategory';
-import { useMemo } from 'react';
-import { RiCheckLine, RiLoaderLine } from 'react-icons/ri';
+import { ReactNode, useEffect, useMemo, useRef, useState } from 'react';
+import { RiLoaderLine, RiCheckLine } from 'react-icons/ri';
 import { twJoin } from 'tailwind-merge';
 import tinycolor from 'tinycolor2';
-import { categories, SettingId, settingsList, settingsWithIds } from 'utils/settings';
+import { replaceSpaces } from 'utils/misc';
+import { SettingId, categories, settingsList, settingsWithIds } from 'utils/settings';
 
 const CUSTOM_SETTINGS: SettingId[] = ['fontFamily', 'theme'];
 const COMMON_BUTTON_PROPS: Omit<ButtonProps, 'ref'> = { className: 'w-full', variant: 'filled' };
@@ -20,10 +20,12 @@ const COMMON_BUTTON_PROPS: Omit<ButtonProps, 'ref'> = { className: 'w-full', var
 export default function Page() {
   const { themes, isThemeLoading, commandLineHandler } = useGlobal();
   const settings = useSettings();
-  const { quickRestart, keyTips, setSettings } = settings;
-  const { listRef, currentCategory, scrollToCategory } = useSettingCategory();
-  const { ref: buttonRef, width } = useElementSize<HTMLButtonElement>();
+  const { setSettings } = settings;
   const [customFontModalOpen, customFontModalHandler] = useDisclosure(false);
+  const [currentCategory, setCurrentCategory] = useState<(typeof categories)[number]>(
+    categories[0]
+  );
+  const listRef = useRef<HTMLDivElement>(null);
 
   const settingsComponents = useMemo(() => {
     const components = settingsWithIds.reduce(
@@ -44,7 +46,7 @@ export default function Page() {
               ))
             ) : (
               <Button onClick={() => commandLineHandler.open(id)} {...COMMON_BUTTON_PROPS}>
-                {settings[id]}
+                {settings[id] as ReactNode}
               </Button>
             )}
           </Setting>
@@ -139,26 +141,41 @@ export default function Page() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isThemeLoading, settings]);
 
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const { isIntersecting, target } of entries) {
+          if (isIntersecting) {
+            setCurrentCategory(target.id.replace(/-/g, ' ') as (typeof categories)[number]);
+            break;
+          }
+        }
+      },
+      { root: listRef.current, rootMargin: '-10% 0px -90%' }
+    );
+    if (listRef.current)
+      Array.from(listRef.current.children).forEach((child) => observer.observe(child));
+    return () => observer.disconnect();
+  }, []);
+
   return (
-    <Transition className='relative w-full cursor-default'>
-      <div className='absolute grid h-full w-full grid-cols-[auto_1fr] grid-rows-[1fr_auto] gap-x-5'>
-        <div
-          className='relative flex max-h-full flex-col gap-3 overflow-y-auto overflow-x-hidden py-1 pr-2.5'
-          style={{ width: width + 22 }}
-        >
+    <Transition className='relative cursor-default'>
+      <div className='absolute inset-0 flex h-full gap-x-5'>
+        <nav className='relative flex flex-shrink-0 flex-col gap-3 overflow-y-auto overflow-x-hidden py-1 pr-2.5'>
           {categories.map((category) => (
             <Button
               key={category}
-              ref={category === 'hide elements' ? buttonRef : null}
               className={twJoin([
-                'group relative -my-0.5 py-1.5 px-0',
+                'group relative -my-0.5 py-1.5 px-0 transition-all',
                 currentCategory === category
-                  ? 'text-sub-alt hover:text-sub-alt focus:text-sub-alt'
+                  ? 'ml-2.5 text-sub-alt hover:text-sub-alt focus:text-sub-alt'
                   : 'focus:text-sub',
               ])}
-              component={motion.button}
-              animate={{ marginLeft: currentCategory === category ? 10 : 0 }}
-              onClick={() => scrollToCategory(category)}
+              onClick={() =>
+                document
+                  .getElementById(replaceSpaces(category, '-'))
+                  ?.scrollIntoView({ behavior: 'smooth' })
+              }
             >
               {currentCategory === category && (
                 <motion.div
@@ -171,10 +188,14 @@ export default function Page() {
               {category}
             </Button>
           ))}
-        </div>
+        </nav>
         <div className='flex max-h-full flex-col gap-9 overflow-auto' ref={listRef}>
           {categories.map((category) => (
-            <div key={category} className='flex flex-col gap-5' id={category.replaceAll(' ', '-')}>
+            <section
+              key={category}
+              className='flex flex-col gap-5'
+              id={category.replaceAll(' ', '-')}
+            >
               <Text
                 className={twJoin([
                   'pt-1 text-[28px] leading-none',
@@ -187,15 +208,9 @@ export default function Page() {
               {settingsWithIds
                 .filter((setting) => setting.category === category)
                 .map(({ id }) => settingsComponents[id])}
-            </div>
+            </section>
           ))}
         </div>
-        {keyTips && (
-          <Text className='col-span-full justify-self-end pt-4' dimmed>
-            pro tip: you can also change all these settings quickly using the command line (
-            <Key>{quickRestart === 'esc' ? 'tab' : 'esc'}</Key>)
-          </Text>
-        )}
       </div>
       <CustomFontModal modalOpen={customFontModalOpen} onClose={customFontModalHandler.close} />
     </Transition>
