@@ -1,6 +1,11 @@
 'use client';
 
-import { useDisclosure, useLocalStorage, useWindowEvent } from '@mantine/hooks';
+import {
+  useDisclosure,
+  useIsomorphicEffect,
+  useLocalStorage,
+  useWindowEvent,
+} from '@mantine/hooks';
 import { CommandLine } from 'components/command-line';
 import { GlobalContext, GlobalProvider, GlobalValues } from 'context/globalContext';
 import { SettingsContext, SettingsProvider } from 'context/settingsContext';
@@ -9,15 +14,18 @@ import { useDidMount } from 'hooks/useDidMount';
 import { useLanguage } from 'hooks/useLanguage';
 import { useTheme } from 'hooks/useTheme';
 import produce, { freeze } from 'immer';
-import { ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
+import { ReactNode, useCallback, useMemo, useState } from 'react';
 import tinycolor from 'tinycolor2';
 import { DraftFunction, useImmer } from 'use-immer';
 import { getRandomNumber } from 'utils/misc';
 import {
-  defaultSettings,
+  CustomTheme,
   SettingId,
   Settings,
   ThemeInfo,
+  defaultSettings,
+  removeThemeColors,
+  setThemeColors,
   updateSettingsList,
 } from 'utils/settings';
 import { Footer, Header } from '.';
@@ -53,7 +61,10 @@ export default function Content({ children, languages, themes }: ContentProps) {
     [_setSettings]
   );
   const { language } = useLanguage(settings.language);
-  const { isLoading, previewTheme, clearPreview } = useTheme(settings.theme, { previewDelay: 100 });
+  const { themeColors, isLoading, previewTheme, clearPreview } = useTheme(settings.theme, {
+    previewDelay: 100,
+    enabled: settings.themeType === 'preset',
+  });
 
   const restartTest = useCallback(() => {
     setGlobalValues((draft) => {
@@ -103,25 +114,33 @@ export default function Content({ children, languages, themes }: ContentProps) {
       draft.theme.options = themes.map(({ name }) => ({ value: name }));
     });
   });
-  useEffect(() => {
+  useIsomorphicEffect(() => {
     const fontFamily = settings.fontFamily;
     document.documentElement.style.setProperty(
       '--font',
       fontFamily.startsWith('--') ? `var(${fontFamily})` : fontFamily
     );
   }, [settings.fontFamily]);
+  useIsomorphicEffect(() => {
+    if (themeColors) setThemeColors(themeColors, document.documentElement);
+  }, [themeColors]);
+  useIsomorphicEffect(() => {
+    const customTheme = settings.customThemes.find(({ id }) => id === settings.customThemeId);
+    if (settings.themeType === 'custom' && customTheme) setThemeColors(customTheme.colors);
+    else removeThemeColors();
+  }, [settings.customThemeId, settings.customThemes, settings.themeType]);
   useWindowEvent('keydown', (event) => {
     setGlobalValues((draft) => void (draft.capsLock = event.getModifierState('CapsLock')));
     if (
       event.key === (settings.quickRestart !== 'esc' ? 'Escape' : 'Tab') &&
       (!globalValues.modalOpen || commandLineOpen)
-    ) {
+    )
       commandLineHandler.toggle();
-    }
   });
 
   return (
     <GlobalProvider
+      themeColors={themeColors}
       language={language}
       isThemeLoading={isLoading}
       setGlobalValues={setGlobalValues}
