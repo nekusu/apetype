@@ -121,7 +121,7 @@ export default function Content({ children, languages, themes }: ContentProps) {
 
   useDidMount(() => {
     _setSettings((currentSettings) => ({ ...defaultSettings, ...currentSettings }));
-    const encodedCustomTheme = searchParams.get('customTheme');
+    const encodedCustomTheme = searchParams?.get('customTheme');
     if (encodedCustomTheme) {
       const customTheme = JSON.parse(
         Buffer.from(encodedCustomTheme, 'base64').toString()
