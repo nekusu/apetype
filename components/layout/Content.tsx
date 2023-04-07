@@ -14,6 +14,7 @@ import { useDidMount } from 'hooks/useDidMount';
 import { useLanguage } from 'hooks/useLanguage';
 import { useTheme } from 'hooks/useTheme';
 import produce, { freeze } from 'immer';
+import { useSearchParams } from 'next/navigation';
 import { ReactNode, useCallback, useMemo, useState } from 'react';
 import tinycolor from 'tinycolor2';
 import { DraftFunction, useImmer } from 'use-immer';
@@ -65,6 +66,7 @@ export default function Content({ children, languages, themes }: ContentProps) {
     previewDelay: 100,
     enabled: settings.themeType === 'preset',
   });
+  const searchParams = useSearchParams();
 
   const restartTest = useCallback(() => {
     setGlobalValues((draft) => {
@@ -113,6 +115,19 @@ export default function Content({ children, languages, themes }: ContentProps) {
       draft.language.options = languages.map((language) => ({ value: language }));
       draft.theme.options = themes.map(({ name }) => ({ value: name }));
     });
+    const encodedCustomTheme = searchParams.get('customTheme');
+    if (encodedCustomTheme) {
+      const customTheme = JSON.parse(
+        Buffer.from(encodedCustomTheme, 'base64').toString()
+      ) as CustomTheme;
+      if (!settings.customThemes.find(({ id }) => id === customTheme.id))
+        setSettings((draft) => {
+          draft.themeType = 'custom';
+          draft.customThemes.push(customTheme);
+          draft.customThemes.sort((a, b) => a.name.localeCompare(b.name));
+          draft.customThemeId = customTheme.id;
+        });
+    }
   });
   useIsomorphicEffect(() => {
     const fontFamily = settings.fontFamily;
