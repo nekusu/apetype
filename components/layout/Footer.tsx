@@ -8,7 +8,8 @@ import { RiGitBranchLine, RiGithubLine, RiLoaderLine, RiPaletteFill } from 'reac
 
 export default function Footer() {
   const { isThemeLoading, commandLineHandler } = useGlobal();
-  const { theme } = useSettings();
+  const { themeType, theme, customThemes, customThemeId } = useSettings();
+  const customTheme = customThemes.find(({ id }) => id === customThemeId);
 
   return (
     <Transition className='w-full'>
@@ -28,7 +29,7 @@ export default function Footer() {
         <Flex className='gap-6'>
           <Button className='p-0 text-sm' onClick={() => commandLineHandler.open('theme')}>
             {isThemeLoading ? <RiLoaderLine className='animate-spin' /> : <RiPaletteFill />}
-            {theme}
+            {themeType === 'custom' && customTheme ? `custom (${customTheme.name})` : theme}
           </Button>
           <Tooltip label='See changelog' offset={8} placement='left'>
             <Button
