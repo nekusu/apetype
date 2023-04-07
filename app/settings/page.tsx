@@ -10,13 +10,14 @@ import { motion } from 'framer-motion';
 import { ReactNode, useEffect, useMemo, useRef, useState } from 'react';
 import { twJoin } from 'tailwind-merge';
 import { replaceSpaces } from 'utils/misc';
-import { SettingId, categories, settingsList, settingsWithIds } from 'utils/settings';
+import { Settings, categories } from 'utils/settings';
 
-const CUSTOM_SETTINGS: SettingId[] = ['fontFamily', 'theme'];
+const CUSTOM_SETTINGS: (keyof Settings)[] = ['fontFamily', 'theme'];
 const COMMON_BUTTON_PROPS: Omit<ButtonProps, 'ref'> = { className: 'w-full', variant: 'filled' };
 
 export default function Page() {
-  const { commandLineHandler } = useGlobal();
+  const { settingsList, commandLineHandler } = useGlobal();
+  const settingsListValues = useMemo(() => Object.values(settingsList), [settingsList]);
   const settings = useSettings();
   const { setSettings } = settings;
   const [customFontModalOpen, customFontModalHandler] = useDisclosure(false);
@@ -26,7 +27,7 @@ export default function Page() {
   const listRef = useRef<HTMLDivElement>(null);
 
   const settingsComponents = useMemo(() => {
-    const components = settingsWithIds.reduce(
+    const components = settingsListValues.reduce(
       (components, { id, command, description, options }) => {
         if (CUSTOM_SETTINGS.includes(id)) return components;
         components[id] = (
@@ -34,7 +35,7 @@ export default function Page() {
             {options.length < 16 ? (
               options.map(({ alt, value }) => (
                 <Button
-                  key={alt ?? value}
+                  key={alt ?? value.toString()}
                   active={settings[id] === value}
                   onClick={() => setSettings((draft) => void (draft[id] = value as never))}
                   {...COMMON_BUTTON_PROPS}
@@ -51,7 +52,7 @@ export default function Page() {
         );
         return components;
       },
-      {} as Record<SettingId, JSX.Element>
+      {} as Record<keyof Settings, JSX.Element>
     );
     {
       const { command, description, options } = settingsList.fontFamily;
@@ -154,7 +155,7 @@ export default function Page() {
               >
                 {category}
               </Text>
-              {settingsWithIds
+              {settingsListValues
                 .filter((setting) => setting.category === category)
                 .map(({ id }) => settingsComponents[id])}
             </section>

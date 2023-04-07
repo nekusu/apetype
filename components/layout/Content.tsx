@@ -21,13 +21,12 @@ import { DraftFunction, useImmer } from 'use-immer';
 import { getRandomNumber } from 'utils/misc';
 import {
   CustomTheme,
-  SettingId,
   Settings,
   ThemeInfo,
   defaultSettings,
   removeThemeColors,
   setThemeColors,
-  updateSettingsList,
+  settingsList,
 } from 'utils/settings';
 import { Footer, Header } from '.';
 
@@ -47,9 +46,20 @@ export default function Content({ children, languages, themes }: ContentProps) {
     isUserTyping: false,
     isTestFinished: false,
     modalOpen: false,
+    settingsList: {
+      ...settingsList,
+      language: {
+        ...settingsList.language,
+        options: languages.map((language) => ({ value: language })),
+      },
+      theme: {
+        ...settingsList.theme,
+        options: themes.map(({ name }) => ({ value: name })),
+      },
+    },
   });
   const [commandLineOpen, _commandLineHandler] = useDisclosure(false);
-  const [settingId, setSettingId] = useState<SettingId>();
+  const [settingId, setSettingId] = useState<keyof Settings>();
   const [settings, _setSettings] = useLocalStorage<Settings>({
     key: 'settings',
     defaultValue: freeze(defaultSettings),
@@ -111,10 +121,6 @@ export default function Content({ children, languages, themes }: ContentProps) {
 
   useDidMount(() => {
     _setSettings((currentSettings) => ({ ...defaultSettings, ...currentSettings }));
-    updateSettingsList((draft) => {
-      draft.language.options = languages.map((language) => ({ value: language }));
-      draft.theme.options = themes.map(({ name }) => ({ value: name }));
-    });
     const encodedCustomTheme = searchParams.get('customTheme');
     if (encodedCustomTheme) {
       const customTheme = JSON.parse(

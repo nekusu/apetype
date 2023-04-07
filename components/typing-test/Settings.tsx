@@ -7,7 +7,6 @@ import { useSettings } from 'context/settingsContext';
 import { useEffect, useState } from 'react';
 import { IconType } from 'react-icons';
 import { RiInputMethodFill, RiTimeFill, RiToolsFill } from 'react-icons/ri';
-import { settingsList } from 'utils/settings';
 
 const DEFAULT_ICON_SIZE = 15;
 const ICONS: Record<string, IconType> = {
@@ -29,7 +28,7 @@ function getDurationPreview(time: number) {
 }
 
 export default function Settings() {
-  const { setGlobalValues } = useGlobal();
+  const { settingsList, setGlobalValues } = useGlobal();
   const settings = useSettings();
   const { mode, setSettings } = settings;
   const [modalOpen, modalHandler] = useDisclosure(false);

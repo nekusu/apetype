@@ -1,6 +1,6 @@
 import { createContext, ReactNode, useContext } from 'react';
 import { Updater } from 'use-immer';
-import { SettingId, ThemeColors, ThemeInfo } from 'utils/settings';
+import { Settings, settingsList, ThemeColors, ThemeInfo } from 'utils/settings';
 import { Language } from 'utils/typingTest';
 
 export interface GlobalValues {
@@ -13,12 +13,13 @@ export interface GlobalValues {
   isUserTyping: boolean;
   isTestFinished: boolean;
   modalOpen: boolean;
+  settingsList: typeof settingsList;
 }
 
 export interface GlobalContext extends GlobalValues {
   setGlobalValues: Updater<GlobalValues>;
   commandLineHandler: {
-    open: (settingId?: SettingId) => void;
+    open: (settingId?: keyof Settings) => void;
     close: () => void;
     toggle: () => void;
   };
