@@ -3,6 +3,33 @@ import produce from 'immer';
 import { WritableDraft } from 'immer/dist/internal';
 import { ReactNode } from 'react';
 
+export interface ThemeInfo {
+  name: string;
+  bgColor: string;
+  mainColor: string;
+  subColor: string;
+  textColor: string;
+}
+
+export interface ThemeColors extends Record<string, string> {
+  bg: string;
+  main: string;
+  caret: string;
+  sub: string;
+  subAlt: string;
+  text: string;
+  error: string;
+  errorExtra: string;
+  colorfulError: string;
+  colorfulErrorExtra: string;
+}
+
+export interface CustomTheme {
+  id: string;
+  name: string;
+  colors: ThemeColors;
+}
+
 export type Mode = 'time' | 'words';
 export type Time = number;
 export type Words = number;
@@ -24,7 +51,9 @@ export type PageWidth = '1000px' | '1250px' | '1500px' | '2000px' | '100%';
 export type FlipTestColors = boolean;
 export type ColorfulMode = boolean;
 export type RandomizeTheme = boolean | 'light' | 'dark';
+export type ThemeType = 'preset' | 'custom';
 export type Theme = string;
+export type CustomThemeId = string;
 export type LiveWpm = boolean;
 export type LiveAccuracy = boolean;
 export type TimerProgress = boolean;
@@ -54,7 +83,10 @@ export interface Settings {
   flipTestColors: FlipTestColors;
   colorfulMode: ColorfulMode;
   randomizeTheme: RandomizeTheme;
+  themeType: ThemeType;
   theme: Theme;
+  customThemes: CustomTheme[];
+  customThemeId: CustomThemeId;
   liveWpm: LiveWpm;
   liveAccuracy: LiveAccuracy;
   timerProgress: TimerProgress;
@@ -65,31 +97,46 @@ export interface Settings {
 
 export interface SettingParams<T> {
   command: string;
-  category?:
-    | 'behavior'
-    | 'input'
-    | 'sound'
-    | 'caret'
-    | 'appearance'
-    | 'theme'
-    | 'hide elements'
-    | 'danger zone';
+  category?: (typeof categories)[number];
   description?: ReactNode;
   options: { alt?: string; value: T }[];
   custom?: boolean;
 }
 
-export interface ThemeInfo {
-  name: string;
-  bgColor: string;
-  mainColor: string;
-  subColor: string;
-  textColor: string;
-}
-
 export type SettingId = keyof Settings;
 export type SettingsValues = SettingParams<SettingId>[];
 export type SettingWithId = SettingParams<SettingId> & { id: SettingId };
+
+export const themeColorVariables: Record<keyof ThemeColors, string> = {
+  bg: '--bg-color',
+  main: '--main-color',
+  caret: '--caret-color',
+  sub: '--sub-color',
+  subAlt: '--sub-alt-color',
+  text: '--text-color',
+  error: '--error-color',
+  errorExtra: '--error-extra-color',
+  colorfulError: '--colorful-error-color',
+  colorfulErrorExtra: '--colorful-error-extra-color',
+};
+
+export function getThemeColors() {
+  const style = getComputedStyle(document.body);
+  return Object.entries(themeColorVariables).reduce((variables, [key, value]) => {
+    variables[key as keyof typeof themeColorVariables] = style?.getPropertyValue(value) ?? '';
+    return variables;
+  }, {} as typeof themeColorVariables);
+}
+export function setThemeColors(colors: ThemeColors, element = document.body) {
+  Object.entries(colors).forEach(([key, value]) =>
+    element.style.setProperty(themeColorVariables[key as keyof typeof themeColorVariables], value)
+  );
+}
+export function removeThemeColors() {
+  Object.entries(themeColorVariables).forEach(([, value]) =>
+    document.body.style.removeProperty(value)
+  );
+}
 
 const OFF_ON_OPTIONS = [
   { alt: 'off', value: false },
@@ -113,7 +160,7 @@ export const categories = [
   'theme',
   'hide elements',
   'danger zone',
-];
+] as const;
 
 export let settingsList = {
   mode: create<Mode>({
@@ -410,7 +457,10 @@ export const defaultSettings: Settings = {
   flipTestColors: false,
   colorfulMode: true,
   randomizeTheme: false,
+  themeType: 'preset',
   theme: 'serika dark',
+  customThemes: [],
+  customThemeId: '',
   liveWpm: true,
   liveAccuracy: true,
   timerProgress: true,
