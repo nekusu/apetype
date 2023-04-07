@@ -1,10 +1,11 @@
 import { createContext, ReactNode, useContext } from 'react';
 import { Updater } from 'use-immer';
-import { SettingId, ThemeInfo } from 'utils/settings';
+import { SettingId, ThemeColors, ThemeInfo } from 'utils/settings';
 import { Language } from 'utils/typingTest';
 
 export interface GlobalValues {
   themes: Record<string, Omit<ThemeInfo, 'name'>>;
+  themeColors?: ThemeColors;
   language?: Language;
   testId?: string;
   capsLock: boolean;

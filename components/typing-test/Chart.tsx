@@ -2,20 +2,20 @@
 
 import {
   CategoryScale,
-  Chart as ChartJS,
   ChartData,
+  Chart as ChartJS,
   ChartOptions,
   Filler,
-  LinearScale,
   LineController,
   LineElement,
+  LinearScale,
   PointElement,
   ScatterController,
   Tooltip,
 } from 'chart.js';
+import { useGlobal } from 'context/globalContext';
 import { useSettings } from 'context/settingsContext';
 import { useTypingTest } from 'context/typingTestContext';
-import { useMemo, useRef } from 'react';
 import { Chart as MultitypeChart } from 'react-chartjs-2';
 import { useImmer } from 'use-immer';
 import ChartTooltip, { ChartTooltipProps } from './ChartTooltip';
@@ -31,21 +31,12 @@ ChartJS.register(
   Tooltip
 );
 
-function getTheme() {
-  const style = getComputedStyle(document.documentElement);
-  const fontFamily = style.getPropertyValue('--font');
-  const colors = {
-    main: style.getPropertyValue('--main-color'),
-    sub: style.getPropertyValue('--sub-color'),
-    subAlt: style.getPropertyValue('--sub-alt-color'),
-    text: style.getPropertyValue('--text-color'),
-    colorfulError: style.getPropertyValue('--colorful-error-color'),
-  };
-
-  return { fontFamily, colors };
+function getFontFamily() {
+  return getComputedStyle(document.body).getPropertyValue('--font');
 }
 
 export default function Chart() {
+  const { themeColors } = useGlobal();
   const { showDecimalPlaces } = useSettings();
   const { stats, elapsedTime } = useTypingTest();
   const { raw, wpm, errors } = stats;
@@ -53,17 +44,10 @@ export default function Chart() {
     position: { top: 0, left: 0 },
     disabled: true,
   });
-  const chartRef = useRef(null);
-  const { fontFamily, colors } = useMemo(() => getTheme(), []);
-  const labels = Array.from({ length: stats.raw.length }, (_, i) => i + 1);
 
-  if (stats.raw.length > elapsedTime) {
-    labels[stats.raw.length - 1] = elapsedTime;
-  }
-  const style = {
-    font: { family: fontFamily },
-    color: colors.sub,
-  };
+  const labels = Array.from({ length: stats.raw.length }, (_, i) => i + 1);
+  if (stats.raw.length > elapsedTime) labels[stats.raw.length - 1] = elapsedTime;
+  const style = { font: { family: getFontFamily() }, color: themeColors?.sub };
   const ticks = {
     precision: 0,
     autoSkip: true,
@@ -79,7 +63,7 @@ export default function Chart() {
       x: {
         axis: 'x',
         ticks,
-        grid: { color: colors.subAlt },
+        grid: { color: themeColors?.subAlt },
       },
       wpm: {
         axis: 'y',
@@ -87,7 +71,7 @@ export default function Chart() {
         beginAtZero: true,
         min: 0,
         ticks,
-        grid: { color: colors.subAlt },
+        grid: { color: themeColors?.subAlt },
       },
       error: {
         axis: 'y',
@@ -128,7 +112,7 @@ export default function Chart() {
         label: 'raw',
         fill: true,
         data: raw.map((r) => (showDecimalPlaces ? r.toFixed(2) : Math.floor(r))),
-        borderColor: colors.sub,
+        borderColor: themeColors?.sub,
         backgroundColor: 'rgba(0, 0, 0, 0.1)',
         borderWidth: 2,
         tension: 0.3,
@@ -141,7 +125,7 @@ export default function Chart() {
         label: 'wpm',
         fill: true,
         data: wpm.map((w) => (showDecimalPlaces ? w.toFixed(2) : Math.floor(w))),
-        borderColor: colors.main,
+        borderColor: themeColors?.main,
         backgroundColor: 'rgba(0, 0, 0, 0.1)',
         borderWidth: 2,
         tension: 0.3,
@@ -153,8 +137,8 @@ export default function Chart() {
         type: 'scatter' as const,
         label: 'errors',
         data: errors.map((e) => (e ? e : null)),
-        borderColor: colors.colorfulError,
-        pointBackgroundColor: colors.colorfulError,
+        borderColor: themeColors?.colorfulError,
+        pointBackgroundColor: themeColors?.colorfulError,
         borderWidth: 2,
         yAxisID: 'error',
         order: 1,
@@ -164,14 +148,8 @@ export default function Chart() {
   };
 
   return (
-    <div className='relative h-[200px] max-h-[200px] w-full'>
-      <MultitypeChart
-        ref={chartRef}
-        className='!w-full'
-        type='line'
-        options={options}
-        data={data}
-      />
+    <div className='relative h-[200px] w-full'>
+      <MultitypeChart className='!w-full' type='line' options={options} data={data} />
       {!!tooltip.position.top && <ChartTooltip {...tooltip} />}
     </div>
   );

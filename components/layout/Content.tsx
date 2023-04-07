@@ -1,6 +1,11 @@
 'use client';
 
-import { useDisclosure, useLocalStorage, useWindowEvent } from '@mantine/hooks';
+import {
+  useDisclosure,
+  useIsomorphicEffect,
+  useLocalStorage,
+  useWindowEvent,
+} from '@mantine/hooks';
 import { CommandLine } from 'components/command-line';
 import { GlobalContext, GlobalProvider, GlobalValues } from 'context/globalContext';
 import { SettingsContext, SettingsProvider } from 'context/settingsContext';
@@ -9,15 +14,19 @@ import { useDidMount } from 'hooks/useDidMount';
 import { useLanguage } from 'hooks/useLanguage';
 import { useTheme } from 'hooks/useTheme';
 import produce, { freeze } from 'immer';
-import { ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { ReactNode, useCallback, useMemo, useState } from 'react';
 import tinycolor from 'tinycolor2';
 import { DraftFunction, useImmer } from 'use-immer';
 import { getRandomNumber } from 'utils/misc';
 import {
-  defaultSettings,
+  CustomTheme,
   SettingId,
   Settings,
   ThemeInfo,
+  defaultSettings,
+  removeThemeColors,
+  setThemeColors,
   updateSettingsList,
 } from 'utils/settings';
 import { Footer, Header } from '.';
@@ -53,7 +62,11 @@ export default function Content({ children, languages, themes }: ContentProps) {
     [_setSettings]
   );
   const { language } = useLanguage(settings.language);
-  const { isLoading, previewTheme, clearPreview } = useTheme(settings.theme, { previewDelay: 100 });
+  const { themeColors, isLoading, previewTheme, clearPreview } = useTheme(settings.theme, {
+    previewDelay: 100,
+    enabled: settings.themeType === 'preset',
+  });
+  const searchParams = useSearchParams();
 
   const restartTest = useCallback(() => {
     setGlobalValues((draft) => {
@@ -102,26 +115,47 @@ export default function Content({ children, languages, themes }: ContentProps) {
       draft.language.options = languages.map((language) => ({ value: language }));
       draft.theme.options = themes.map(({ name }) => ({ value: name }));
     });
+    const encodedCustomTheme = searchParams.get('customTheme');
+    if (encodedCustomTheme) {
+      const customTheme = JSON.parse(
+        Buffer.from(encodedCustomTheme, 'base64').toString()
+      ) as CustomTheme;
+      if (!settings.customThemes.find(({ id }) => id === customTheme.id))
+        setSettings((draft) => {
+          draft.themeType = 'custom';
+          draft.customThemes.push(customTheme);
+          draft.customThemes.sort((a, b) => a.name.localeCompare(b.name));
+          draft.customThemeId = customTheme.id;
+        });
+    }
   });
-  useEffect(() => {
+  useIsomorphicEffect(() => {
     const fontFamily = settings.fontFamily;
     document.documentElement.style.setProperty(
       '--font',
       fontFamily.startsWith('--') ? `var(${fontFamily})` : fontFamily
     );
   }, [settings.fontFamily]);
+  useIsomorphicEffect(() => {
+    if (themeColors) setThemeColors(themeColors, document.documentElement);
+  }, [themeColors]);
+  useIsomorphicEffect(() => {
+    const customTheme = settings.customThemes.find(({ id }) => id === settings.customThemeId);
+    if (settings.themeType === 'custom' && customTheme) setThemeColors(customTheme.colors);
+    else removeThemeColors();
+  }, [settings.customThemeId, settings.customThemes, settings.themeType]);
   useWindowEvent('keydown', (event) => {
     setGlobalValues((draft) => void (draft.capsLock = event.getModifierState('CapsLock')));
     if (
       event.key === (settings.quickRestart !== 'esc' ? 'Escape' : 'Tab') &&
       (!globalValues.modalOpen || commandLineOpen)
-    ) {
+    )
       commandLineHandler.toggle();
-    }
   });
 
   return (
     <GlobalProvider
+      themeColors={themeColors}
       language={language}
       isThemeLoading={isLoading}
       setGlobalValues={setGlobalValues}
