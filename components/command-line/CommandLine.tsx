@@ -62,13 +62,13 @@ export default function CommandLine({
     if (setting) {
       const haystack = setting.options.map(({ alt, value }) => `${alt ?? ''}¦${value.toString()}`);
       const indexes = uf.filter(haystack, input);
-      const results = indexes.map((i) => setting.options[i]);
-      return { settings, options: results };
+      const results = indexes?.map((i) => setting.options[i]);
+      return { settings, options: results ?? options };
     } else {
       const haystack = settingsListValues.map(({ command }) => command);
       const indexes = uf.filter(haystack, input);
-      const results = indexes.map((i) => settingsListValues[i]);
-      return { settings: results, options };
+      const results = indexes?.map((i) => settingsListValues[i]);
+      return { settings: results ?? settings, options };
     }
   }, [input, setting, settingsListValues]);
 
