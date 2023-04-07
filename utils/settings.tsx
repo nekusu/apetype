@@ -1,7 +1,6 @@
 import { Key } from 'components/core';
-import produce from 'immer';
-import { WritableDraft } from 'immer/dist/internal';
 import { ReactNode } from 'react';
+import { toCamelCase } from './misc';
 
 export interface ThemeInfo {
   name: string;
@@ -103,10 +102,6 @@ export interface SettingParams<T> {
   custom?: boolean;
 }
 
-export type SettingId = keyof Settings;
-export type SettingsValues = SettingParams<SettingId>[];
-export type SettingWithId = SettingParams<SettingId> & { id: SettingId };
-
 export const themeColorVariables: Record<keyof ThemeColors, string> = {
   bg: '--bg-color',
   main: '--main-color',
@@ -148,7 +143,7 @@ const HIDE_SHOW_OPTIONS = [
 ];
 
 function create<T>(params: SettingParams<T>) {
-  return params;
+  return { ...params, id: toCamelCase(params.command) as keyof Settings };
 }
 
 export const categories = [
@@ -162,7 +157,7 @@ export const categories = [
   'danger zone',
 ] as const;
 
-export let settingsList = {
+export const settingsList = {
   mode: create<Mode>({
     command: 'mode',
     options: [{ value: 'time' }, { value: 'words' }],
@@ -417,24 +412,6 @@ export let settingsList = {
   }),
 };
 
-export let settingsIds: SettingId[] = [];
-export let settingsValues: SettingsValues = [];
-export let settingsWithIds: SettingWithId[] = [];
-
-function createSettingsVariations() {
-  settingsIds = Object.keys(settingsList) as SettingId[];
-  settingsValues = Object.values(settingsList) as SettingsValues;
-  settingsWithIds = Object.entries(settingsList).map(([id, setting]) => ({
-    id,
-    ...setting,
-  })) as SettingWithId[];
-}
-
-export function updateSettingsList(recipe: (draft: WritableDraft<typeof settingsList>) => void) {
-  settingsList = produce(settingsList, recipe);
-  createSettingsVariations();
-}
-
 export const defaultSettings: Settings = {
   mode: 'time',
   time: 60,
@@ -468,5 +445,3 @@ export const defaultSettings: Settings = {
   outOfFocusWarning: true,
   capsLockWarning: true,
 };
-
-createSettingsVariations();

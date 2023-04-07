@@ -5,15 +5,14 @@ import { useGlobal } from 'context/globalContext';
 import { useSettings } from 'context/settingsContext';
 import { useMemo } from 'react';
 import tinycolor from 'tinycolor2';
-import { settingsList, ThemeType } from 'utils/settings';
+import { ThemeType } from 'utils/settings';
 import CustomTheme from './CustomTheme';
 import ThemeButton from './ThemeButton';
 
 const THEME_TYPES: ThemeType[] = ['preset', 'custom'];
-const { command } = settingsList.theme;
 
 export default function Theme() {
-  const { themes, isThemeLoading } = useGlobal();
+  const { themes, isThemeLoading, settingsList } = useGlobal();
   const { theme, themeType, setSettings } = useSettings();
   const sortedOptions = useMemo(() => {
     const { options } = settingsList.theme;
@@ -22,12 +21,12 @@ export default function Theme() {
       const bgColorB = tinycolor(themes[b.value].bgColor);
       return bgColorB.getLuminance() - bgColorA.getLuminance();
     });
-  }, [themes]);
+  }, [settingsList.theme, themes]);
 
   return (
     <div className='grid auto-rows-auto grid-cols-[2fr_1.2fr] gap-y-4 gap-x-5'>
       <Text className='text-lg' component='h3'>
-        {command}
+        {settingsList.theme.command}
       </Text>
       <div className='flex items-center gap-2'>
         {THEME_TYPES.map((type) => (

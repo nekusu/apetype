@@ -17,13 +17,13 @@ import {
   RiTerminalLine,
 } from 'react-icons/ri';
 import { ViewportList, ViewportListRef } from 'react-viewport-list';
-import { SettingId, settingsWithIds, SettingWithId } from 'utils/settings';
+import { Settings } from 'utils/settings';
 import Item from './Item';
 
 export interface CommandLineProps {
   open: boolean;
   onClose: () => void;
-  settingId?: SettingId;
+  settingId?: keyof Settings;
   previewTheme: (name: string) => void;
   clearPreview: () => void;
 }
@@ -44,33 +44,33 @@ export default function CommandLine({
   previewTheme,
   clearPreview,
 }: CommandLineProps) {
-  const { themes, isThemeLoading } = useGlobal();
+  const { themes, isThemeLoading, settingsList } = useGlobal();
+  const settingsListValues = useMemo(() => Object.values(settingsList), [settingsList]);
   const settings = useSettings();
   const { quickRestart, keyTips, setSettings } = settings;
   const [input, setInput] = useInputState('');
   const [index, setIndex] = useState(0);
-  const [setting, setSetting] = useState<SettingWithId | undefined>();
+  const [setting, setSetting] = useState<(typeof settingsListValues)[number] | undefined>();
   const isUsingKeyboard = useRef(true);
   const focusLockRef = useFocusLock();
   const viewportRef = useRef<HTMLDivElement>(null);
   const listRef = useRef<ViewportListRef>(null);
 
   const items = useMemo(() => {
-    let settings = settingsWithIds;
-    let options = setting?.options ?? [];
+    const settings = settingsListValues;
+    const options = setting?.options ?? [];
     if (setting) {
-      const haystack = setting.options.map(({ alt, value }) => `${alt ?? ''}¦${value}`);
+      const haystack = setting.options.map(({ alt, value }) => `${alt ?? ''}¦${value.toString()}`);
       const indexes = uf.filter(haystack, input);
       const results = indexes.map((i) => setting.options[i]);
-      options = results;
+      return { settings, options: results };
     } else {
-      const haystack = settingsWithIds.map(({ command }) => command);
+      const haystack = settingsListValues.map(({ command }) => command);
       const indexes = uf.filter(haystack, input);
-      const results = indexes.map((i) => settingsWithIds[i]);
-      settings = results;
+      const results = indexes.map((i) => settingsListValues[i]);
+      return { settings: results, options };
     }
-    return { settings, options };
-  }, [input, setting]);
+  }, [input, setting, settingsListValues]);
 
   let selectedIndex = setting
     ? items.options.findIndex(({ value }) => value === settings[setting.id])
@@ -115,7 +115,7 @@ export default function CommandLine({
   };
 
   useIsomorphicEffect(() => {
-    if (open) setSetting(settingsWithIds.find(({ id }) => id === settingId));
+    if (open) setSetting(settingsListValues.find(({ id }) => id === settingId));
     else {
       clearPreview();
       setInput('');
@@ -132,7 +132,7 @@ export default function CommandLine({
   }, [input, selectedIndex]);
   useEffect(() => {
     if (isUsingKeyboard.current) listRef.current?.scrollToIndex({ index });
-    if (setting?.id === 'theme') previewTheme(items.options[index].value);
+    if (setting?.id === 'theme') previewTheme(items.options[index].value.toString());
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [index]);
 
@@ -215,12 +215,13 @@ export default function CommandLine({
               const selected = selectedIndex === i;
               return (
                 <Item
-                  key={alt ?? value}
+                  key={alt ?? value.toString()}
                   active={active}
-                  label={setting.id === 'caretStyle' ? value || alt : alt ?? value}
+                  label={(setting.id === 'caretStyle' ? value || alt : alt ?? value)?.toString()}
                   selected={selected && (!isThemeLoading || !active)}
                   style={{
-                    fontFamily: setting.id === 'fontFamily' ? `var(${value})` : undefined,
+                    fontFamily:
+                      setting.id === 'fontFamily' ? `var(${value.toString()})` : undefined,
                   }}
                   onClick={() => select()}
                   onMouseMove={() => hoverItem(i)}
@@ -230,7 +231,7 @@ export default function CommandLine({
                       {isThemeLoading && active && (
                         <RiLoaderLine className='animate-spin' size={18} />
                       )}
-                      {!selected && <ThemeBubbles withBackground {...themes[value]} />}
+                      {!selected && <ThemeBubbles withBackground {...themes[value.toString()]} />}
                     </>
                   )}
                 </Item>
