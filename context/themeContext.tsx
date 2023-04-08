@@ -5,8 +5,9 @@ import { useDidMount } from 'hooks/useDidMount';
 import { useSearchParams } from 'next/navigation';
 import { ReactNode, createContext, useCallback, useContext, useState } from 'react';
 import useSWR from 'swr';
+import tinycolor from 'tinycolor2';
 import { Updater, useImmer } from 'use-immer';
-import { replaceSpaces } from 'utils/misc';
+import { getRandomNumber, replaceSpaces } from 'utils/misc';
 import { STATIC_URL } from 'utils/monkeytype';
 import {
   CustomTheme,
@@ -16,6 +17,7 @@ import {
   removeThemeColors,
   setThemeColors,
 } from 'utils/theme';
+import { useGlobal } from './globalContext';
 import { useSettings } from './settingsContext';
 
 export interface ThemeValues {
@@ -39,7 +41,15 @@ interface ThemeProviderProps {
 export const ThemeContext = createContext<ThemeContext | null>(null);
 
 export function ThemeProvider({ children, previewDelay, themes }: ThemeProviderProps) {
-  const { themeType, theme, customThemes, customTheme: customThemeId, setSettings } = useSettings();
+  const { testId } = useGlobal();
+  const {
+    randomizeTheme,
+    themeType,
+    theme,
+    customThemes,
+    customTheme: customThemeId,
+    setSettings,
+  } = useSettings();
   const [themeValues, setThemeValues] = useImmer<ThemeValues>({
     themes: themes.reduce((themes, { name, bgColor, mainColor, subColor, textColor }) => {
       themes[name] = { bg: bgColor, main: mainColor, sub: subColor, text: textColor };
@@ -100,6 +110,31 @@ export function ThemeProvider({ children, previewDelay, themes }: ThemeProviderP
     if (themeType === 'custom' && customTheme) setThemeColors(customTheme.colors);
     else removeThemeColors();
   }, [customThemeId, customThemes, previewThemeId, themeType]);
+  useIsomorphicEffect(() => {
+    if (randomizeTheme) {
+      if (themeType === 'preset') {
+        const themeList = themes.filter(
+          ({ name, bgColor }) =>
+            name !== theme &&
+            (randomizeTheme === true ||
+              (randomizeTheme === 'light' && tinycolor(bgColor).isLight()) ||
+              (randomizeTheme === 'dark' && tinycolor(bgColor).isDark()))
+        );
+        const randomTheme = themeList[getRandomNumber(themeList.length - 1)];
+        setSettings((draft) => void (randomTheme && (draft.theme = randomTheme.name)));
+      } else {
+        const themeList = customThemes.filter(
+          ({ id, colors: { bg } }) =>
+            id !== customThemeId &&
+            (randomizeTheme === true ||
+              (randomizeTheme === 'light' && tinycolor(bg).isLight()) ||
+              (randomizeTheme === 'dark' && tinycolor(bg).isDark()))
+        );
+        const randomTheme = themeList[getRandomNumber(themeList.length - 1)];
+        setSettings((draft) => void (randomTheme && (draft.customTheme = randomTheme.id)));
+      }
+    }
+  }, [testId]);
 
   return (
     <ThemeContext.Provider
