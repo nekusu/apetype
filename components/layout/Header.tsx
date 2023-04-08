@@ -21,14 +21,17 @@ const BUTTONS = [
 ];
 
 export default function Header() {
-  const { isUserTyping } = useGlobal();
+  const { isUserTyping, restartTest } = useGlobal();
   const router = useRouter();
 
   return (
     <div className='relative z-10 grid w-full select-none grid-cols-[auto_1fr_auto] gap-3'>
       <Flex
-        className='cursor-pointer flex-nowrap font-[family-name:var(--font-lexend-deca)] transition-transform active:translate-y-[2px]'
-        onClick={() => router.push('/')}
+        className='cursor-pointer flex-nowrap font-[--font-lexend-deca] transition-transform active:translate-y-[2px]'
+        onClick={() => {
+          router.push('/');
+          restartTest();
+        }}
       >
         <LogoIcon />
         <Transition

@@ -19,7 +19,7 @@ const PATH_PROPS = {
 };
 
 export default function LogoIcon() {
-  const { isUserTyping } = useGlobal();
+  const { testId, isUserTyping } = useGlobal();
   const rectControls = useAnimation();
 
   useEffect(() => {
@@ -30,7 +30,7 @@ export default function LogoIcon() {
         transition: { duration: 1 },
       });
     }
-  }, [isUserTyping, rectControls]);
+  }, [isUserTyping, rectControls, testId]);
 
   return (
     <svg
