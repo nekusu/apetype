@@ -19,8 +19,8 @@ export default function Theme() {
   const sortedOptions = useMemo(() => {
     const { options } = settingsList.theme;
     return [...options].sort((a, b) => {
-      const bgColorA = tinycolor(themes[a.value].bgColor);
-      const bgColorB = tinycolor(themes[b.value].bgColor);
+      const bgColorA = tinycolor(themes[a.value].bg);
+      const bgColorB = tinycolor(themes[b.value].bg);
       return bgColorB.getLuminance() - bgColorA.getLuminance();
     });
   }, [settingsList.theme, themes]);
@@ -55,7 +55,7 @@ export default function Theme() {
                 loading={isLoading}
                 selected={selected}
                 onClick={() => setSettings((draft) => void (draft.theme = value))}
-                {...selectedTheme}
+                colors={{ ...selectedTheme }}
               />
             );
           })}

@@ -3,31 +3,22 @@ import { ButtonProps } from 'components/core/Button';
 import { forwardRef, ReactNode } from 'react';
 import { RiCheckLine, RiLoaderLine } from 'react-icons/ri';
 import { twMerge } from 'tailwind-merge';
-import { ThemeInfo } from 'utils/theme';
+import { ThemeColors } from 'utils/theme';
 import ThemeBubbles from './ThemeBubbles';
 
-export interface ThemeButtonProps extends Omit<ButtonProps, 'ref' | 'name'>, ThemeInfo {
+export interface ThemeButtonProps extends Omit<ButtonProps, 'ref' | 'name'> {
+  colors: Partial<ThemeColors>;
   leftNode?: ReactNode;
   loading?: boolean;
+  name: string;
   selected: boolean;
 }
 
 const ThemeButton = forwardRef<HTMLButtonElement, ThemeButtonProps>(function ThemeButton(
-  {
-    bgColor,
-    className,
-    leftNode,
-    loading,
-    mainColor,
-    name,
-    subColor,
-    selected,
-    style,
-    textColor,
-    ...props
-  },
+  { className, colors, leftNode, loading, name, selected, style, ...props },
   ref
 ) {
+  const { bg, text } = colors;
   return (
     <Button
       ref={ref}
@@ -37,7 +28,7 @@ const ThemeButton = forwardRef<HTMLButtonElement, ThemeButtonProps>(function The
         className,
       ])}
       variant='filled'
-      style={{ background: bgColor, color: textColor, outlineColor: textColor, ...style }}
+      style={{ background: bg, color: text, outlineColor: text, ...style }}
       {...props}
     >
       <div className='justify-self-start opacity-0 transition-opacity group-hover:opacity-100'>
@@ -53,7 +44,7 @@ const ThemeButton = forwardRef<HTMLButtonElement, ThemeButtonProps>(function The
       ) : (
         <ThemeBubbles
           className='opacity-0 transition-opacity group-hover:opacity-100'
-          {...{ bgColor, mainColor, subColor, textColor }}
+          colors={colors}
         />
       )}
     </Button>
