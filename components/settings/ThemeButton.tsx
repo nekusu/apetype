@@ -3,7 +3,7 @@ import { ButtonProps } from 'components/core/Button';
 import { forwardRef, ReactNode } from 'react';
 import { RiCheckLine, RiLoaderLine } from 'react-icons/ri';
 import { twMerge } from 'tailwind-merge';
-import { ThemeInfo } from 'utils/settings';
+import { ThemeInfo } from 'utils/theme';
 import ThemeBubbles from './ThemeBubbles';
 
 export interface ThemeButtonProps extends Omit<ButtonProps, 'ref' | 'name'>, ThemeInfo {

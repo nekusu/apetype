@@ -3,12 +3,14 @@
 import { Button, Flex, Tooltip, Transition } from 'components/core';
 import { useGlobal } from 'context/globalContext';
 import { useSettings } from 'context/settingsContext';
+import { useTheme } from 'context/themeContext';
 import project from 'package.json';
 import { RiGitBranchLine, RiGithubLine, RiLoaderLine, RiPaletteFill } from 'react-icons/ri';
 
 export default function Footer() {
-  const { isThemeLoading, commandLineHandler } = useGlobal();
-  const { themeType, theme, customThemes, customThemeId } = useSettings();
+  const { commandLine } = useGlobal();
+  const { themeType, theme, customThemes, customTheme: customThemeId } = useSettings();
+  const { isLoading } = useTheme();
   const customTheme = customThemes.find(({ id }) => id === customThemeId);
 
   return (
@@ -27,8 +29,8 @@ export default function Footer() {
           </Button>
         </Flex>
         <Flex className='gap-6'>
-          <Button className='p-0 text-sm' onClick={() => commandLineHandler.open('theme')}>
-            {isThemeLoading ? <RiLoaderLine className='animate-spin' /> : <RiPaletteFill />}
+          <Button className='p-0 text-sm' onClick={() => commandLine.handler?.open('theme')}>
+            {isLoading ? <RiLoaderLine className='animate-spin' /> : <RiPaletteFill />}
             {themeType === 'custom' && customTheme ? `custom (${customTheme.name})` : theme}
           </Button>
           <Tooltip label='See changelog' offset={8} placement='left'>

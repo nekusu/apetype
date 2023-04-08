@@ -13,8 +13,8 @@ import {
   ScatterController,
   Tooltip,
 } from 'chart.js';
-import { useGlobal } from 'context/globalContext';
 import { useSettings } from 'context/settingsContext';
+import { useTheme } from 'context/themeContext';
 import { useTypingTest } from 'context/typingTestContext';
 import { Chart as MultitypeChart } from 'react-chartjs-2';
 import { useImmer } from 'use-immer';
@@ -36,8 +36,8 @@ function getFontFamily() {
 }
 
 export default function Chart() {
-  const { themeColors } = useGlobal();
   const { showDecimalPlaces } = useSettings();
+  const { colors } = useTheme();
   const { stats, elapsedTime } = useTypingTest();
   const { raw, wpm, errors } = stats;
   const [tooltip, setTooltip] = useImmer<ChartTooltipProps>({
@@ -47,7 +47,7 @@ export default function Chart() {
 
   const labels = Array.from({ length: stats.raw.length }, (_, i) => i + 1);
   if (stats.raw.length > elapsedTime) labels[stats.raw.length - 1] = elapsedTime;
-  const style = { font: { family: getFontFamily() }, color: themeColors?.sub };
+  const style = { font: { family: getFontFamily() }, color: colors?.sub };
   const ticks = {
     precision: 0,
     autoSkip: true,
@@ -63,7 +63,7 @@ export default function Chart() {
       x: {
         axis: 'x',
         ticks,
-        grid: { color: themeColors?.subAlt },
+        grid: { color: colors?.subAlt },
       },
       wpm: {
         axis: 'y',
@@ -71,7 +71,7 @@ export default function Chart() {
         beginAtZero: true,
         min: 0,
         ticks,
-        grid: { color: themeColors?.subAlt },
+        grid: { color: colors?.subAlt },
       },
       error: {
         axis: 'y',
@@ -112,7 +112,7 @@ export default function Chart() {
         label: 'raw',
         fill: true,
         data: raw.map((r) => (showDecimalPlaces ? r.toFixed(2) : Math.floor(r))),
-        borderColor: themeColors?.sub,
+        borderColor: colors?.sub,
         backgroundColor: 'rgba(0, 0, 0, 0.1)',
         borderWidth: 2,
         tension: 0.3,
@@ -125,7 +125,7 @@ export default function Chart() {
         label: 'wpm',
         fill: true,
         data: wpm.map((w) => (showDecimalPlaces ? w.toFixed(2) : Math.floor(w))),
-        borderColor: themeColors?.main,
+        borderColor: colors?.main,
         backgroundColor: 'rgba(0, 0, 0, 0.1)',
         borderWidth: 2,
         tension: 0.3,
@@ -137,8 +137,8 @@ export default function Chart() {
         type: 'scatter' as const,
         label: 'errors',
         data: errors.map((e) => (e ? e : null)),
-        borderColor: themeColors?.colorfulError,
-        pointBackgroundColor: themeColors?.colorfulError,
+        borderColor: colors?.colorfulError,
+        pointBackgroundColor: colors?.colorfulError,
         borderWidth: 2,
         yAxisID: 'error',
         order: 1,

@@ -9,20 +9,9 @@ import { AnimatePresence } from 'framer-motion';
 import { RiTerminalLine } from 'react-icons/ri';
 
 export default function Home() {
-  const {
-    language,
-    testId,
-    isUserTyping,
-    isTestFinished,
-    modalOpen,
-    commandLineHandler,
-    restartTest,
-  } = useGlobal();
-  const { mode, time, words, quickRestart, keyTips } = useSettings();
+  const { testId, isUserTyping, isTestFinished, modalOpen, commandLine, restartTest } = useGlobal();
+  const { quickRestart, keyTips } = useSettings();
 
-  useDidUpdate(() => {
-    if (language) restartTest();
-  }, [language, mode, time, words]);
   useDidUpdate(() => {
     if (isUserTyping) document.body.requestPointerLock();
     else document.exitPointerLock();
@@ -49,7 +38,7 @@ export default function Home() {
                 className='absolute right-0 bottom-0 rounded-[50%] p-2.5'
                 variant='filled'
                 active
-                onClick={() => commandLineHandler.open()}
+                onClick={() => commandLine.handler?.open()}
               >
                 <RiTerminalLine size={18} />
               </Button>

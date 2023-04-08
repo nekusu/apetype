@@ -1,27 +1,28 @@
 'use client';
 
+import { useDidUpdate } from '@mantine/hooks';
 import { Button, Tooltip, Transition } from 'components/core';
 import { useGlobal } from 'context/globalContext';
 import { useSettings } from 'context/settingsContext';
 import { TypingTestProvider } from 'context/typingTestContext';
 import { AnimatePresence } from 'framer-motion';
+import { useLanguage } from 'hooks/useLanguage';
 import { useEffect } from 'react';
 import { RiArrowRightLine, RiEarthFill, RiLockFill, RiRefreshLine } from 'react-icons/ri';
-import { useImmer } from 'use-immer';
-import { initialValues } from 'utils/typingTest';
 import { Result, Stats, Words } from '.';
 
 export default function Test() {
+  const { capsLock, isUserTyping, isTestFinished, setGlobalValues, commandLine, restartTest } =
+    useGlobal();
   const {
-    capsLock,
-    isUserTyping,
-    isTestFinished,
-    setGlobalValues,
-    commandLineHandler,
-    restartTest,
-  } = useGlobal();
-  const { quickRestart, language, capsLockWarning } = useSettings();
-  const [values, setValues] = useImmer(initialValues);
+    mode,
+    time,
+    words,
+    quickRestart,
+    language: languageName,
+    capsLockWarning,
+  } = useSettings();
+  const { language } = useLanguage(languageName);
 
   useEffect(() => {
     if (isTestFinished) setGlobalValues((draft) => void (draft.isUserTyping = false));
@@ -29,9 +30,12 @@ export default function Test() {
   useEffect(() => {
     return () => setGlobalValues((draft) => void (draft.isTestFinished = false));
   }, [setGlobalValues]);
+  useDidUpdate(() => {
+    if (language) restartTest();
+  }, [language, mode, time, words]);
 
   return (
-    <TypingTestProvider setValues={setValues} {...values}>
+    <TypingTestProvider language={language}>
       <Transition className='row-start-2 row-end-3' transition={{ duration: 0.075 }}>
         <AnimatePresence mode='wait'>
           {isTestFinished ? (
@@ -58,9 +62,9 @@ export default function Test() {
               <AnimatePresence>
                 {!isUserTyping && (
                   <Transition className='absolute top-0 flex w-full justify-center gap-4'>
-                    <Button className='p-0' onClick={() => commandLineHandler.open('language')}>
+                    <Button className='p-0' onClick={() => commandLine.handler?.open('language')}>
                       <RiEarthFill />
-                      {language}
+                      {languageName}
                     </Button>
                   </Transition>
                 )}
@@ -70,7 +74,7 @@ export default function Test() {
                   active
                   className='absolute inset-x-0 -top-16 mx-auto py-3 px-3.5'
                   variant='filled'
-                  onClick={() => commandLineHandler.open('capsLockWarning')}
+                  onClick={() => commandLine.handler?.open('capsLockWarning')}
                 >
                   <RiLockFill />
                   Caps Lock

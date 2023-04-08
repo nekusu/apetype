@@ -1,6 +1,6 @@
 import { ButtonHTMLAttributes, DetailedHTMLProps, memo } from 'react';
 import { twMerge } from 'tailwind-merge';
-import { ThemeInfo } from 'utils/settings';
+import { ThemeInfo } from 'utils/theme';
 
 export interface ThemeBubblesProps
   extends Partial<ThemeInfo>,

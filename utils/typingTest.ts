@@ -17,6 +17,7 @@ export interface Word {
 }
 
 export interface TypingTestValues {
+  language?: Language;
   words: Word[];
   wordIndex: number;
   inputValue: string;

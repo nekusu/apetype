@@ -3,6 +3,7 @@
 import { Button, Text } from 'components/core';
 import { useGlobal } from 'context/globalContext';
 import { useSettings } from 'context/settingsContext';
+import { useTheme } from 'context/themeContext';
 import { useMemo } from 'react';
 import tinycolor from 'tinycolor2';
 import { ThemeType } from 'utils/settings';
@@ -12,8 +13,9 @@ import ThemeButton from './ThemeButton';
 const THEME_TYPES: ThemeType[] = ['preset', 'custom'];
 
 export default function Theme() {
-  const { themes, isThemeLoading, settingsList } = useGlobal();
+  const { settingsList } = useGlobal();
   const { theme, themeType, setSettings } = useSettings();
+  const { themes, isLoading } = useTheme();
   const sortedOptions = useMemo(() => {
     const { options } = settingsList.theme;
     return [...options].sort((a, b) => {
@@ -50,7 +52,7 @@ export default function Theme() {
               <ThemeButton
                 key={value}
                 name={value}
-                loading={isThemeLoading}
+                loading={isLoading}
                 selected={selected}
                 onClick={() => setSettings((draft) => void (draft.theme = value))}
                 {...selectedTheme}

@@ -1,7 +1,6 @@
 'use client';
 
 import { Group } from 'components/core';
-import { useGlobal } from 'context/globalContext';
 import { useSettings } from 'context/settingsContext';
 import { useTypingTest } from 'context/typingTestContext';
 import { useMemo } from 'react';
@@ -9,9 +8,8 @@ import { accuracy as acc, consistency as con } from 'utils/typingTest';
 import Chart from './Chart';
 
 export default function Result() {
-  const { language } = useGlobal();
   const { mode, time, words: wordAmount, showDecimalPlaces } = useSettings();
-  const { words, currentStats, stats, elapsedTime } = useTypingTest();
+  const { language, words, currentStats, stats, elapsedTime } = useTypingTest();
   const { raw, wpm, characters, errors } = currentStats;
   const accuracy = acc(characters, errors);
   const consistency = useMemo(() => con(stats.raw), [stats.raw]);

@@ -1,11 +1,12 @@
 'use client';
 
 import uFuzzy from '@leeoniya/ufuzzy';
-import { useInputState, useIsomorphicEffect } from '@mantine/hooks';
+import { useInputState, useIsomorphicEffect, useWindowEvent } from '@mantine/hooks';
 import { Button, Key, Modal, Tooltip, Transition } from 'components/core';
 import { ThemeBubbles } from 'components/settings';
 import { useGlobal } from 'context/globalContext';
 import { useSettings } from 'context/settingsContext';
+import { useTheme } from 'context/themeContext';
 import { motion } from 'framer-motion';
 import { useFocusLock } from 'hooks/useFocusLock';
 import { ReactNode, useEffect, useMemo, useRef, useState } from 'react';
@@ -17,16 +18,7 @@ import {
   RiTerminalLine,
 } from 'react-icons/ri';
 import { ViewportList, ViewportListRef } from 'react-viewport-list';
-import { Settings } from 'utils/settings';
 import Item from './Item';
-
-export interface CommandLineProps {
-  open: boolean;
-  onClose: () => void;
-  settingId?: keyof Settings;
-  previewTheme: (name: string) => void;
-  clearPreview: () => void;
-}
 
 const uf = new uFuzzy({ intraIns: 1, interChars: '.' });
 const DescriptionTooltip = ({ description }: { description: ReactNode }) => (
@@ -37,17 +29,13 @@ const DescriptionTooltip = ({ description }: { description: ReactNode }) => (
   </Tooltip>
 );
 
-export default function CommandLine({
-  settingId,
-  open,
-  onClose,
-  previewTheme,
-  clearPreview,
-}: CommandLineProps) {
-  const { themes, isThemeLoading, settingsList } = useGlobal();
+export default function CommandLine() {
+  const { modalOpen, settingsList, commandLine, setGlobalValues } = useGlobal();
+  const { open, initialSetting, handler } = commandLine;
   const settingsListValues = useMemo(() => Object.values(settingsList), [settingsList]);
   const settings = useSettings();
   const { quickRestart, keyTips, setSettings } = settings;
+  const { themes, isLoading, previewTheme, clearPreview } = useTheme();
   const [input, setInput] = useInputState('');
   const [index, setIndex] = useState(0);
   const [setting, setSetting] = useState<(typeof settingsListValues)[number] | undefined>();
@@ -60,9 +48,9 @@ export default function CommandLine({
     const settings = settingsListValues;
     const options = setting?.options ?? [];
     if (setting) {
-      const haystack = setting.options.map(({ alt, value }) => `${alt ?? ''}¦${value.toString()}`);
+      const haystack = options.map(({ alt, value }) => `${alt ?? ''}¦${value.toString()}`);
       const indexes = uf.filter(haystack, input);
-      const results = indexes?.map((i) => setting.options[i]);
+      const results = indexes?.map((i) => options[i]);
       return { settings, options: results ?? options };
     } else {
       const haystack = settingsListValues.map(({ command }) => command);
@@ -115,7 +103,7 @@ export default function CommandLine({
   };
 
   useIsomorphicEffect(() => {
-    if (open) setSetting(settingsListValues.find(({ id }) => id === settingId));
+    if (open && initialSetting) setSetting(settingsList[initialSetting]);
     else {
       clearPreview();
       setInput('');
@@ -135,12 +123,18 @@ export default function CommandLine({
     if (setting?.id === 'theme') previewTheme(items.options[index].value.toString());
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [index]);
+  useWindowEvent('keydown', (event) => {
+    setGlobalValues((draft) => void (draft.capsLock = event.getModifierState('CapsLock')));
+    if (event.key === (quickRestart !== 'esc' ? 'Escape' : 'Tab') && (!modalOpen || open))
+      if (open) handler?.close();
+      else handler?.open();
+  });
 
   return (
     <Modal
       className='flex w-[700px] flex-col overflow-hidden p-0'
       open={open}
-      onClose={onClose}
+      onClose={handler?.close}
       closeOnEscape={false}
     >
       <form
@@ -218,7 +212,7 @@ export default function CommandLine({
                   key={alt ?? value.toString()}
                   active={active}
                   label={(setting.id === 'caretStyle' ? value || alt : alt ?? value)?.toString()}
-                  selected={selected && (!isThemeLoading || !active)}
+                  selected={selected && (!isLoading || !active)}
                   style={{
                     fontFamily:
                       setting.id === 'fontFamily' ? `var(${value.toString()})` : undefined,
@@ -228,9 +222,7 @@ export default function CommandLine({
                 >
                   {setting.id === 'theme' && (
                     <>
-                      {isThemeLoading && active && (
-                        <RiLoaderLine className='animate-spin' size={18} />
-                      )}
+                      {isLoading && active && <RiLoaderLine className='animate-spin' size={18} />}
                       {!selected && <ThemeBubbles withBackground {...themes[value.toString()]} />}
                     </>
                   )}

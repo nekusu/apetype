@@ -16,7 +16,7 @@ const CUSTOM_SETTINGS: (keyof Settings)[] = ['fontFamily', 'theme'];
 const COMMON_BUTTON_PROPS: Omit<ButtonProps, 'ref'> = { className: 'w-full', variant: 'filled' };
 
 export default function Page() {
-  const { settingsList, commandLineHandler } = useGlobal();
+  const { settingsList, commandLine } = useGlobal();
   const settingsListValues = useMemo(() => Object.values(settingsList), [settingsList]);
   const settings = useSettings();
   const { setSettings } = settings;
@@ -44,7 +44,10 @@ export default function Page() {
                 </Button>
               ))
             ) : (
-              <Button onClick={() => commandLineHandler.open(id)} {...COMMON_BUTTON_PROPS}>
+              <Button
+                onClick={() => commandLine.handler?.open(id as keyof typeof settingsList)}
+                {...COMMON_BUTTON_PROPS}
+              >
                 {settings[id] as ReactNode}
               </Button>
             )}

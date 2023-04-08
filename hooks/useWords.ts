@@ -1,10 +1,9 @@
-import { useGlobal } from 'context/globalContext';
 import { useSettings } from 'context/settingsContext';
 import { useTypingTest } from 'context/typingTestContext';
 import { getRandomWords, parseWords } from 'utils/typingTest';
 
 export function useWords() {
-  const { language } = useGlobal();
+  const { language } = useTypingTest();
   const { mode, words: wordAmount, quickEnd } = useSettings();
   const { setValues } = useTypingTest();
 
