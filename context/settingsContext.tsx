@@ -4,11 +4,8 @@ import { useIsomorphicEffect, useLocalStorage } from '@mantine/hooks';
 import { useDidMount } from 'hooks/useDidMount';
 import produce, { freeze } from 'immer';
 import { ReactNode, createContext, useCallback, useContext, useEffect } from 'react';
-import tinycolor from 'tinycolor2';
 import { DraftFunction, Updater } from 'use-immer';
-import { getRandomNumber } from 'utils/misc';
 import { Settings, defaultSettings } from 'utils/settings';
-import { ThemeInfo } from 'utils/theme';
 import { useGlobal } from './globalContext';
 
 export interface SettingsContext extends Settings {
@@ -17,13 +14,12 @@ export interface SettingsContext extends Settings {
 
 interface SettingsProviderProps {
   children: ReactNode;
-  themes: ThemeInfo[];
 }
 
 export const SettingsContext = createContext<SettingsContext | null>(null);
 
-export function SettingsProvider({ children, themes }: SettingsProviderProps) {
-  const { testId, setGlobalValues } = useGlobal();
+export function SettingsProvider({ children }: SettingsProviderProps) {
+  const { setGlobalValues } = useGlobal();
   const [settings, _setSettings] = useLocalStorage<Settings>({
     key: 'settings',
     defaultValue: freeze(defaultSettings),
@@ -54,21 +50,6 @@ export function SettingsProvider({ children, themes }: SettingsProviderProps) {
       fontFamily.startsWith('--') ? `var(${fontFamily})` : fontFamily
     );
   }, [settings.fontFamily]);
-  useIsomorphicEffect(() => {
-    if (settings.randomizeTheme) {
-      let theme: ThemeInfo | undefined;
-      do theme = themes[getRandomNumber(themes.length)];
-      while (
-        !theme ||
-        (settings.randomizeTheme === 'light' && tinycolor(theme.bgColor).isDark()) ||
-        (settings.randomizeTheme === 'dark' && tinycolor(theme.bgColor).isLight()) ||
-        theme.name === settings.theme
-      );
-      setSettings((draft) => {
-        if (theme) draft.theme = theme.name;
-      });
-    }
-  }, [testId]);
 
   return (
     <SettingsContext.Provider value={{ setSettings, ...settings }}>

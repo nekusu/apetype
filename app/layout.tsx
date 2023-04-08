@@ -88,7 +88,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <head />
       <body className='flex justify-center bg-bg font transition-colors'>
         <GlobalProvider languages={languages} themes={themes}>
-          <SettingsProvider themes={themes}>
+          <SettingsProvider>
             <ThemeProvider previewDelay={250} themes={themes}>
               <MainLayout>{children}</MainLayout>
               <CommandLine />
