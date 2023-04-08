@@ -12,7 +12,7 @@ import {
   Source_Code_Pro,
   Ubuntu,
   Ubuntu_Mono,
-} from '@next/font/google';
+} from "next/font/google";
 import { Content } from 'components/layout';
 import { twJoin } from 'tailwind-merge';
 import { STATIC_URL } from 'utils/monkeytype';
