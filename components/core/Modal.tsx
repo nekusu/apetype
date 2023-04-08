@@ -15,7 +15,7 @@ export interface ModalProps extends HTMLMotionProps<'div'> {
   id?: string;
   lockScroll?: boolean;
   open: boolean;
-  onClose: () => void;
+  onClose?: () => void;
   overflow?: 'inside' | 'outside';
   target?: HTMLElement | null;
   trapFocus?: boolean;
@@ -40,10 +40,10 @@ export default function Modal({
   const focusTrapRef = useFocusTrap(trapFocus && open);
 
   const handleEscapePress = () => {
-    if (closeOnEscape) onClose();
+    if (closeOnEscape) onClose?.();
   };
   const handleOutsideClick = (event: MouseEvent) => {
-    if (closeOnClickOutside && event.target === event.currentTarget) onClose();
+    if (closeOnClickOutside && event.target === event.currentTarget) onClose?.();
   };
 
   useEffect(() => {
