@@ -19,7 +19,7 @@ import {
 import { useSettings } from './settingsContext';
 
 export interface ThemeValues {
-  themes: Record<string, Omit<ThemeInfo, 'name'>>;
+  themes: Record<string, Partial<ThemeColors>>;
   colors?: ThemeColors;
   isLoading?: boolean;
 }
@@ -41,12 +41,13 @@ export const ThemeContext = createContext<ThemeContext | null>(null);
 export function ThemeProvider({ children, previewDelay, themes }: ThemeProviderProps) {
   const { themeType, theme, customThemes, customTheme: customThemeId, setSettings } = useSettings();
   const [themeValues, setThemeValues] = useImmer<ThemeValues>({
-    themes: themes.reduce((themes, { name, ...rest }) => {
-      themes[name] = rest;
+    themes: themes.reduce((themes, { name, bgColor, mainColor, subColor, textColor }) => {
+      themes[name] = { bg: bgColor, main: mainColor, sub: subColor, text: textColor };
       return themes;
     }, {} as ThemeContext['themes']),
   });
   const [themeName, setThemeName] = useState(replaceSpaces(theme));
+  const [previewThemeId, setPreviewThemeId] = useState<string | null>(null);
   const { start, clear } = useTimeout((params: string[]) => {
     const [name] = params;
     setThemeName(replaceSpaces(name));
@@ -60,14 +61,17 @@ export function ThemeProvider({ children, previewDelay, themes }: ThemeProviderP
   const previewTheme = useCallback(
     (id?: string) => {
       if (!id) return;
-      clear();
-      start(id);
+      if (themeType === 'preset') {
+        clear();
+        start(id);
+      } else setPreviewThemeId(id);
     },
-    [clear, start]
+    [clear, start, themeType]
   );
   const clearPreview = useCallback(() => {
     clear();
     setThemeName(replaceSpaces(theme));
+    setPreviewThemeId(null);
   }, [clear, theme]);
 
   useDidMount(() => {
@@ -92,10 +96,10 @@ export function ThemeProvider({ children, previewDelay, themes }: ThemeProviderP
     if (colors) setThemeColors(colors, document.documentElement);
   }, [colors]);
   useIsomorphicEffect(() => {
-    const customTheme = customThemes.find(({ id }) => id === customThemeId);
+    const customTheme = customThemes.find(({ id }) => id === (previewThemeId ?? customThemeId));
     if (themeType === 'custom' && customTheme) setThemeColors(customTheme.colors);
     else removeThemeColors();
-  }, [customThemeId, customThemes, themeType]);
+  }, [customThemeId, customThemes, previewThemeId, themeType]);
 
   return (
     <ThemeContext.Provider

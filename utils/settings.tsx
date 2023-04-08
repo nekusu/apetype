@@ -74,6 +74,7 @@ export interface SettingParams<T> {
   description?: ReactNode;
   options: { alt?: string; value: T }[];
   custom?: boolean;
+  hidden?: boolean;
 }
 
 const OFF_ON_OPTIONS = [
@@ -311,6 +312,12 @@ export const settingsList = {
     command: 'theme',
     category: 'theme',
     options: [],
+  }),
+  customTheme: create<CustomThemeId>({
+    command: 'custom theme',
+    category: 'theme',
+    options: [],
+    hidden: true,
   }),
   liveWpm: create<LiveWpm>({
     command: 'live wpm',

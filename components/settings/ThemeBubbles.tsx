@@ -1,23 +1,14 @@
-import { ButtonHTMLAttributes, DetailedHTMLProps, memo } from 'react';
+import { ComponentPropsWithoutRef, memo } from 'react';
 import { twMerge } from 'tailwind-merge';
-import { ThemeInfo } from 'utils/theme';
+import { ThemeColors } from 'utils/theme';
 
-export interface ThemeBubblesProps
-  extends Partial<ThemeInfo>,
-    DetailedHTMLProps<ButtonHTMLAttributes<HTMLDivElement>, HTMLDivElement> {
+export interface ThemeBubblesProps extends ComponentPropsWithoutRef<'div'> {
+  colors: Partial<ThemeColors>;
   withBackground?: boolean;
 }
 
-function ThemeBubbles({
-  className,
-  style,
-  bgColor,
-  mainColor,
-  subColor,
-  textColor,
-  withBackground,
-  ...props
-}: ThemeBubblesProps) {
+function ThemeBubbles({ className, colors, style, withBackground, ...props }: ThemeBubblesProps) {
+  const { bg, main, sub, text } = colors;
   return (
     <div
       className={twMerge([
@@ -25,12 +16,12 @@ function ThemeBubbles({
         withBackground && 'rounded-full p-1',
         className,
       ])}
-      style={{ background: withBackground ? bgColor : undefined, ...style }}
+      style={{ background: withBackground ? bg : undefined, ...style }}
       {...props}
     >
-      <div className='h-3 w-3 rounded-full' style={{ background: mainColor }} />
-      <div className='h-3 w-3 rounded-full' style={{ background: subColor }} />
-      <div className='h-3 w-3 rounded-full' style={{ background: textColor }} />
+      <div className='h-3 w-3 rounded-full' style={{ background: main }} />
+      <div className='h-3 w-3 rounded-full' style={{ background: sub }} />
+      <div className='h-3 w-3 rounded-full' style={{ background: text }} />
     </div>
   );
 }

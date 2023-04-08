@@ -144,10 +144,7 @@ export default function CustomTheme({ className, ...props }: HTMLMotionProps<'di
                         name={name}
                         selected={id === customThemeId}
                         onClick={() => setSettings((draft) => void (draft.customTheme = id))}
-                        bgColor={colors.bg}
-                        mainColor={colors.main}
-                        subColor={colors.sub}
-                        textColor={colors.text}
+                        colors={colors}
                       />
                     </Transition>
                   ))}

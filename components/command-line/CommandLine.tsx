@@ -32,13 +32,17 @@ const DescriptionTooltip = ({ description }: { description: ReactNode }) => (
 export default function CommandLine() {
   const { modalOpen, settingsList, commandLine, setGlobalValues } = useGlobal();
   const { open, initialSetting, handler } = commandLine;
-  const settingsListValues = useMemo(() => Object.values(settingsList), [settingsList]);
+  const settingsListValues = useMemo(
+    () => Object.values(settingsList).filter(({ hidden }) => !hidden),
+    [settingsList]
+  );
   const settings = useSettings();
-  const { quickRestart, keyTips, setSettings } = settings;
+  const { quickRestart, themeType, customThemes, keyTips, setSettings } = settings;
   const { themes, isLoading, previewTheme, clearPreview } = useTheme();
   const [input, setInput] = useInputState('');
   const [index, setIndex] = useState(0);
-  const [setting, setSetting] = useState<(typeof settingsListValues)[number] | undefined>();
+  const [setting, setSetting] = useState<(typeof settingsListValues)[number] | null>();
+  const isThemeSetting = setting && ['theme', 'customTheme'].includes(setting.id);
   const isUsingKeyboard = useRef(true);
   const focusLockRef = useFocusLock();
   const viewportRef = useRef<HTMLDivElement>(null);
@@ -51,12 +55,12 @@ export default function CommandLine() {
       const haystack = options.map(({ alt, value }) => `${alt ?? ''}¦${value.toString()}`);
       const indexes = uf.filter(haystack, input);
       const results = indexes?.map((i) => options[i]);
-      return { settings, options: results ?? options };
+      return { settings: [] as typeof settings, options: results ?? options };
     } else {
-      const haystack = settingsListValues.map(({ command }) => command);
+      const haystack = settings.map(({ command }) => command);
       const indexes = uf.filter(haystack, input);
-      const results = indexes?.map((i) => settingsListValues[i]);
-      return { settings: results ?? settings, options };
+      const results = indexes?.map((i) => settings[i]);
+      return { settings: results ?? settings, options: [] as typeof options };
     }
   }, [input, setting, settingsListValues]);
 
@@ -99,7 +103,20 @@ export default function CommandLine() {
       if (setting.custom && index === items.options.length)
         saveSetting(isNaN(+input) ? input : +input);
       else saveSetting(items.options[index].value);
-    } else setSetting(items.settings[index]);
+    } else {
+      if (items.settings[index].id === 'theme' && themeType === 'custom')
+        setSetting(settingsList.customTheme);
+      else setSetting(items.settings[index]);
+    }
+  };
+  const toggleThemeType = () => {
+    if (themeType === 'preset' && customThemes.length) {
+      setSettings((draft) => void (draft.themeType = 'custom'));
+      setSetting(settingsList.customTheme);
+    } else {
+      setSettings((draft) => void (draft.themeType = 'preset'));
+      setSetting(settingsList.theme);
+    }
   };
 
   useIsomorphicEffect(() => {
@@ -107,6 +124,7 @@ export default function CommandLine() {
     else {
       clearPreview();
       setInput('');
+      setSetting(null);
     }
   }, [open]);
   useIsomorphicEffect(() => {
@@ -120,7 +138,8 @@ export default function CommandLine() {
   }, [input, selectedIndex]);
   useEffect(() => {
     if (isUsingKeyboard.current) listRef.current?.scrollToIndex({ index });
-    if (setting?.id === 'theme') previewTheme(items.options[index].value.toString());
+    if (setting && ['theme', 'customTheme'].includes(setting.id))
+      previewTheme(items.options[index]?.value.toString());
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [index]);
   useWindowEvent('keydown', (event) => {
@@ -128,6 +147,7 @@ export default function CommandLine() {
     if (event.key === (quickRestart !== 'esc' ? 'Escape' : 'Tab') && (!modalOpen || open))
       if (open) handler?.close();
       else handler?.open();
+    if (event.key === 'Control' && isThemeSetting) toggleThemeType();
   });
 
   return (
@@ -150,10 +170,21 @@ export default function CommandLine() {
             active
             onClick={() => setSetting(undefined)}
           >
-            {setting.command}
+            {isThemeSetting ? 'theme' : setting.command}
           </Button>
         ) : (
           <RiTerminalLine className='text-main' />
+        )}
+        {isThemeSetting && (setting.id === 'customTheme' || !!customThemes.length) && (
+          <Button
+            className='-ml-1 px-2.5 py-1.5 text-xs'
+            component={Transition}
+            variant='filled'
+            onClick={toggleThemeType}
+          >
+            {themeType}
+            {keyTips && <Key>ctrl</Key>}
+          </Button>
         )}
         <motion.input
           ref={focusLockRef}
@@ -220,10 +251,19 @@ export default function CommandLine() {
                   onClick={() => select()}
                   onMouseMove={() => hoverItem(i)}
                 >
-                  {setting.id === 'theme' && (
+                  {isThemeSetting && (
                     <>
                       {isLoading && active && <RiLoaderLine className='animate-spin' size={18} />}
-                      {!selected && <ThemeBubbles withBackground {...themes[value.toString()]} />}
+                      {!selected && (
+                        <ThemeBubbles
+                          colors={
+                            setting.id === 'customTheme'
+                              ? customThemes.find(({ id }) => value === id)?.colors ?? {}
+                              : { ...themes[value.toString()] }
+                          }
+                          withBackground
+                        />
+                      )}
                     </>
                   )}
                 </Item>

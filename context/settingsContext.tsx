@@ -3,7 +3,7 @@
 import { useIsomorphicEffect, useLocalStorage } from '@mantine/hooks';
 import { useDidMount } from 'hooks/useDidMount';
 import produce, { freeze } from 'immer';
-import { ReactNode, createContext, useCallback, useContext } from 'react';
+import { ReactNode, createContext, useCallback, useContext, useEffect } from 'react';
 import tinycolor from 'tinycolor2';
 import { DraftFunction, Updater } from 'use-immer';
 import { getRandomNumber } from 'utils/misc';
@@ -23,7 +23,7 @@ interface SettingsProviderProps {
 export const SettingsContext = createContext<SettingsContext | null>(null);
 
 export function SettingsProvider({ children, themes }: SettingsProviderProps) {
-  const { testId } = useGlobal();
+  const { testId, setGlobalValues } = useGlobal();
   const [settings, _setSettings] = useLocalStorage<Settings>({
     key: 'settings',
     defaultValue: freeze(defaultSettings),
@@ -39,6 +39,14 @@ export function SettingsProvider({ children, themes }: SettingsProviderProps) {
   useDidMount(() => {
     _setSettings((currentSettings) => ({ ...defaultSettings, ...currentSettings }));
   });
+  useEffect(() => {
+    setGlobalValues(
+      (draft) =>
+        void (draft.settingsList.customTheme.options = settings.customThemes.map(
+          ({ id, name }) => ({ alt: name, value: id })
+        ))
+    );
+  }, [setGlobalValues, settings.customThemes]);
   useIsomorphicEffect(() => {
     const fontFamily = settings.fontFamily;
     document.documentElement.style.setProperty(
