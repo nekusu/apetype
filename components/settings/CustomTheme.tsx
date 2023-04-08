@@ -3,14 +3,13 @@
 import { useDidUpdate, useInputState } from '@mantine/hooks';
 import { Button, Input, Text, Transition } from 'components/core';
 import { ButtonProps } from 'components/core/Button';
-import { useGlobal } from 'context/globalContext';
 import { useSettings } from 'context/settingsContext';
+import { useTheme } from 'context/themeContext';
 import { AnimatePresence, HTMLMotionProps } from 'framer-motion';
 import { useEffect, useRef, useState } from 'react';
 import { RiDeleteBin7Line } from 'react-icons/ri';
 import { twMerge } from 'tailwind-merge';
-import type { CustomTheme } from 'utils/settings';
-import { ThemeColors, themeColorVariables } from 'utils/settings';
+import { CustomTheme, ThemeColors, themeColorVariables } from 'utils/theme';
 import ThemeButton from './ThemeButton';
 
 type Color = keyof ThemeColors;
@@ -33,8 +32,8 @@ const LABELS: ThemeColors = {
 };
 
 export default function CustomTheme({ className, ...props }: HTMLMotionProps<'div'>) {
-  const { themeColors } = useGlobal();
-  const { theme, customThemes, customThemeId, setSettings } = useSettings();
+  const { theme, customThemes, customTheme: customThemeId, setSettings } = useSettings();
+  const { colors: themeColors } = useTheme();
   const [name, setName] = useInputState('');
   const [colors, setColors] = useState(initialColors);
   const themeButtonRef = useRef<HTMLButtonElement>(null);
@@ -52,15 +51,15 @@ export default function CustomTheme({ className, ...props }: HTMLMotionProps<'di
       if (!draft.customThemes.some((theme) => theme.id === id)) {
         draft.customThemes.push({ ...theme, id });
         draft.customThemes.sort((a, b) => a.name.localeCompare(b.name));
-        draft.customThemeId = id;
+        draft.customTheme = id;
       }
     });
   };
   const deleteTheme = (id: string) => {
     setSettings((draft) => {
-      if (id === draft.customThemeId) {
-        const index = draft.customThemes.findIndex(({ id }) => id === draft.customThemeId);
-        draft.customThemeId = draft.customThemes[index > 0 ? index - 1 : index + 1]?.id;
+      if (id === draft.customTheme) {
+        const index = draft.customThemes.findIndex(({ id }) => id === draft.customTheme);
+        draft.customTheme = draft.customThemes[index > 0 ? index - 1 : index + 1]?.id;
       }
       draft.customThemes = draft.customThemes.filter((theme) => theme.id !== id);
     });
@@ -77,7 +76,7 @@ export default function CustomTheme({ className, ...props }: HTMLMotionProps<'di
   };
   const saveTheme = () => {
     setSettings((draft) => {
-      const index = draft.customThemes.findIndex(({ id }) => id === draft.customThemeId);
+      const index = draft.customThemes.findIndex(({ id }) => id === draft.customTheme);
       if (index >= 0) {
         draft.customThemes[index].name = name;
         draft.customThemes[index].colors = colors;
@@ -144,7 +143,7 @@ export default function CustomTheme({ className, ...props }: HTMLMotionProps<'di
                         }
                         name={name}
                         selected={id === customThemeId}
-                        onClick={() => setSettings((draft) => void (draft.customThemeId = id))}
+                        onClick={() => setSettings((draft) => void (draft.customTheme = id))}
                         bgColor={colors.bg}
                         mainColor={colors.main}
                         subColor={colors.sub}

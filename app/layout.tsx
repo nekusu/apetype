@@ -1,3 +1,8 @@
+import { CommandLine } from 'components/command-line';
+import { MainLayout } from 'components/layout';
+import { GlobalProvider } from 'context/globalContext';
+import { SettingsProvider } from 'context/settingsContext';
+import { ThemeProvider } from 'context/themeContext';
 import {
   Fira_Code,
   Inconsolata,
@@ -12,11 +17,10 @@ import {
   Source_Code_Pro,
   Ubuntu,
   Ubuntu_Mono,
-} from "next/font/google";
-import { Content } from 'components/layout';
+} from 'next/font/google';
 import { twJoin } from 'tailwind-merge';
 import { STATIC_URL } from 'utils/monkeytype';
-import { ThemeInfo } from 'utils/settings';
+import { ThemeInfo } from 'utils/theme';
 import './globals.css';
 
 const firaCode = Fira_Code({ variable: '--font-fira-code', subsets: ['latin'] });
@@ -76,15 +80,21 @@ async function getThemes() {
 }
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const languages = await getLanguages();
+  const themes = await getThemes();
+
   return (
     <html lang='en' className={twJoin(fonts.map((font) => font.variable))}>
       <head />
-      <body className='bg-bg font transition-colors'>
-        <div className='flex justify-center'>
-          <Content languages={await getLanguages()} themes={await getThemes()}>
-            {children}
-          </Content>
-        </div>
+      <body className='flex justify-center bg-bg font transition-colors'>
+        <GlobalProvider languages={languages} themes={themes}>
+          <SettingsProvider themes={themes}>
+            <ThemeProvider previewDelay={250} themes={themes}>
+              <MainLayout>{children}</MainLayout>
+              <CommandLine />
+            </ThemeProvider>
+          </SettingsProvider>
+        </GlobalProvider>
       </body>
     </html>
   );
