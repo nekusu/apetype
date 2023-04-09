@@ -1,23 +1,21 @@
 'use client';
 
 import { useDidUpdate, useInputState } from '@mantine/hooks';
-import { Button, Input, Text, Transition } from 'components/core';
+import { Button, ColorPicker, Input, Text, Transition } from 'components/core';
 import { ButtonProps } from 'components/core/Button';
 import { useSettings } from 'context/settingsContext';
 import { useTheme } from 'context/themeContext';
 import { AnimatePresence, HTMLMotionProps } from 'framer-motion';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { RiDeleteBin7Line } from 'react-icons/ri';
 import { twMerge } from 'tailwind-merge';
+import { useImmer } from 'use-immer';
 import { CustomTheme, ThemeColors, themeColorVariables } from 'utils/theme';
 import ThemeButton from './ThemeButton';
 
 type Color = keyof ThemeColors;
 
-const initialColors = Object.keys(themeColorVariables).reduce((colors, key) => {
-  colors[key as Color] = '';
-  return colors;
-}, {} as ThemeColors);
+const COMMON_BUTTON_PROPS: Omit<ButtonProps, 'ref'> = { className: 'w-full', variant: 'filled' };
 const LABELS: ThemeColors = {
   bg: 'background',
   main: 'main',
@@ -30,21 +28,36 @@ const LABELS: ThemeColors = {
   colorfulError: 'colorful error',
   colorfulErrorExtra: 'colorful error extra',
 };
+const initialColors = Object.keys(themeColorVariables).reduce((colors, key) => {
+  colors[key as Color] = '';
+  return colors;
+}, {} as ThemeColors);
+
+interface ColorInputProps {
+  color: Color;
+  value: string;
+  setValue: (value: string) => void;
+}
+
+function ColorInput({ color, value, setValue }: ColorInputProps) {
+  return (
+    <Input
+      label={LABELS[color]}
+      leftNode={<ColorPicker color={value} onChange={(color) => setValue(color)} />}
+      value={value}
+      onChange={({ target: { value } }) => setValue(value)}
+    />
+  );
+}
 
 export default function CustomTheme({ className, ...props }: HTMLMotionProps<'div'>) {
   const { theme, customThemes, customTheme: customThemeId, setSettings } = useSettings();
   const { colors } = useTheme();
   const [name, setName] = useInputState('');
-  const [inputColors, setInputColors] = useState(initialColors);
+  const [inputColors, setInputColors] = useImmer(initialColors);
   const themeButtonRef = useRef<HTMLButtonElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
   const customTheme = customThemes.find(({ id }) => id === customThemeId);
 
-  const getInputProps = (color: Color) => ({
-    value: inputColors[color],
-    onChange: ({ target: { value } }: React.ChangeEvent<HTMLInputElement>) =>
-      setInputColors((prevColors) => ({ ...prevColors, [color]: value })),
-  });
   const addTheme = (theme: Omit<CustomTheme, 'id'>) => {
     const id = crypto.randomUUID();
     setSettings((draft) => {
@@ -101,7 +114,6 @@ export default function CustomTheme({ className, ...props }: HTMLMotionProps<'di
   );
 
   useDidUpdate(() => {
-    inputRef.current?.focus();
     themeButtonRef.current?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
   }, [customTheme]);
   useEffect(() => {
@@ -160,7 +172,6 @@ export default function CustomTheme({ className, ...props }: HTMLMotionProps<'di
             }}
           >
             <Input
-              ref={inputRef}
               wrapperClassName='col-span-2'
               label='name'
               value={name}
@@ -168,24 +179,11 @@ export default function CustomTheme({ className, ...props }: HTMLMotionProps<'di
               required
             />
             {Object.entries(inputColors).map(([key, value]) => (
-              <Input
+              <ColorInput
                 key={key}
-                label={LABELS[key as Color]}
-                leftNode={
-                  <div
-                    className='relative h-4 w-4 flex-shrink-0 rounded-full border border-sub'
-                    style={{ background: value }}
-                  >
-                    <input
-                      type='color'
-                      className='pointer-events-auto absolute h-full w-full opacity-0'
-                      tabIndex={-1}
-                      {...getInputProps(key as Color)}
-                    />
-                  </div>
-                }
-                required
-                {...getInputProps(key as Color)}
+                color={key}
+                value={value}
+                setValue={(value) => setInputColors((draft) => void (draft[key] = value))}
               />
             ))}
             <div className='col-span-full mt-3 flex gap-2'>
@@ -196,13 +194,13 @@ export default function CustomTheme({ className, ...props }: HTMLMotionProps<'di
               >
                 delete
               </Button>
-              <Button className='w-full' variant='filled' onClick={duplicateTheme}>
+              <Button onClick={duplicateTheme} {...COMMON_BUTTON_PROPS}>
                 duplicate
               </Button>
-              <Button className='w-full' variant='filled' onClick={shareTheme}>
+              <Button onClick={shareTheme} {...COMMON_BUTTON_PROPS}>
                 share
               </Button>
-              <Button className='w-full' variant='filled' type='submit'>
+              <Button type='submit' {...COMMON_BUTTON_PROPS}>
                 save
               </Button>
             </div>
