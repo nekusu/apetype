@@ -36,8 +36,9 @@ function getFontFamily() {
 }
 
 export default function Chart() {
-  const { showDecimalPlaces } = useSettings();
-  const { colors } = useTheme();
+  const { showDecimalPlaces, themeType } = useSettings();
+  const theme = useTheme();
+  const colors = theme.colors[themeType];
   const { stats, elapsedTime } = useTypingTest();
   const { raw, wpm, errors } = stats;
   const [tooltip, setTooltip] = useImmer<ChartTooltipProps>({

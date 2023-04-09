@@ -33,17 +33,17 @@ const LABELS: ThemeColors = {
 
 export default function CustomTheme({ className, ...props }: HTMLMotionProps<'div'>) {
   const { theme, customThemes, customTheme: customThemeId, setSettings } = useSettings();
-  const { colors: themeColors } = useTheme();
+  const { colors } = useTheme();
   const [name, setName] = useInputState('');
-  const [colors, setColors] = useState(initialColors);
+  const [inputColors, setInputColors] = useState(initialColors);
   const themeButtonRef = useRef<HTMLButtonElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const customTheme = customThemes.find(({ id }) => id === customThemeId);
 
   const getInputProps = (color: Color) => ({
-    value: colors[color],
+    value: inputColors[color],
     onChange: ({ target: { value } }: React.ChangeEvent<HTMLInputElement>) =>
-      setColors((prevColors) => ({ ...prevColors, [color]: value })),
+      setInputColors((prevColors) => ({ ...prevColors, [color]: value })),
   });
   const addTheme = (theme: Omit<CustomTheme, 'id'>) => {
     const id = crypto.randomUUID();
@@ -79,7 +79,7 @@ export default function CustomTheme({ className, ...props }: HTMLMotionProps<'di
       const index = draft.customThemes.findIndex(({ id }) => id === draft.customTheme);
       if (index >= 0) {
         draft.customThemes[index].name = name;
-        draft.customThemes[index].colors = colors;
+        draft.customThemes[index].colors = inputColors;
         draft.customThemes.sort((a, b) => a.name.localeCompare(b.name));
       }
     });
@@ -90,10 +90,10 @@ export default function CustomTheme({ className, ...props }: HTMLMotionProps<'di
       className={className}
       variant='filled'
       onClick={() => {
-        if (!themeColors) return;
+        if (!colors.preset) return;
         setName(theme);
-        setColors(themeColors);
-        addTheme({ name: theme, colors: themeColors });
+        setInputColors(colors.preset);
+        addTheme({ name: theme, colors: colors.preset });
       }}
     >
       create theme
@@ -107,7 +107,7 @@ export default function CustomTheme({ className, ...props }: HTMLMotionProps<'di
   useEffect(() => {
     if (customTheme) {
       setName(customTheme.name);
-      setColors(customTheme.colors);
+      setInputColors(customTheme.colors);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [customTheme]);
@@ -167,7 +167,7 @@ export default function CustomTheme({ className, ...props }: HTMLMotionProps<'di
               onChange={setName}
               required
             />
-            {Object.entries(colors).map(([key, value]) => (
+            {Object.entries(inputColors).map(([key, value]) => (
               <Input
                 key={key}
                 label={LABELS[key as Color]}

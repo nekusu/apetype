@@ -4,7 +4,7 @@ import { useDidUpdate, useIsomorphicEffect, useTimeout } from '@mantine/hooks';
 import { colord } from 'colord';
 import { useDidMount } from 'hooks/useDidMount';
 import { useSearchParams } from 'next/navigation';
-import { ReactNode, createContext, useCallback, useContext, useState } from 'react';
+import { ReactNode, createContext, useCallback, useContext, useMemo, useState } from 'react';
 import useSWR from 'swr';
 import { Updater, useImmer } from 'use-immer';
 import { getRandomNumber, replaceSpaces } from 'utils/misc';
@@ -22,7 +22,10 @@ import { useSettings } from './settingsContext';
 
 export interface ThemeValues {
   themes: Record<string, Pick<ThemeColors, 'bg' | 'main' | 'sub' | 'text'>>;
-  colors?: ThemeColors;
+  colors: {
+    preset?: ThemeColors;
+    custom?: ThemeColors;
+  };
   isLoading?: boolean;
 }
 
@@ -55,19 +58,24 @@ export function ThemeProvider({ children, previewDelay, themes }: ThemeProviderP
       themes[name] = { bg: bgColor, main: mainColor, sub: subColor, text: textColor };
       return themes;
     }, {} as ThemeContext['themes']),
+    colors: {},
   });
-  const [themeName, setThemeName] = useState(replaceSpaces(theme));
+  const [presetName, setPresetName] = useState(replaceSpaces(theme));
   const [previewThemeId, setPreviewThemeId] = useState<string | null>(null);
   const { start, clear } = useTimeout((params: string[]) => {
     const [name] = params;
-    setThemeName(replaceSpaces(name));
+    setPresetName(replaceSpaces(name));
   }, previewDelay);
-  const { data: colors, isLoading } = useSWR<ThemeColors, Error>(
-    `${STATIC_URL}/themes/${themeName}.css`,
+  const { data: presetColors, isLoading } = useSWR<ThemeColors, Error>(
+    `${STATIC_URL}/themes/${presetName}.css`,
     (url: string) => fetch(url).then(async (res) => extractThemeColors(await res.text())),
     { keepPreviousData: true }
   );
   const searchParams = useSearchParams();
+  const customTheme = useMemo(
+    () => customThemes.find(({ id }) => id === (previewThemeId ?? customThemeId)),
+    [customThemeId, customThemes, previewThemeId]
+  );
   const previewTheme = useCallback(
     (id?: string) => {
       if (!id) return;
@@ -80,7 +88,7 @@ export function ThemeProvider({ children, previewDelay, themes }: ThemeProviderP
   );
   const clearPreview = useCallback(() => {
     clear();
-    setThemeName(replaceSpaces(theme));
+    setPresetName(replaceSpaces(theme));
     setPreviewThemeId(null);
   }, [clear, theme]);
 
@@ -100,13 +108,12 @@ export function ThemeProvider({ children, previewDelay, themes }: ThemeProviderP
     }
   });
   useDidUpdate(() => {
-    setThemeName(replaceSpaces(theme));
+    setPresetName(replaceSpaces(theme));
   }, [theme]);
   useIsomorphicEffect(() => {
-    if (colors) setThemeColors(colors, document.documentElement);
-  }, [colors]);
+    if (presetColors) setThemeColors(presetColors, document.documentElement);
+  }, [presetColors]);
   useIsomorphicEffect(() => {
-    const customTheme = customThemes.find(({ id }) => id === (previewThemeId ?? customThemeId));
     if (themeType === 'custom' && customTheme) setThemeColors(customTheme.colors);
     else removeThemeColors();
   }, [customThemeId, customThemes, previewThemeId, themeType]);
@@ -138,7 +145,14 @@ export function ThemeProvider({ children, previewDelay, themes }: ThemeProviderP
 
   return (
     <ThemeContext.Provider
-      value={{ setThemeValues, colors, isLoading, previewTheme, clearPreview, ...themeValues }}
+      value={{
+        ...themeValues,
+        setThemeValues,
+        isLoading,
+        previewTheme,
+        clearPreview,
+        colors: { preset: presetColors, custom: customTheme?.colors },
+      }}
     >
       {children}
     </ThemeContext.Provider>
