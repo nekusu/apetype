@@ -3,7 +3,7 @@
 import { Group, Tooltip } from 'components/core';
 import { useSettings } from 'context/settingsContext';
 import { useTypingTest } from 'context/typingTestContext';
-import { useMemo } from 'react';
+import { Fragment, useMemo } from 'react';
 import { Letter as LetterType, accuracy as acc, consistency as con } from 'utils/typingTest';
 import { Chart, Letter } from './';
 
@@ -54,23 +54,20 @@ export default function Result() {
             `${mode} ${mode === 'time' ? time : mode === 'words' ? wordAmount : ''}`,
             language?.name,
           ]}
+          valueDirection='vertical'
           valueSize='sm'
         />
         <Group title='raw' values={showDecimalPlaces ? raw.toFixed(2) : Math.floor(raw)} />
         <Group
           title='characters'
-          values={
-            <div className='flex leading-none' style={{ fontSize: '2rem' }}>
-              {Object.entries(characterStats).map(([status, count]) => (
-                <>
-                  <Tooltip key={status} label={status} placement='top'>
-                    <Letter status={status as LetterType['status']} original={count.toString()} />
-                  </Tooltip>
-                  <span className='text-main last:hidden'>/</span>
-                </>
-              ))}
-            </div>
-          }
+          values={Object.entries(characterStats).map(([status, count]) => (
+            <Fragment key={status}>
+              <Tooltip label={status} placement='top'>
+                <Letter status={status as LetterType['status']} original={count.toString()} />
+              </Tooltip>
+              <span className='last:hidden'>/</span>
+            </Fragment>
+          ))}
         />
         <Group
           title='consistency'

@@ -1,10 +1,12 @@
 import { ReactNode } from 'react';
+import { twJoin } from 'tailwind-merge';
 import { Text } from '.';
 
 export interface GroupProps {
   title: string;
   titleSize?: 'sm' | 'md' | 'lg';
   values: ReactNode | ReactNode[];
+  valueDirection?: 'horizontal' | 'vertical';
   valueSize?: 'sm' | 'md' | 'lg';
 }
 
@@ -14,7 +16,13 @@ const sizes = {
   lg: '4rem',
 };
 
-export default function Group({ title, titleSize = 'sm', values, valueSize = 'md' }: GroupProps) {
+export default function Group({
+  title,
+  titleSize = 'sm',
+  values,
+  valueDirection = 'horizontal',
+  valueSize = 'md',
+}: GroupProps) {
   if (!Array.isArray(values)) values = [values];
 
   return (
@@ -22,20 +30,17 @@ export default function Group({ title, titleSize = 'sm', values, valueSize = 'md
       <Text className='mb-1 leading-none' dimmed style={{ fontSize: sizes[titleSize] }}>
         {title}
       </Text>
-      {(values as ReactNode[]).map((value, index) =>
-        ['string', 'number'].includes(typeof value) ? (
-          <Text
-            key={index}
-            className='leading-none text-main'
-            dimmed
-            style={{ fontSize: sizes[valueSize] }}
-          >
-            {value}
-          </Text>
-        ) : (
-          value
-        )
-      )}
+      <div
+        className={twJoin([
+          'flex leading-none text-main',
+          valueDirection === 'vertical' && 'flex-col',
+        ])}
+        style={{ fontSize: sizes[valueSize] }}
+      >
+        {(values as ReactNode[]).map((value, index) =>
+          ['string', 'number'].includes(typeof value) ? <div key={index}>{value}</div> : value
+        )}
+      </div>
     </div>
   );
 }
