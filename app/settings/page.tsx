@@ -1,18 +1,18 @@
 'use client';
 
-import { useDisclosure } from '@mantine/hooks';
 import { Button, Text, Transition } from 'components/core';
 import { ButtonProps } from 'components/core/Button';
-import { CustomFontModal, Setting, Theme } from 'components/settings';
+import { FontFamily, Setting, Theme } from 'components/settings';
 import { useGlobal } from 'context/globalContext';
 import { useSettings } from 'context/settingsContext';
 import { motion } from 'framer-motion';
 import { ReactNode, useEffect, useMemo, useRef, useState } from 'react';
 import { twJoin } from 'tailwind-merge';
 import { replaceSpaces } from 'utils/misc';
-import { Settings, categories } from 'utils/settings';
+import { categories } from 'utils/settings';
 
-const CUSTOM_SETTINGS: (keyof Settings)[] = ['fontFamily', 'theme'];
+type Category = (typeof categories)[number];
+
 const COMMON_BUTTON_PROPS: Omit<ButtonProps, 'ref'> = { className: 'w-full', variant: 'filled' };
 
 export default function Page() {
@@ -23,17 +23,14 @@ export default function Page() {
   );
   const settings = useSettings();
   const { setSettings } = settings;
-  const [customFontModalOpen, customFontModalHandler] = useDisclosure(false);
-  const [currentCategory, setCurrentCategory] = useState<(typeof categories)[number]>(
-    categories[0]
-  );
+  const [currentCategory, setCurrentCategory] = useState<Category>(categories[0]);
   const listRef = useRef<HTMLDivElement>(null);
 
   const settingsComponents = useMemo(() => {
     const components = settingsListValues.reduce(
       (components, { id, command, description, options }) => {
-        if (CUSTOM_SETTINGS.includes(id)) return components;
-        components[id] = (
+        if (['fontFamily', 'theme'].includes(id)) return components;
+        components[id as keyof typeof settingsList] = (
           <Setting key={id} title={command} description={description} options={options}>
             {options.length < 16 ? (
               options.map(({ alt, value }) => (
@@ -58,40 +55,9 @@ export default function Page() {
         );
         return components;
       },
-      {} as Record<keyof Settings, JSX.Element>
+      {} as Record<keyof typeof settingsList, JSX.Element>
     );
-    {
-      const { command, description, options } = settingsList.fontFamily;
-      const isCustomFont = !options.map(({ value }) => value).includes(settings.fontFamily);
-      components.fontFamily = (
-        <Setting
-          key='fontFamily'
-          title={command}
-          description={description}
-          options={options}
-          gridColumns={4}
-        >
-          {options.map(({ alt, value }) => (
-            <Button
-              key={value}
-              active={settings.fontFamily === value}
-              onClick={() => setSettings((draft) => void (draft.fontFamily = value as never))}
-              style={{ fontFamily: `var(${value})` }}
-              {...COMMON_BUTTON_PROPS}
-            >
-              {alt}
-            </Button>
-          ))}
-          <Button
-            active={isCustomFont}
-            onClick={customFontModalHandler.open}
-            {...COMMON_BUTTON_PROPS}
-          >
-            custom {isCustomFont && `(${settings.fontFamily})`}
-          </Button>
-        </Setting>
-      );
-    }
+    components.fontFamily = <FontFamily key='fontFamily' />;
     components.theme = <Theme key='theme' />;
     return components;
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -122,14 +88,14 @@ export default function Page() {
             <Button
               key={category}
               className={twJoin([
-                'group relative -my-0.5 py-1.5 px-0 transition-all',
+                'group relative -my-0.5 px-0 py-1.5 transition-all',
                 currentCategory === category
                   ? 'ml-2.5 text-sub-alt hover:text-sub-alt focus:text-sub-alt'
                   : 'focus:text-sub',
               ])}
               onClick={() =>
                 document
-                  .getElementById(replaceSpaces(category, '-'))
+                  .getElementById(replaceSpaces(category))
                   ?.scrollIntoView({ behavior: 'smooth' })
               }
             >
@@ -147,11 +113,7 @@ export default function Page() {
         </nav>
         <div className='flex max-h-full flex-col gap-9 overflow-auto' ref={listRef}>
           {categories.map((category) => (
-            <section
-              key={category}
-              className='flex flex-col gap-5'
-              id={category.replaceAll(' ', '-')}
-            >
+            <section key={category} className='flex flex-col gap-5' id={replaceSpaces(category)}>
               <Text
                 className={twJoin([
                   'pt-1 text-[28px] leading-none',
@@ -163,12 +125,11 @@ export default function Page() {
               </Text>
               {settingsListValues
                 .filter((setting) => setting.category === category)
-                .map(({ id }) => settingsComponents[id])}
+                .map(({ id }) => settingsComponents[id as keyof typeof settingsList])}
             </section>
           ))}
         </div>
       </div>
-      <CustomFontModal modalOpen={customFontModalOpen} onClose={customFontModalHandler.close} />
     </Transition>
   );
 }
