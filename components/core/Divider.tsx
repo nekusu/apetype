@@ -1,12 +1,11 @@
-import { DetailedHTMLProps, forwardRef, HTMLAttributes } from 'react';
+import { ComponentPropsWithoutRef, ElementRef, forwardRef } from 'react';
 import { twMerge } from 'tailwind-merge';
 
-export interface DividerProps
-  extends DetailedHTMLProps<HTMLAttributes<HTMLDivElement>, HTMLDivElement> {
+export interface DividerProps extends ComponentPropsWithoutRef<'div'> {
   orientation?: 'horizontal' | 'vertical';
 }
 
-const Divider = forwardRef<HTMLDivElement, DividerProps>(function Divider(
+const Divider = forwardRef<ElementRef<'div'>, DividerProps>(function Divider(
   { className, orientation = 'vertical', ...props },
   ref
 ) {

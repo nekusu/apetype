@@ -1,28 +1,30 @@
-import { DetailedHTMLProps, forwardRef, HTMLAttributes } from 'react';
-import { twMerge } from 'tailwind-merge';
-import { createPolymorphicComponent, PolymorphicComponentProps } from 'utils/polymorphicComponent';
-import Dynamic from './Dynamic';
+'use client';
 
-export interface TextProps
-  extends DetailedHTMLProps<HTMLAttributes<HTMLDivElement>, HTMLDivElement> {
+import { Slot } from '@radix-ui/react-slot';
+import { ComponentPropsWithoutRef, ElementRef, forwardRef } from 'react';
+import { twMerge } from 'tailwind-merge';
+
+export interface TextProps extends ComponentPropsWithoutRef<'div'> {
+  asChild?: boolean;
   dimmed?: boolean;
 }
 
-const Text = forwardRef<HTMLDivElement, PolymorphicComponentProps<'div', TextProps>>(function Text(
-  { className, dimmed = false, ...props },
+const Text = forwardRef<ElementRef<'div'>, TextProps>(function Text(
+  { asChild, className, dimmed = false, ...props },
   ref
 ) {
+  const Component = asChild ? Slot : 'div';
   return (
-    <Dynamic
+    <Component
+      ref={ref}
       className={twMerge([
         `text-left text-base transition`,
         dimmed ? 'text-sub' : `text-text`,
         className,
       ])}
-      ref={ref}
       {...props}
     />
   );
 });
 
-export default createPolymorphicComponent<'div', TextProps>(Text);
+export default Text;

@@ -11,9 +11,11 @@ export default function NotFound() {
         404
       </Text>
       <Text className='text-center'>Looks like you found a page that doesn&apos;t exist.</Text>
-      <Button className='gap-2.5 py-3 px-4' component={Link} href='/' variant='filled'>
-        <RiKeyboardBoxFill />
-        Go Home
+      <Button asChild className='gap-2.5 px-4 py-3' variant='filled'>
+        <Link href='/'>
+          <RiKeyboardBoxFill />
+          Go Home
+        </Link>
       </Button>
     </Transition>
   );

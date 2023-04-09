@@ -1,6 +1,6 @@
 'use client';
 
-import { Button, Flex, Key, Tooltip, Transition } from 'components/core';
+import { Button, Key, Tooltip, Transition } from 'components/core';
 import { useGlobal } from 'context/globalContext';
 import { useSettings } from 'context/settingsContext';
 import { useTheme } from 'context/themeContext';
@@ -22,20 +22,16 @@ export default function Footer() {
 
   return (
     <Transition className='w-full'>
-      <Flex className='justify-between'>
-        <Flex className='gap-6'>
-          <Button
-            className='p-0 text-sm'
-            component='a'
-            href='https://github.com/nekusu'
-            target='_blank'
-            rel='noopener noreferrer'
-          >
-            <RiGithubLine />
-            nekusu
+      <div className='flex items-center justify-between gap-2'>
+        <div className='gap-6'>
+          <Button asChild className='p-0 text-sm'>
+            <a href='https://github.com/nekusu' target='_blank' rel='noopener noreferrer'>
+              <RiGithubLine />
+              nekusu
+            </a>
           </Button>
-        </Flex>
-        <Flex className='gap-6'>
+        </div>
+        <div className='flex items-center gap-6'>
           <Tooltip
             label={
               <>
@@ -61,18 +57,18 @@ export default function Footer() {
             </Button>
           </Tooltip>
           <Tooltip label='See changelog' offset={8} placement='left'>
-            <Button
-              className='p-0 text-sm'
-              component='a'
-              href={`https://github.com/nekusu/apetype/releases/tag/v${project.version}`}
-              target='_blank'
-              rel='noopener noreferrer'
-            >
-              <RiGitBranchLine />v{project.version}
+            <Button asChild className='p-0 text-sm'>
+              <a
+                href={`https://github.com/nekusu/apetype/releases/tag/v${project.version}`}
+                target='_blank'
+                rel='noopener noreferrer'
+              >
+                <RiGitBranchLine />v{project.version}
+              </a>
             </Button>
           </Tooltip>
-        </Flex>
-      </Flex>
+        </div>
+      </div>
     </Transition>
   );
 }

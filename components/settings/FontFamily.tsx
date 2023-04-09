@@ -53,8 +53,8 @@ export default function FontFamily() {
             modalHandler.close();
           }}
         >
-          <Text className='text-2xl' component='h3'>
-            Custom font
+          <Text asChild className='text-2xl'>
+            <h3>Custom font</h3>
           </Text>
           <Input placeholder='Font name' value={customFont} onChange={setCustomFont} />
           <Text className='text-sm' dimmed>

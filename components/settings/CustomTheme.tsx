@@ -153,38 +153,40 @@ export default function CustomTheme({ className, ...props }: HTMLMotionProps<'di
             </div>
           </div>
           <form
-            className='grid grid-cols-4 gap-2'
+            className='grid grid-cols-4 gap-x-2 gap-y-3'
             onSubmit={(e) => {
               e.preventDefault();
               saveTheme();
             }}
           >
-            <Text component='label' className='col-span-2 text-sm focus-within:text-text' dimmed>
-              name
-              <Input ref={inputRef} className='mt-0.5' value={name} onChange={setName} required />
-            </Text>
+            <Input
+              ref={inputRef}
+              wrapperClassName='col-span-2'
+              label='name'
+              value={name}
+              onChange={setName}
+              required
+            />
             {Object.entries(colors).map(([key, value]) => (
-              <Text key={key} component='label' className='text-sm focus-within:text-text' dimmed>
-                {LABELS[key as Color]}
-                <Input
-                  className='mt-0.5'
-                  icon={
-                    <div
-                      className='relative h-4 w-4 rounded-full border border-sub'
-                      style={{ background: value }}
-                    >
-                      <input
-                        type='color'
-                        className='pointer-events-auto absolute h-full w-full opacity-0'
-                        tabIndex={-1}
-                        {...getInputProps(key as Color)}
-                      />
-                    </div>
-                  }
-                  required
-                  {...getInputProps(key as Color)}
-                />
-              </Text>
+              <Input
+                key={key}
+                label={LABELS[key as Color]}
+                leftNode={
+                  <div
+                    className='relative h-4 w-4 flex-shrink-0 rounded-full border border-sub'
+                    style={{ background: value }}
+                  >
+                    <input
+                      type='color'
+                      className='pointer-events-auto absolute h-full w-full opacity-0'
+                      tabIndex={-1}
+                      {...getInputProps(key as Color)}
+                    />
+                  </div>
+                }
+                required
+                {...getInputProps(key as Color)}
+              />
             ))}
             <div className='col-span-full mt-3 flex gap-2'>
               <Button

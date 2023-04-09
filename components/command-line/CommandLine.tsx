@@ -164,26 +164,28 @@ export default function CommandLine() {
       >
         {setting?.command ? (
           <Button
+            asChild
             className='-ml-1 px-2.5 py-1.5 text-xs font-semibold'
-            component={Transition}
             variant='filled'
             active
             onClick={() => setSetting(undefined)}
           >
-            {isThemeSetting ? 'theme' : setting.command}
+            <Transition>{isThemeSetting ? 'theme' : setting.command}</Transition>
           </Button>
         ) : (
           <RiTerminalLine className='text-main' />
         )}
         {isThemeSetting && (setting.id === 'customTheme' || !!customThemes.length) && (
           <Button
+            asChild
             className='-ml-1 px-2.5 py-1.5 text-xs'
-            component={Transition}
             variant='filled'
             onClick={toggleThemeType}
           >
-            {themeType}
-            {keyTips && <Key>ctrl</Key>}
+            <Transition>
+              {themeType}
+              {keyTips && <Key>ctrl</Key>}
+            </Transition>
           </Button>
         )}
         <motion.input

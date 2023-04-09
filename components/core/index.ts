@@ -1,7 +1,5 @@
 export { default as Button } from './Button';
 export { default as Divider } from './Divider';
-export { default as Dynamic } from './Dynamic';
-export { default as Flex } from './Flex';
 export { default as Group } from './Group';
 export { default as Input } from './Input';
 export { default as Key } from './Key';

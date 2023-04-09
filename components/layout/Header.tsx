@@ -1,6 +1,6 @@
 'use client';
 
-import { Button, Flex, Text, Tooltip, Transition } from 'components/core';
+import { Button, Text, Tooltip, Transition } from 'components/core';
 import { useGlobal } from 'context/globalContext';
 import { AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
@@ -26,8 +26,8 @@ export default function Header() {
 
   return (
     <div className='relative z-10 grid w-full select-none grid-cols-[auto_1fr_auto] gap-3'>
-      <Flex
-        className='cursor-pointer flex-nowrap font-[--font-lexend-deca] transition-transform active:translate-y-[2px]'
+      <div
+        className='flex items-center gap-2 font-[--font-lexend-deca] transition-transform active:translate-y-0.5'
         onClick={() => {
           router.push('/');
           restartTest();
@@ -70,7 +70,7 @@ export default function Header() {
             apetype
           </Text>
         </Transition>
-      </Flex>
+      </div>
       <AnimatePresence>
         {!isUserTyping && (
           <Transition
@@ -83,8 +83,8 @@ export default function Header() {
           >
             {BUTTONS.map(({ label, href, icon }) => (
               <Tooltip key={label} label={label}>
-                <Button className='text-xl' component={Link} href={href}>
-                  {icon}
+                <Button asChild className='text-xl'>
+                  <Link href={href}>{icon}</Link>
                 </Button>
               </Tooltip>
             ))}

@@ -15,8 +15,8 @@ function Setting<T>({ children, title, description, options, gridColumns }: Sett
       className='grid auto-rows-auto gap-x-5 gap-y-1.5'
       style={{ gridTemplateColumns: gridColumns ? '1fr' : '2fr 1.2fr' }}
     >
-      <Text className='col-span-full text-lg' component='h3'>
-        {title}
+      <Text asChild className='col-span-full text-lg'>
+        <h3>{title}</h3>
       </Text>
       {description && (
         <Text className='text-sm' dimmed>
