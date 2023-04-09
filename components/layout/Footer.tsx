@@ -1,6 +1,6 @@
 'use client';
 
-import { Button, Flex, Key, Tooltip, Transition } from 'components/core';
+import { Button, Key, Tooltip, Transition } from 'components/core';
 import { useGlobal } from 'context/globalContext';
 import { useSettings } from 'context/settingsContext';
 import { useTheme } from 'context/themeContext';
@@ -22,16 +22,16 @@ export default function Footer() {
 
   return (
     <Transition className='w-full'>
-      <Flex className='justify-between'>
-        <Flex className='gap-6'>
+      <div className='flex items-center justify-between gap-2'>
+        <div className='gap-6'>
           <Button asChild className='p-0 text-sm'>
             <a href='https://github.com/nekusu' target='_blank' rel='noopener noreferrer'>
               <RiGithubLine />
               nekusu
             </a>
           </Button>
-        </Flex>
-        <Flex className='gap-6'>
+        </div>
+        <div className='flex items-center gap-6'>
           <Tooltip
             label={
               <>
@@ -67,8 +67,8 @@ export default function Footer() {
               </a>
             </Button>
           </Tooltip>
-        </Flex>
-      </Flex>
+        </div>
+      </div>
     </Transition>
   );
 }
