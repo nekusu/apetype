@@ -106,7 +106,7 @@ export default function Settings() {
           )}
           <Input
             type='number'
-            icon={<Icon />}
+            leftNode={<Icon />}
             min={0}
             value={customAmount.toString()}
             onChange={({ target: { value } }) => setCustomAmount(+value)}

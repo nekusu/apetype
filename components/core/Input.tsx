@@ -1,44 +1,73 @@
-import { DetailedHTMLProps, forwardRef, InputHTMLAttributes } from 'react';
+import { useId, useMergedRef } from '@mantine/hooks';
+import { ComponentPropsWithoutRef, ElementRef, ReactNode, forwardRef, useRef } from 'react';
 import { twMerge } from 'tailwind-merge';
 
-export interface InputProps
-  extends DetailedHTMLProps<InputHTMLAttributes<HTMLInputElement>, HTMLInputElement> {
-  icon?: React.ReactNode;
-  iconClassName?: string;
+export interface InputProps extends ComponentPropsWithoutRef<'input'> {
+  inputClassName?: string;
+  label?: ReactNode;
+  leftNode?: ReactNode;
+  rightNode?: ReactNode;
   wrapperClassName?: string;
 }
 
-const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
-  { className, icon, iconClassName, type = 'text', wrapperClassName, ...props },
+const Input = forwardRef<ElementRef<'input'>, InputProps>(function Input(
+  {
+    className,
+    disabled,
+    id,
+    inputClassName,
+    label,
+    leftNode,
+    rightNode,
+    type = 'text',
+    wrapperClassName,
+    ...props
+  },
   ref
 ) {
+  const uuid = useId(id);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const mergedRef = useMergedRef(ref, inputRef);
+
   return (
     <div
       className={twMerge([
-        'relative text-base transition active:translate-y-[2px]',
+        'flex flex-col gap-1 text-sub transition focus-within:text-text',
+        disabled && 'pointer-events-none opacity-60',
         wrapperClassName,
       ])}
     >
-      {icon && (
-        <div
-          className={twMerge([
-            'pointer-events-none absolute inset-y-0 left-0 flex w-9 items-center justify-center text-sub',
-            iconClassName,
-          ])}
+      {label && (
+        <label
+          className={twMerge(['w-max', typeof label === 'string' && 'text-sm leading-none'])}
+          htmlFor={uuid}
         >
-          {icon}
-        </div>
+          {label}
+        </label>
       )}
-      <input
+      <div
         className={twMerge([
-          'w-full rounded-lg bg-sub-alt py-2 px-2.5 leading-tight text-sub caret-main outline-none outline-offset-[-2px] transition focus:text-text focus:outline-2 focus:outline-main',
-          icon && 'pl-9',
+          'flex w-full cursor-text items-center rounded-lg bg-sub-alt px-3 py-2 text-sub caret-main outline-none -outline-offset-2 transition focus-within:text-text focus-within:outline-2 focus-within:outline-main active:translate-y-0.5',
           className,
         ])}
-        ref={ref}
-        type={type}
-        {...props}
-      />
+        onClick={() => inputRef.current?.focus()}
+      >
+        {leftNode}
+        <input
+          ref={mergedRef}
+          className={twMerge([
+            'h-full w-full bg-transparent outline-none placeholder:text-sub',
+            leftNode && 'pl-2',
+            rightNode && 'pr-2',
+            inputClassName,
+          ])}
+          disabled={disabled}
+          id={uuid}
+          type={type}
+          {...props}
+        />
+        {rightNode}
+      </div>
     </div>
   );
 });
