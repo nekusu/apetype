@@ -24,15 +24,11 @@ export default function Footer() {
     <Transition className='w-full'>
       <Flex className='justify-between'>
         <Flex className='gap-6'>
-          <Button
-            className='p-0 text-sm'
-            component='a'
-            href='https://github.com/nekusu'
-            target='_blank'
-            rel='noopener noreferrer'
-          >
-            <RiGithubLine />
-            nekusu
+          <Button asChild className='p-0 text-sm'>
+            <a href='https://github.com/nekusu' target='_blank' rel='noopener noreferrer'>
+              <RiGithubLine />
+              nekusu
+            </a>
           </Button>
         </Flex>
         <Flex className='gap-6'>
@@ -61,14 +57,14 @@ export default function Footer() {
             </Button>
           </Tooltip>
           <Tooltip label='See changelog' offset={8} placement='left'>
-            <Button
-              className='p-0 text-sm'
-              component='a'
-              href={`https://github.com/nekusu/apetype/releases/tag/v${project.version}`}
-              target='_blank'
-              rel='noopener noreferrer'
-            >
-              <RiGitBranchLine />v{project.version}
+            <Button asChild className='p-0 text-sm'>
+              <a
+                href={`https://github.com/nekusu/apetype/releases/tag/v${project.version}`}
+                target='_blank'
+                rel='noopener noreferrer'
+              >
+                <RiGitBranchLine />v{project.version}
+              </a>
             </Button>
           </Tooltip>
         </Flex>

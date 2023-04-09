@@ -1,11 +1,20 @@
-import { DetailedHTMLProps, forwardRef, HTMLAttributes } from 'react';
+'use client';
+
+import { Slot } from '@radix-ui/react-slot';
+import { ComponentPropsWithoutRef, ElementRef, forwardRef } from 'react';
 import { twMerge } from 'tailwind-merge';
 
-export type KeyProps = DetailedHTMLProps<HTMLAttributes<HTMLDivElement>, HTMLDivElement>;
+export interface KeyProps extends ComponentPropsWithoutRef<'div'> {
+  asChild?: boolean;
+}
 
-const Key = forwardRef<HTMLDivElement, KeyProps>(function Key({ className, ...props }, ref) {
+const Key = forwardRef<ElementRef<'div'>, KeyProps>(function Key(
+  { asChild, className, ...props },
+  ref
+) {
+  const Component = asChild ? Slot : 'span';
   return (
-    <span
+    <Component
       className={twMerge([
         'mx-px inline-block rounded bg-sub px-1 text-xs text-bg transition',
         className,

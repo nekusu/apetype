@@ -26,9 +26,9 @@ export default function Theme() {
   }, [settingsList.theme, themes]);
 
   return (
-    <div className='grid auto-rows-auto grid-cols-[2fr_1.2fr] gap-y-4 gap-x-5'>
-      <Text className='text-lg' component='h3'>
-        {settingsList.theme.command}
+    <div className='grid auto-rows-auto grid-cols-[2fr_1.2fr] gap-x-5 gap-y-4'>
+      <Text asChild className='text-lg'>
+        <h3>{settingsList.theme.command}</h3>
       </Text>
       <div className='flex items-center gap-2'>
         {THEME_TYPES.map((type) => (

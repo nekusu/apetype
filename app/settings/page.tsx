@@ -111,24 +111,24 @@ export default function Page() {
             </Button>
           ))}
         </nav>
-        <div className='flex max-h-full flex-col gap-9 overflow-auto' ref={listRef}>
+        <main className='flex max-h-full flex-col gap-9 overflow-auto' ref={listRef}>
           {categories.map((category) => (
             <section key={category} className='flex flex-col gap-5' id={replaceSpaces(category)}>
               <Text
+                asChild
                 className={twJoin([
                   'pt-1 text-[28px] leading-none',
                   category === 'danger zone' ? 'text-error' : 'text-main',
                 ])}
-                component='h2'
               >
-                {category}
+                <h2>{category}</h2>
               </Text>
               {settingsListValues
                 .filter((setting) => setting.category === category)
                 .map(({ id }) => settingsComponents[id as keyof typeof settingsList])}
             </section>
           ))}
-        </div>
+        </main>
       </div>
     </Transition>
   );

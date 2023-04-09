@@ -57,7 +57,7 @@ export default function Settings() {
           <Button
             key={value}
             active={mode === value}
-            className='py-3 px-2 text-xs'
+            className='px-2 py-3 text-xs'
             onClick={() => setSettings((draft) => void (draft.mode = value))}
           >
             <Icon size={DEFAULT_ICON_SIZE} />
@@ -70,14 +70,14 @@ export default function Settings() {
         <Button
           key={value}
           active={settings[mode] === value}
-          className='py-3 px-2 text-xs'
+          className='px-2 py-3 text-xs'
           onClick={() => setSettings((draft) => void (draft[mode] = value))}
         >
           {value}
         </Button>
       ))}
       {settingsList[mode].custom && (
-        <Button active={customActive} className='py-3 px-2 text-xs' onClick={modalHandler.open}>
+        <Button active={customActive} className='px-2 py-3 text-xs' onClick={modalHandler.open}>
           <RiToolsFill size={DEFAULT_ICON_SIZE} />
           {customActive && (customAmount || 'Infinite')}
         </Button>
@@ -96,8 +96,8 @@ export default function Settings() {
             modalHandler.close();
           }}
         >
-          <Text className='text-2xl' component='h3'>
-            {mode === 'time' ? 'Test duration' : 'Word amount'}
+          <Text asChild className='text-2xl'>
+            <h3>{mode === 'time' ? 'Test duration' : 'Word amount'}</h3>
           </Text>
           {(!customAmount || mode === 'time') && (
             <Text className='text-sm' dimmed>

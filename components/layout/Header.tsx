@@ -83,8 +83,8 @@ export default function Header() {
           >
             {BUTTONS.map(({ label, href, icon }) => (
               <Tooltip key={label} label={label}>
-                <Button className='text-xl' component={Link} href={href}>
-                  {icon}
+                <Button asChild className='text-xl'>
+                  <Link href={href}>{icon}</Link>
                 </Button>
               </Tooltip>
             ))}
