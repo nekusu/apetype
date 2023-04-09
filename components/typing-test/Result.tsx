@@ -1,11 +1,11 @@
 'use client';
 
-import { Group } from 'components/core';
+import { Group, Tooltip } from 'components/core';
 import { useSettings } from 'context/settingsContext';
 import { useTypingTest } from 'context/typingTestContext';
 import { useMemo } from 'react';
-import { accuracy as acc, consistency as con } from 'utils/typingTest';
-import Chart from './Chart';
+import { Letter as LetterType, accuracy as acc, consistency as con } from 'utils/typingTest';
+import { Chart, Letter } from './';
 
 export default function Result() {
   const { mode, time, words: wordAmount, showDecimalPlaces } = useSettings();
@@ -36,13 +36,13 @@ export default function Result() {
         <Group
           title='wpm'
           titleSize='md'
-          values={showDecimalPlaces ? +wpm.toFixed(2) : Math.floor(wpm)}
+          values={showDecimalPlaces ? wpm.toFixed(2) : Math.floor(wpm)}
           valueSize='lg'
         />
         <Group
           title='acc'
           titleSize='md'
-          values={`${showDecimalPlaces ? +accuracy.toFixed(2) : Math.floor(accuracy)}%`}
+          values={`${showDecimalPlaces ? accuracy.toFixed(2) : Math.floor(accuracy)}%`}
           valueSize='lg'
         />
       </div>
@@ -56,11 +56,25 @@ export default function Result() {
           ]}
           valueSize='sm'
         />
-        <Group title='raw' values={showDecimalPlaces ? +raw.toFixed(2) : Math.floor(raw)} />
-        <Group title='characters' values={Object.values(characterStats).join('/')} />
+        <Group title='raw' values={showDecimalPlaces ? raw.toFixed(2) : Math.floor(raw)} />
+        <Group
+          title='characters'
+          values={
+            <div className='flex leading-none' style={{ fontSize: '2rem' }}>
+              {Object.entries(characterStats).map(([status, count]) => (
+                <>
+                  <Tooltip key={status} label={status} placement='top'>
+                    <Letter status={status as LetterType['status']} original={count.toString()} />
+                  </Tooltip>
+                  <span className='text-main last:hidden'>/</span>
+                </>
+              ))}
+            </div>
+          }
+        />
         <Group
           title='consistency'
-          values={`${showDecimalPlaces ? +consistency.toFixed(2) : Math.floor(consistency)}%`}
+          values={`${showDecimalPlaces ? consistency.toFixed(2) : Math.floor(consistency)}%`}
         />
         <Group title='time' values={`${elapsedTime}s`} />
       </div>

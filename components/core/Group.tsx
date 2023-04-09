@@ -1,9 +1,10 @@
+import { ReactNode } from 'react';
 import { Text } from '.';
 
 export interface GroupProps {
   title: string;
   titleSize?: 'sm' | 'md' | 'lg';
-  values: (string | number | undefined) | (string | number | undefined)[];
+  values: ReactNode | ReactNode[];
   valueSize?: 'sm' | 'md' | 'lg';
 }
 
@@ -14,25 +15,27 @@ const sizes = {
 };
 
 export default function Group({ title, titleSize = 'sm', values, valueSize = 'md' }: GroupProps) {
-  if (typeof values !== 'object') {
-    values = [values];
-  }
+  if (!Array.isArray(values)) values = [values];
 
   return (
     <div className='flex flex-col'>
       <Text className='mb-1 leading-none' dimmed style={{ fontSize: sizes[titleSize] }}>
         {title}
       </Text>
-      {values.map((value, index) => (
-        <Text
-          key={index}
-          className='leading-none text-main'
-          dimmed
-          style={{ fontSize: sizes[valueSize] }}
-        >
-          {value}
-        </Text>
-      ))}
+      {(values as ReactNode[]).map((value, index) =>
+        ['string', 'number'].includes(typeof value) ? (
+          <Text
+            key={index}
+            className='leading-none text-main'
+            dimmed
+            style={{ fontSize: sizes[valueSize] }}
+          >
+            {value}
+          </Text>
+        ) : (
+          value
+        )
+      )}
     </div>
   );
 }

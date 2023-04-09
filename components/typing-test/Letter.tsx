@@ -6,7 +6,7 @@ import { Settings } from 'utils/settings';
 import { Letter as LetterType } from 'utils/typingTest';
 
 type LetterProps = LetterType &
-  Pick<Settings, 'indicateTypos' | 'hideExtraLetters' | 'flipTestColors' | 'colorfulMode'>;
+  Partial<Pick<Settings, 'indicateTypos' | 'hideExtraLetters' | 'flipTestColors' | 'colorfulMode'>>;
 
 const Letter = forwardRef<HTMLSpanElement, LetterProps>(function Letter(
   { original, typed, status, indicateTypos, hideExtraLetters, flipTestColors, colorfulMode },
@@ -37,7 +37,7 @@ const Letter = forwardRef<HTMLSpanElement, LetterProps>(function Letter(
     >
       {indicateTypos === 'replace' ? typed ?? original : original}
       {indicateTypos === 'below' && status === 'incorrect' && (
-        <span className='absolute top-[1.35em] left-0 flex w-full justify-center text-[.75em] text-text opacity-50'>
+        <span className='absolute left-0 top-[1.35em] flex w-full justify-center text-[.75em] text-text opacity-50'>
           {typed}
         </span>
       )}
