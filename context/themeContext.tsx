@@ -1,11 +1,11 @@
 'use client';
 
 import { useDidUpdate, useIsomorphicEffect, useTimeout } from '@mantine/hooks';
+import { colord } from 'colord';
 import { useDidMount } from 'hooks/useDidMount';
 import { useSearchParams } from 'next/navigation';
 import { ReactNode, createContext, useCallback, useContext, useState } from 'react';
 import useSWR from 'swr';
-import tinycolor from 'tinycolor2';
 import { Updater, useImmer } from 'use-immer';
 import { getRandomNumber, replaceSpaces } from 'utils/misc';
 import { STATIC_URL } from 'utils/monkeytype';
@@ -21,7 +21,7 @@ import { useGlobal } from './globalContext';
 import { useSettings } from './settingsContext';
 
 export interface ThemeValues {
-  themes: Record<string, Partial<ThemeColors>>;
+  themes: Record<string, Pick<ThemeColors, 'bg' | 'main' | 'sub' | 'text'>>;
   colors?: ThemeColors;
   isLoading?: boolean;
 }
@@ -117,8 +117,8 @@ export function ThemeProvider({ children, previewDelay, themes }: ThemeProviderP
           ({ name, bgColor }) =>
             name !== theme &&
             (randomizeTheme === true ||
-              (randomizeTheme === 'light' && tinycolor(bgColor).isLight()) ||
-              (randomizeTheme === 'dark' && tinycolor(bgColor).isDark()))
+              (randomizeTheme === 'light' && colord(bgColor).isLight()) ||
+              (randomizeTheme === 'dark' && colord(bgColor).isDark()))
         );
         const randomTheme = themeList[getRandomNumber(themeList.length - 1)];
         setSettings((draft) => void (randomTheme && (draft.theme = randomTheme.name)));
@@ -127,8 +127,8 @@ export function ThemeProvider({ children, previewDelay, themes }: ThemeProviderP
           ({ id, colors: { bg } }) =>
             id !== customThemeId &&
             (randomizeTheme === true ||
-              (randomizeTheme === 'light' && tinycolor(bg).isLight()) ||
-              (randomizeTheme === 'dark' && tinycolor(bg).isDark()))
+              (randomizeTheme === 'light' && colord(bg).isLight()) ||
+              (randomizeTheme === 'dark' && colord(bg).isDark()))
         );
         const randomTheme = themeList[getRandomNumber(themeList.length - 1)];
         setSettings((draft) => void (randomTheme && (draft.customTheme = randomTheme.id)));

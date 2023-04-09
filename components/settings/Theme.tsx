@@ -1,15 +1,17 @@
 'use client';
 
+import { colord, extend } from 'colord';
+import a11yPlugin from 'colord/plugins/a11y';
 import { Button, Text } from 'components/core';
 import { useGlobal } from 'context/globalContext';
 import { useSettings } from 'context/settingsContext';
 import { useTheme } from 'context/themeContext';
 import { useMemo } from 'react';
-import tinycolor from 'tinycolor2';
 import { ThemeType } from 'utils/settings';
 import CustomTheme from './CustomTheme';
 import ThemeButton from './ThemeButton';
 
+extend([a11yPlugin]);
 const THEME_TYPES: ThemeType[] = ['preset', 'custom'];
 
 export default function Theme() {
@@ -19,9 +21,9 @@ export default function Theme() {
   const sortedOptions = useMemo(() => {
     const { options } = settingsList.theme;
     return [...options].sort((a, b) => {
-      const bgColorA = tinycolor(themes[a.value].bg);
-      const bgColorB = tinycolor(themes[b.value].bg);
-      return bgColorB.getLuminance() - bgColorA.getLuminance();
+      const bgColorA = colord(themes[a.value].bg);
+      const bgColorB = colord(themes[b.value].bg);
+      return bgColorB.brightness() - bgColorA.brightness();
     });
   }, [settingsList.theme, themes]);
 
