@@ -4,6 +4,7 @@ export { default as Group } from './Group';
 export { default as Input } from './Input';
 export { default as Key } from './Key';
 export { default as Modal } from './Modal';
+export * as Popover from './Popover';
 export { default as Text } from './Text';
 export { default as Tooltip } from './Tooltip';
 export { default as Transition } from './Transition';
