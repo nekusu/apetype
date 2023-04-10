@@ -1,6 +1,7 @@
 'use client';
 
 import { useDidUpdate, useInputState } from '@mantine/hooks';
+import { colord } from 'colord';
 import { Button, ColorPicker, Input, Text, Transition } from 'components/core';
 import { ButtonProps } from 'components/core/Button';
 import { useSettings } from 'context/settingsContext';
@@ -42,6 +43,7 @@ interface ColorInputProps {
 function ColorInput({ color, value, setValue }: ColorInputProps) {
   return (
     <Input
+      error={!colord(value).isValid() && 'Invalid color'}
       label={LABELS[color]}
       leftNode={<ColorPicker color={value} onChange={(color) => setValue(color)} />}
       value={value}
@@ -172,11 +174,11 @@ export default function CustomTheme({ className, ...props }: HTMLMotionProps<'di
             }}
           >
             <Input
+              error={!name && 'Name is required'}
               wrapperClassName='col-span-2'
               label='name'
               value={name}
               onChange={setName}
-              required
             />
             {Object.entries(inputColors).map(([key, value]) => (
               <ColorInput
@@ -200,7 +202,13 @@ export default function CustomTheme({ className, ...props }: HTMLMotionProps<'di
               <Button onClick={shareTheme} {...COMMON_BUTTON_PROPS}>
                 share
               </Button>
-              <Button type='submit' {...COMMON_BUTTON_PROPS}>
+              <Button
+                type='submit'
+                disabled={
+                  !name || Object.values(inputColors).some((color) => !colord(color).isValid())
+                }
+                {...COMMON_BUTTON_PROPS}
+              >
                 save
               </Button>
             </div>
