@@ -1,19 +1,24 @@
 'use client';
 
-import { useDidUpdate, useInputState } from '@mantine/hooks';
-import { Button, ColorPicker, Input, Text, Transition } from 'components/core';
+import { useDidUpdate, useDisclosure, useInputState } from '@mantine/hooks';
+import { colord, extend } from 'colord';
+import a11yPlugin from 'colord/plugins/a11y';
+import { Button, ColorPicker, Input, Modal, Text, Tooltip, Transition } from 'components/core';
 import { ButtonProps } from 'components/core/Button';
+import { InputProps } from 'components/core/Input';
 import { useSettings } from 'context/settingsContext';
 import { useTheme } from 'context/themeContext';
 import { AnimatePresence, HTMLMotionProps } from 'framer-motion';
 import { useEffect, useRef } from 'react';
-import { RiDeleteBin7Line } from 'react-icons/ri';
+import { RiAlertLine, RiDeleteBin7Line } from 'react-icons/ri';
 import { twMerge } from 'tailwind-merge';
 import { useImmer } from 'use-immer';
 import { CustomTheme, ThemeColors, themeColorVariables } from 'utils/theme';
 import ThemeButton from './ThemeButton';
 
 type Color = keyof ThemeColors;
+
+extend([a11yPlugin]);
 
 const COMMON_BUTTON_PROPS: Omit<ButtonProps, 'ref'> = { className: 'w-full', variant: 'filled' };
 const LABELS: ThemeColors = {
@@ -33,20 +38,59 @@ const initialColors = Object.keys(themeColorVariables).reduce((colors, key) => {
   return colors;
 }, {} as ThemeColors);
 
-interface ColorInputProps {
-  color: Color;
+interface ColorInputProps extends InputProps {
+  colorKey: Color;
   value: string;
   setValue: (value: string) => void;
 }
 
-function ColorInput({ color, value, setValue }: ColorInputProps) {
+function ColorInput({ colorKey, value, setValue, ...props }: ColorInputProps) {
   return (
     <Input
-      label={LABELS[color]}
+      error={!colord(value).isValid() && 'Invalid color'}
+      label={LABELS[colorKey]}
       leftNode={<ColorPicker color={value} onChange={(color) => setValue(color)} />}
       value={value}
       onChange={({ target: { value } }) => setValue(value)}
+      {...props}
     />
+  );
+}
+
+interface ReadabilityModalProps {
+  open: boolean;
+  onClose: () => void;
+}
+
+function ReadabilityModal({ open, onClose }: ReadabilityModalProps) {
+  return (
+    <Modal centered open={open} onClose={onClose}>
+      <div className='flex max-w-sm flex-col gap-3.5 text-sm'>
+        <Text asChild className='text-2xl'>
+          <h3>Readability</h3>
+        </Text>
+        <Text className='text-[length:inherit]' dimmed>
+          This color may have a negative impact on readability. For optimal results, make sure the
+          main, sub, and text colors have a contrast ratio of at least 2:1 with the background
+          color.
+        </Text>
+        <Text className='text-[length:inherit]' dimmed>
+          While a 2:1 contrast ratio is recommended, this does not meet the{' '}
+          <a
+            className='text-main hover:underline'
+            href='https://www.w3.org/WAI/WCAG21/Understanding/contrast-minimum.html'
+            target='_blank'
+          >
+            WCAG 2.1 accessibility guidelines
+          </a>
+          , which require a minimum of 4.5:1 for normal text and 3:1 for large text. To ensure
+          maximum legibility, consider using a higher contrast ratio.
+        </Text>
+        <Button className='w-full' variant='filled' onClick={onClose}>
+          ok
+        </Button>
+      </div>
+    </Modal>
   );
 }
 
@@ -55,6 +99,7 @@ export default function CustomTheme({ className, ...props }: HTMLMotionProps<'di
   const { colors } = useTheme();
   const [name, setName] = useInputState('');
   const [inputColors, setInputColors] = useImmer(initialColors);
+  const [modalOpen, modalHandler] = useDisclosure(false);
   const themeButtonRef = useRef<HTMLButtonElement>(null);
   const customTheme = customThemes.find(({ id }) => id === customThemeId);
 
@@ -172,18 +217,29 @@ export default function CustomTheme({ className, ...props }: HTMLMotionProps<'di
             }}
           >
             <Input
+              error={!name && 'Name is required'}
               wrapperClassName='col-span-2'
               label='name'
               value={name}
               onChange={setName}
-              required
             />
             {Object.entries(inputColors).map(([key, value]) => (
               <ColorInput
                 key={key}
-                color={key}
+                colorKey={key}
                 value={value}
                 setValue={(value) => setInputColors((draft) => void (draft[key] = value))}
+                rightNode={
+                  ['main', 'sub', 'text'].includes(key) &&
+                  colord(value).isValid() &&
+                  colord(value).contrast(inputColors.bg) < 2 && (
+                    <Tooltip label='Poor contrast ratio' offset={14}>
+                      <Button className='p-0 text-main' tabIndex={-1} onClick={modalHandler.open}>
+                        <RiAlertLine />
+                      </Button>
+                    </Tooltip>
+                  )
+                }
               />
             ))}
             <div className='col-span-full mt-3 flex gap-2'>
@@ -200,7 +256,13 @@ export default function CustomTheme({ className, ...props }: HTMLMotionProps<'di
               <Button onClick={shareTheme} {...COMMON_BUTTON_PROPS}>
                 share
               </Button>
-              <Button type='submit' {...COMMON_BUTTON_PROPS}>
+              <Button
+                type='submit'
+                disabled={
+                  !name || Object.values(inputColors).some((color) => !colord(color).isValid())
+                }
+                {...COMMON_BUTTON_PROPS}
+              >
                 save
               </Button>
             </div>
@@ -214,6 +276,7 @@ export default function CustomTheme({ className, ...props }: HTMLMotionProps<'di
           <CreateThemeButton className='px-3' />
         </>
       )}
+      <ReadabilityModal open={modalOpen} onClose={modalHandler.close} />
     </Transition>
   );
 }
