@@ -1,6 +1,6 @@
 'use client';
 
-import { useDidUpdate } from '@mantine/hooks';
+import { useDidUpdate, useWindowEvent } from '@mantine/hooks';
 import { Button, Tooltip, Transition } from 'components/core';
 import { useGlobal } from 'context/globalContext';
 import { useSettings } from 'context/settingsContext';
@@ -12,8 +12,15 @@ import { RiArrowRightLine, RiEarthFill, RiLockFill, RiRefreshLine } from 'react-
 import { Result, Stats, Words } from '.';
 
 export default function Test() {
-  const { capsLock, isUserTyping, isTestFinished, setGlobalValues, commandLine, restartTest } =
-    useGlobal();
+  const {
+    capsLock,
+    isUserTyping,
+    isTestFinished,
+    setGlobalValues,
+    modalOpen,
+    commandLine,
+    restartTest,
+  } = useGlobal();
   const {
     mode,
     time,
@@ -33,6 +40,16 @@ export default function Test() {
   useDidUpdate(() => {
     if (language) restartTest();
   }, [language, mode, time, words]);
+  useDidUpdate(() => {
+    if (isUserTyping) document.body.requestPointerLock();
+    else document.exitPointerLock();
+  }, [isUserTyping]);
+  useWindowEvent('keydown', (event) => {
+    if (!modalOpen && quickRestart && event.key === (quickRestart === 'tab' ? 'Tab' : 'Escape')) {
+      event.preventDefault();
+      restartTest();
+    }
+  });
 
   return (
     <TypingTestProvider language={language}>
@@ -47,7 +64,7 @@ export default function Test() {
               <Result />
               <div className='flex w-full justify-center gap-4'>
                 <Tooltip label='Next test' offset={8}>
-                  <Button className='py-4 px-8 text-xl' variant='subtle' onClick={restartTest}>
+                  <Button className='px-8 py-4 text-xl' variant='subtle' onClick={restartTest}>
                     <RiArrowRightLine />
                   </Button>
                 </Tooltip>
@@ -72,7 +89,7 @@ export default function Test() {
               {capsLockWarning && capsLock && (
                 <Button
                   active
-                  className='absolute inset-x-0 -top-16 mx-auto py-3 px-3.5'
+                  className='absolute inset-x-0 -top-16 mx-auto px-3.5 py-3'
                   variant='filled'
                   onClick={() => commandLine.handler?.open('capsLockWarning')}
                 >
@@ -84,7 +101,7 @@ export default function Test() {
               {!quickRestart && (
                 <Tooltip label='Restart test' offset={8}>
                   <Button
-                    className='mx-auto mt-2 py-4 px-8 text-xl'
+                    className='mx-auto mt-2 px-8 py-4 text-xl'
                     variant='subtle'
                     onClick={restartTest}
                   >

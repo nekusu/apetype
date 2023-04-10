@@ -1,5 +1,3 @@
-'use client';
-
 import { Button, Text, Transition } from 'components/core';
 import Link from 'next/link';
 import { RiKeyboardBoxFill } from 'react-icons/ri';

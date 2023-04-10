@@ -70,7 +70,6 @@ export function GlobalProvider({ children, languages, themes }: GlobalProviderPr
     [setGlobalValues]
   );
   const restartTest = useThrottle(() => {
-    console.log('restart');
     setGlobalValues((draft) => {
       draft.testId = crypto.randomUUID();
       draft.isUserTyping = false;

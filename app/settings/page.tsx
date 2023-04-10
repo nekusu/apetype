@@ -68,7 +68,7 @@ export default function Page() {
       (entries) => {
         for (const { isIntersecting, target } of entries) {
           if (isIntersecting) {
-            setCurrentCategory(target.id.replace(/-/g, ' ') as (typeof categories)[number]);
+            setCurrentCategory(target.id.replace(/_/g, ' ') as (typeof categories)[number]);
             break;
           }
         }

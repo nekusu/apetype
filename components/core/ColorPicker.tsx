@@ -1,8 +1,7 @@
 'use client';
 
 import { colord } from 'colord';
-import { useMemo } from 'react';
-import { HexColorPicker } from 'react-colorful';
+import { HexAlphaColorPicker } from 'react-colorful';
 import { twMerge } from 'tailwind-merge';
 import { Popover } from '.';
 import { PopoverOptions } from './Popover';
@@ -20,7 +19,7 @@ export default function ColorPicker({
   offset = 14,
   ...props
 }: ColorPickerProps) {
-  const hexString = useMemo(() => (color.startsWith('#') ? color : colord(color).toHex()), [color]);
+  const hexString = colord(color).toHex();
   return (
     <Popover.Root offset={offset} {...props}>
       <Popover.Trigger asChild>
@@ -30,7 +29,7 @@ export default function ColorPicker({
         />
       </Popover.Trigger>
       <Popover.Content>
-        <HexColorPicker
+        <HexAlphaColorPicker
           color={hexString}
           onChange={onChange}
           className='!h-40 !w-40 rounded-lg shadow-lg'

@@ -1,3 +1,5 @@
+'use client';
+
 import { HTMLMotionProps, motion, Variants } from 'framer-motion';
 import { ElementRef, forwardRef } from 'react';
 

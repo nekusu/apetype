@@ -1,7 +1,9 @@
 'use client';
 
 import {
+  autoUpdate,
   flip,
+  FloatingPortal,
   offset as offsetMiddleware,
   Placement,
   shift,
@@ -32,6 +34,7 @@ const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(function Tooltip(
     open,
     onOpenChange: setOpen,
     placement: placement,
+    whileElementsMounted: autoUpdate,
     middleware: [offsetMiddleware(offset), flip(), shift()],
   });
   const hover = useHover(context);
@@ -42,28 +45,30 @@ const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(function Tooltip(
   return (
     <>
       {cloneElement(children as JSX.Element, getReferenceProps({ ref: reference }))}
-      <AnimatePresence>
-        {open && !disabled && (
-          <Transition
-            className={twMerge([
-              'pointer-events-none rounded-lg bg-sub-alt py-2 px-3 text-center text-sm leading-tight text-text shadow-md transition',
-              className,
-            ])}
-            ref={mergedRef}
-            style={{
-              position: strategy,
-              top: y ?? 0,
-              left: x ?? 0,
-              width: 'max-content',
-              ...style,
-            }}
-            {...getFloatingProps()}
-            {...props}
-          >
-            {label}
-          </Transition>
-        )}
-      </AnimatePresence>
+      <FloatingPortal>
+        <AnimatePresence>
+          {open && !disabled && (
+            <Transition
+              className={twMerge([
+                'pointer-events-none rounded-lg bg-sub-alt px-3 py-2 text-center text-sm leading-tight text-text shadow-md transition',
+                className,
+              ])}
+              ref={mergedRef}
+              style={{
+                position: strategy,
+                top: y ?? 0,
+                left: x ?? 0,
+                width: 'max-content',
+                ...style,
+              }}
+              {...getFloatingProps()}
+              {...props}
+            >
+              {label}
+            </Transition>
+          )}
+        </AnimatePresence>
+      </FloatingPortal>
     </>
   );
 });

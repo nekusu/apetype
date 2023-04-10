@@ -86,7 +86,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html lang='en' className={twJoin(fonts.map((font) => font.variable))}>
       <head />
-      <body className='flex justify-center bg-bg font transition-colors'>
+      <body className='flex justify-center overflow-y-hidden bg-bg font transition-colors selection:bg-main selection:text-sub-alt'>
         <GlobalProvider languages={languages} themes={themes}>
           <SettingsProvider>
             <ThemeProvider previewDelay={250} themes={themes}>

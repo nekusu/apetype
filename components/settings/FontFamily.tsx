@@ -3,6 +3,7 @@ import { Button, Input, Modal, Text } from 'components/core';
 import { ButtonProps } from 'components/core/Button';
 import { useGlobal } from 'context/globalContext';
 import { useSettings } from 'context/settingsContext';
+import { RiFontSize } from 'react-icons/ri';
 import Setting from './Setting';
 
 const COMMON_BUTTON_PROPS: Omit<ButtonProps, 'ref'> = { className: 'w-full', variant: 'filled' };
@@ -56,9 +57,14 @@ export default function FontFamily() {
           <Text asChild className='text-2xl'>
             <h3>Custom font</h3>
           </Text>
-          <Input placeholder='Font name' value={customFont} onChange={setCustomFont} />
+          <Input
+            placeholder='Font name'
+            leftNode={<RiFontSize />}
+            value={customFont}
+            onChange={setCustomFont}
+          />
           <Text className='text-sm' dimmed>
-            Make sure you have the font installed on your device before applying
+            Make sure you have the font installed on your device before applying.
           </Text>
           <Button type='submit' disabled={!customFont.length} {...COMMON_BUTTON_PROPS}>
             apply

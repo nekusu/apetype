@@ -4,7 +4,7 @@ import { Button, Text, Tooltip, Transition } from 'components/core';
 import { useGlobal } from 'context/globalContext';
 import { AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import {
   RiInformationFill,
   RiKeyboardBoxFill,
@@ -23,14 +23,15 @@ const BUTTONS = [
 export default function Header() {
   const { isUserTyping, restartTest } = useGlobal();
   const router = useRouter();
+  const pathname = usePathname();
 
   return (
     <div className='relative z-10 grid w-full select-none grid-cols-[auto_1fr_auto] gap-3'>
       <div
-        className='flex items-center gap-2 font-[--font-lexend-deca] transition-transform active:translate-y-0.5'
+        className='flex items-center gap-2 font-[family-name:var(--font-lexend-deca)] transition-transform active:translate-y-0.5'
         onClick={() => {
-          router.push('/');
-          restartTest();
+          if (pathname === '/') restartTest();
+          else router.push('/');
         }}
       >
         <LogoIcon />
