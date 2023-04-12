@@ -1,5 +1,33 @@
 # Changelog
 
+## [0.5.0](https://github.com/nekusu/apetype/compare/v0.4.0...v0.5.0) (2023-04-12)
+
+
+### New Features
+
+* add color analysis and validation in theme editor ([#26](https://github.com/nekusu/apetype/issues/26)) ([653b2ef](https://github.com/nekusu/apetype/commit/653b2ef6d53b7162c32208c061eacd480b63de88))
+* add theme and language caching ([#27](https://github.com/nekusu/apetype/issues/27)) ([70092e9](https://github.com/nekusu/apetype/commit/70092e95ec36b2693a4106ebfbe2e33edfe0ac53))
+* add validation and error handling in Input component ([e647ec7](https://github.com/nekusu/apetype/commit/e647ec7c7cddfe74a288e7df9972f3664e402d47))
+* animate logo icon on every test restart ([f943c2a](https://github.com/nekusu/apetype/commit/f943c2ac89502a7984191430af65e4af0afe712a))
+* replace native color input with custom color picker ([#25](https://github.com/nekusu/apetype/issues/25)) ([fbc76bf](https://github.com/nekusu/apetype/commit/fbc76bff533e60ef8a5389391a52d12bb751957d))
+* theme randomizer for custom themes ([#23](https://github.com/nekusu/apetype/issues/23)) ([b7f04f5](https://github.com/nekusu/apetype/commit/b7f04f5f87783cf259f9c4c3f7facb26eb49aafd))
+* **cli:** add custom theme selection in CLI ([#22](https://github.com/nekusu/apetype/issues/22)) ([875283c](https://github.com/nekusu/apetype/commit/875283c00277c174f086a1ae68545583090107d3))
+* **settings:** add custom theme editor ([#18](https://github.com/nekusu/apetype/issues/18)) ([b7193c5](https://github.com/nekusu/apetype/commit/b7193c546990e96e529d0af49863fb4192881b4b))
+* **settings:** add randomize theme setting ([#14](https://github.com/nekusu/apetype/issues/14)) ([18113ef](https://github.com/nekusu/apetype/commit/18113ef0d1ae4c87f852805a09db25cf899ee19c))
+* **settings:** add theme selection ([#13](https://github.com/nekusu/apetype/issues/13)) ([0acb600](https://github.com/nekusu/apetype/commit/0acb600c64ec5e758dd71ae17da6e2c96771eb9e))
+* **test:** add colors and tooltips to character stats test result ([4f7b761](https://github.com/nekusu/apetype/commit/4f7b761b06915e0bb77ddf52abe0a9e65c65f911))
+
+
+### Performance Improvements
+
+* **cli:** replace fuzzy search library ([#12](https://github.com/nekusu/apetype/issues/12)) ([46fa3e3](https://github.com/nekusu/apetype/commit/46fa3e39f3c55690c4c85254da0f156a3910ebf5))
+
+
+### Bug Fixes
+
+* **cli:** item tooltips covered by command line modal ([8f68381](https://github.com/nekusu/apetype/commit/8f6838167b7aca7f66279e40d68e7659ed914723))
+* **test:** result chart not using custom theme colors ([589b3d2](https://github.com/nekusu/apetype/commit/589b3d2802e6934c4c5a044dd2133014649dc687))
+
 ## [0.4.0](https://github.com/nekusu/apetype/compare/v0.3.0...v0.4.0) (2023-02-19)
 
 
