@@ -3,7 +3,6 @@
 import { useDidUpdate, useIsomorphicEffect, useTimeout } from '@mantine/hooks';
 import { colord } from 'colord';
 import { useDidMount } from 'hooks/useDidMount';
-import { useSearchParams } from 'next/navigation';
 import { ReactNode, createContext, useCallback, useContext, useMemo, useState } from 'react';
 import useSWRImmutable from 'swr/immutable';
 import { Updater, useImmer } from 'use-immer';
@@ -71,7 +70,6 @@ export function ThemeProvider({ children, previewDelay, themes }: ThemeProviderP
     (url: string) => fetch(url).then(async (res) => extractThemeColors(await res.text())),
     { keepPreviousData: true }
   );
-  const searchParams = useSearchParams();
   const customTheme = useMemo(
     () => customThemes.find(({ id }) => id === (previewThemeId ?? customThemeId)),
     [customThemeId, customThemes, previewThemeId]
@@ -93,7 +91,8 @@ export function ThemeProvider({ children, previewDelay, themes }: ThemeProviderP
   }, [clear, theme]);
 
   useDidMount(() => {
-    const encodedCustomTheme = searchParams?.get('customTheme');
+    const params = new URLSearchParams(document.location.search);
+    const encodedCustomTheme = params.get('customTheme');
     if (encodedCustomTheme) {
       const customTheme = JSON.parse(
         Buffer.from(encodedCustomTheme, 'base64').toString()
