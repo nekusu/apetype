@@ -1,24 +1,23 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { useWindowEvent } from '@mantine/hooks';
 import { useRef } from 'react';
 import { State } from 'swr';
 import { useDidMount } from './useDidMount';
 
-export function cacheProvider() {
-  const appCache = localStorage.getItem('app-cache') || '[]';
-  const map = new Map(JSON.parse(appCache) as Iterable<[string, State<any, any>]>);
-  window.addEventListener('beforeunload', () => {
-    const appCache = JSON.stringify(Array.from(map.entries()));
-    localStorage.setItem('app-cache', appCache);
-  });
-  return map;
-}
-
 export function useCacheProvider() {
-  const provider = useRef<typeof cacheProvider>();
+  const cache = useRef<Map<string, State<any, any>>>(new Map());
 
   useDidMount(() => {
-    provider.current = cacheProvider;
+    const appCache = localStorage.getItem('app-cache');
+    if (appCache) {
+      const map = new Map(JSON.parse(appCache) as Iterable<[string, State<any, any>]>);
+      map.forEach((value, key) => cache.current.set(key, value));
+    }
+  });
+  useWindowEvent('beforeunload', () => {
+    const appCache = JSON.stringify(Array.from(cache.current.entries()));
+    localStorage.setItem('app-cache', appCache);
   });
 
-  return provider.current;
+  return () => cache.current;
 }
