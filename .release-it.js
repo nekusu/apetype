@@ -40,4 +40,7 @@ module.exports = {
       },
     },
   },
+  hooks: {
+    'after:release': 'pnpm genversion',
+  },
 };
