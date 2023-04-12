@@ -4,8 +4,8 @@ import { Button, Key, Tooltip, Transition } from 'components/core';
 import { useGlobal } from 'context/globalContext';
 import { useSettings } from 'context/settingsContext';
 import { useTheme } from 'context/themeContext';
-import project from 'package.json';
 import { RiGitBranchLine, RiGithubLine, RiLoaderLine, RiPaletteFill } from 'react-icons/ri';
+import { version } from 'utils/version';
 
 export default function Footer() {
   const { commandLine } = useGlobal();
@@ -59,11 +59,11 @@ export default function Footer() {
           <Tooltip label='See changelog' offset={8} placement='left'>
             <Button asChild className='p-0 text-sm'>
               <a
-                href={`https://github.com/nekusu/apetype/releases/tag/v${project.version}`}
+                href={`https://github.com/nekusu/apetype/releases/tag/v${version}`}
                 target='_blank'
                 rel='noopener noreferrer'
               >
-                <RiGitBranchLine />v{project.version}
+                <RiGitBranchLine />v{version}
               </a>
             </Button>
           </Tooltip>
