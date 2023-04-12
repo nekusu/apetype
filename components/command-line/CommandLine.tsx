@@ -2,32 +2,19 @@
 
 import uFuzzy from '@leeoniya/ufuzzy';
 import { useInputState, useIsomorphicEffect, useWindowEvent } from '@mantine/hooks';
-import { Button, Key, Modal, Tooltip, Transition } from 'components/core';
+import { Button, Key, Modal, Transition } from 'components/core';
 import { ThemeBubbles } from 'components/settings';
 import { useGlobal } from 'context/globalContext';
 import { useSettings } from 'context/settingsContext';
 import { useTheme } from 'context/themeContext';
 import { motion } from 'framer-motion';
 import { useFocusLock } from 'hooks/useFocusLock';
-import { ReactNode, useEffect, useMemo, useRef, useState } from 'react';
-import {
-  RiArrowDownLine,
-  RiArrowUpLine,
-  RiLoaderLine,
-  RiQuestionLine,
-  RiTerminalLine,
-} from 'react-icons/ri';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { RiArrowDownLine, RiArrowUpLine, RiLoaderLine, RiTerminalLine } from 'react-icons/ri';
 import { ViewportList, ViewportListRef } from 'react-viewport-list';
 import Item from './Item';
 
 const uf = new uFuzzy({ intraIns: 1, interChars: '.' });
-const DescriptionTooltip = ({ description }: { description: ReactNode }) => (
-  <Tooltip className='max-w-[65%] text-xs' label={description} placement='left'>
-    <div className='cursor-help'>
-      <RiQuestionLine size={18} />
-    </div>
-  </Tooltip>
-);
 
 export default function CommandLine() {
   const { modalOpen, settingsList, commandLine, setGlobalValues } = useGlobal();
@@ -221,7 +208,6 @@ export default function CommandLine() {
         ) : (
           <div className='cursor-default text-sm text-sub'>nothing found</div>
         )}
-        {setting?.description && <DescriptionTooltip description={setting.description} />}
       </form>
       <motion.div
         ref={viewportRef}
@@ -274,16 +260,15 @@ export default function CommandLine() {
           </ViewportList>
         ) : (
           <ViewportList ref={listRef} viewportRef={viewportRef} items={items.settings}>
-            {(setting, i) => (
+            {({ id, command, description }, i) => (
               <Item
-                key={setting.id}
+                key={id}
                 active={index === i}
-                label={setting.command}
+                description={description}
+                label={command}
                 onClick={() => select()}
                 onMouseMove={() => hoverItem(i)}
-              >
-                {setting.description && <DescriptionTooltip description={setting.description} />}
-              </Item>
+              />
             )}
           </ViewportList>
         )}

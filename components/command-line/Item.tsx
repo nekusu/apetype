@@ -1,15 +1,16 @@
 'use client';
 
-import { Key } from 'components/core';
+import { Key, Tooltip } from 'components/core';
 import { useSettings } from 'context/settingsContext';
 import { HTMLMotionProps, motion } from 'framer-motion';
 import { ReactNode } from 'react';
-import { RiCheckLine } from 'react-icons/ri';
+import { RiCheckLine, RiQuestionLine } from 'react-icons/ri';
 import { twJoin, twMerge } from 'tailwind-merge';
 
 export interface ItemProps extends HTMLMotionProps<'div'> {
   active?: boolean;
   children?: ReactNode;
+  description?: ReactNode;
   label?: string;
   selected?: boolean;
 }
@@ -18,6 +19,7 @@ export default function Item({
   active,
   children,
   className,
+  description,
   label,
   selected,
   ...props
@@ -45,6 +47,17 @@ export default function Item({
       )}
       {selected && <RiCheckLine size={18} />}
       {children}
+      {description && (
+        <Tooltip
+          className='z-50 max-w-[min(550px,_70vw)] text-xs'
+          label={description}
+          placement='left'
+        >
+          <div className='cursor-help'>
+            <RiQuestionLine size={18} />
+          </div>
+        </Tooltip>
+      )}
     </motion.div>
   );
 }
