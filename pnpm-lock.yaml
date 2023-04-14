@@ -25,6 +25,9 @@ dependencies:
   immer:
     specifier: ^9.0.21
     version: 9.0.21
+  lz-ts:
+    specifier: ^1.1.2
+    version: 1.1.2
   next:
     specifier: ^13.3.0
     version: 13.3.0(react-dom@18.2.0)(react@18.2.0)
@@ -3700,6 +3703,10 @@ packages:
     dependencies:
       yallist: 4.0.0
     dev: true
+
+  /lz-ts@1.1.2:
+    resolution: {integrity: sha512-ye8sVndmvzs46cPgX1Yjlk3o/Sueu0VHn253rKpsWiK2/bAbsVkD7DEJiaueiPfbZTi17GLRPkv3W5O3BUNd2g==}
+    dev: false
 
   /macos-release@3.1.0:
     resolution: {integrity: sha512-/M/R0gCDgM+Cv1IuBG1XGdfTFnMEG6PZeT+KGWHO/OG+imqmaD9CH5vHBTycEM3+Kc4uG2Il+tFAuUWLqQOeUA==}
