@@ -19,6 +19,7 @@
     "@radix-ui/react-slot": "^1.0.1",
     "chart.js": "^4.2.1",
     "colord": "^2.9.3",
+    "earwurm": "^0.3.0",
     "framer-motion": "^10.11.2",
     "immer": "^9.0.21",
     "lz-ts": "^1.1.2",

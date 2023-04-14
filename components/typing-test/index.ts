@@ -4,6 +4,7 @@ export { default as ChartTooltip } from './ChartTooltip';
 export { default as Letter } from './Letter';
 export { default as Result } from './Result';
 export { default as Settings } from './Settings';
+export { default as Sound } from './Sound';
 export { default as Stats } from './Stats';
 export { default as Test } from './Test';
 export { default as Tips } from './Tips';

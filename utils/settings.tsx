@@ -11,6 +11,10 @@ export type Language = string;
 export type QuickEnd = boolean;
 export type IndicateTypos = false | 'below' | 'replace';
 export type HideExtraLetters = boolean;
+export type SoundVolume = 0.1 | 0.5 | 1;
+export type Sound = 'beep' | 'click' | 'hitmarker' | 'nk-creams' | 'osu' | 'pop' | 'typewriter';
+export type SoundOnClick = false | Sound;
+export type SoundOnError = boolean;
 export type SmoothCaret = boolean;
 export type CaretStyle = false | 'default' | 'block' | 'outline' | 'underline';
 export type TimerProgressStyle = 'text' | 'bar' | 'both';
@@ -43,6 +47,9 @@ export interface Settings {
   quickEnd: QuickEnd;
   indicateTypos: IndicateTypos;
   hideExtraLetters: HideExtraLetters;
+  soundVolume: SoundVolume;
+  soundOnClick: SoundOnClick;
+  soundOnError: SoundOnError;
   smoothCaret: SmoothCaret;
   caretStyle: CaretStyle;
   timerProgressStyle: TimerProgressStyle;
@@ -86,8 +93,18 @@ const HIDE_SHOW_OPTIONS = [
   { alt: 'show', value: true },
 ];
 
-function create<T>(params: SettingParams<T>) {
-  return { ...params, id: toCamelCase(params.command) as keyof Settings };
+function create<T>({
+  options,
+  ...params
+}: Omit<SettingParams<T>, 'options'> & { options?: (SettingParams<T>['options'][number] | T)[] }) {
+  return {
+    id: toCamelCase(params.command) as keyof Settings,
+    options:
+      (options?.map((option) =>
+        typeof option !== 'object' ? { value: option } : option
+      ) as SettingParams<T>['options']) ?? [],
+    ...params,
+  } as const;
 }
 
 export const categories = [
@@ -104,16 +121,16 @@ export const categories = [
 export const settingsList = {
   mode: create<Mode>({
     command: 'mode',
-    options: [{ value: 'time' }, { value: 'words' }],
+    options: ['time', 'words'],
   }),
   time: create<Time>({
     command: 'time',
-    options: [{ value: 15 }, { value: 30 }, { value: 60 }, { value: 120 }],
+    options: [15, 30, 60, 120],
     custom: true,
   }),
   words: create<Words>({
     command: 'words',
-    options: [{ value: 10 }, { value: 25 }, { value: 50 }, { value: 100 }],
+    options: [10, 25, 50, 100],
     custom: true,
   }),
   quickRestart: create<QuickRestart>({
@@ -126,11 +143,7 @@ export const settingsList = {
         &quot;esc&quot; option will move opening the command line to the <Key>tab</Key> key.
       </>
     ),
-    options: [
-      { alt: 'off', value: false },
-      { alt: 'tab', value: 'tab' },
-      { alt: 'esc', value: 'esc' },
-    ],
+    options: [{ alt: 'off', value: false }, 'tab', 'esc'],
   }),
   language: create<Language>({
     command: 'language',
@@ -159,11 +172,7 @@ export const settingsList = {
         will replace the letters with the ones you typed.
       </>
     ),
-    options: [
-      { alt: 'off', value: false },
-      { alt: 'below', value: 'below' },
-      { alt: 'replace', value: 'replace' },
-    ],
+    options: [{ alt: 'off', value: false }, 'below', 'replace'],
   }),
   hideExtraLetters: create<HideExtraLetters>({
     command: 'hide extra letters',
@@ -174,6 +183,37 @@ export const settingsList = {
         but might feel a bit confusing when you press a key and nothing happens.
       </>
     ),
+    options: OFF_ON_OPTIONS,
+  }),
+  soundVolume: create<SoundVolume>({
+    command: 'sound volume',
+    category: 'sound',
+    description: <>Change the volume of the sound effects.</>,
+    options: [
+      { alt: 'quiet', value: 0.1 },
+      { alt: 'medium', value: 0.5 },
+      { alt: 'loud', value: 1 },
+    ],
+  }),
+  soundOnClick: create<SoundOnClick>({
+    command: 'sound on click',
+    category: 'sound',
+    description: <>Plays a short sound when you press a key.</>,
+    options: [
+      { alt: 'off', value: false },
+      'beep',
+      'click',
+      'hitmarker',
+      { alt: 'nk creams', value: 'nk-creams' },
+      'osu',
+      'pop',
+      'typewriter',
+    ],
+  }),
+  soundOnError: create<SoundOnError>({
+    command: 'sound on error',
+    category: 'sound',
+    description: <>Plays a short sound if you press an incorrect key or press space too early.</>,
     options: OFF_ON_OPTIONS,
   }),
   smoothCaret: create<SmoothCaret>({
@@ -198,13 +238,13 @@ export const settingsList = {
     command: 'timer/progress style',
     category: 'appearance',
     description: <>Change the style of the timer/progress-bar during a test.</>,
-    options: [{ value: 'text' }, { value: 'bar' }, { value: 'both' }],
+    options: ['text', 'bar', 'both'],
   }),
   statsColor: create<StatsColor>({
     command: 'stats color',
     category: 'appearance',
     description: <>Change the color of the timer/progress-bar, live wpm, and accuracy stats.</>,
-    options: [{ value: 'sub' }, { value: 'text' }, { value: 'main' }],
+    options: ['sub', 'text', 'main'],
   }),
   statsOpacity: create<StatsOpacity>({
     command: 'stats opacity',
@@ -233,14 +273,7 @@ export const settingsList = {
     command: 'font size',
     category: 'appearance',
     description: <>Change the font size of the test words.</>,
-    options: [
-      { value: 1 },
-      { value: 1.25 },
-      { value: 1.5 },
-      { value: 2 },
-      { value: 3 },
-      { value: 4 },
-    ],
+    options: [1, 1.25, 1.5, 2, 3, 4],
   }),
   fontFamily: create<FontFamily>({
     command: 'font family',
@@ -306,7 +339,7 @@ export const settingsList = {
         respectively.
       </>
     ),
-    options: [...OFF_ON_OPTIONS, { value: 'light' }, { value: 'dark' }],
+    options: [...OFF_ON_OPTIONS, 'light', 'dark'],
   }),
   theme: create<Theme>({
     command: 'theme',
@@ -371,6 +404,9 @@ export const defaultSettings: Settings = {
   quickEnd: true,
   indicateTypos: 'replace',
   hideExtraLetters: false,
+  soundVolume: 0.5,
+  soundOnClick: false,
+  soundOnError: true,
   smoothCaret: true,
   caretStyle: 'default',
   timerProgressStyle: 'both',

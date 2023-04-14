@@ -19,6 +19,9 @@ dependencies:
   colord:
     specifier: ^2.9.3
     version: 2.9.3
+  earwurm:
+    specifier: ^0.3.0
+    version: 0.3.0(emitten@0.4.3)
   framer-motion:
     specifier: ^10.11.2
     version: 10.11.2(react-dom@18.2.0)(react@18.2.0)
@@ -2025,6 +2028,15 @@ packages:
       is-obj: 2.0.0
     dev: true
 
+  /earwurm@0.3.0(emitten@0.4.3):
+    resolution: {integrity: sha512-iTn7soKF/tVWCueMA+IxJ1HAQ569rlaZ2LyW3RddUvC14ogQFuCa/iOuX+Egsg2N/6EbgTiBIae4gRZy4kkd5g==}
+    engines: {node: '>=18.0.0'}
+    peerDependencies:
+      emitten: ^0.4.3
+    dependencies:
+      emitten: 0.4.3
+    dev: false
+
   /eastasianwidth@0.2.0:
     resolution: {integrity: sha512-I88TYZWc9XiYHRQ4/3c5rjjfgkjhLyW2luGIheGERbNQ6OY7yTybanSpDXZa8y7VUP9YmDcYa+eyq4ca7iLqWA==}
     dev: true
@@ -2032,6 +2044,11 @@ packages:
   /electron-to-chromium@1.4.356:
     resolution: {integrity: sha512-nEftV1dRX3omlxAj42FwqRZT0i4xd2dIg39sog/CnCJeCcL1TRd2Uh0i9Oebgv8Ou0vzTPw++xc+Z20jzS2B6A==}
     dev: true
+
+  /emitten@0.4.3:
+    resolution: {integrity: sha512-H8LglEU3yZMiXjEGiISqvkTMg50H+BKcTgeGoBWVAdAmJuw2CrMI4et43Xu0K+vTZeNIs/25F8a3+AFWE6O15g==}
+    engines: {node: '>=18.0.0'}
+    dev: false
 
   /emoji-regex@8.0.0:
     resolution: {integrity: sha512-MSjYzcWNOA0ewAHpz0MxpYFvwg6yjy1NG3xteoqz644VCo/RPgnr1/GGt+ic3iJTzQ8Eu3TdM14SawnVUmGE6A==}

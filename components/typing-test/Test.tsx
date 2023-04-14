@@ -9,7 +9,7 @@ import { AnimatePresence } from 'framer-motion';
 import { useLanguage } from 'hooks/useLanguage';
 import { useEffect } from 'react';
 import { RiArrowRightLine, RiEarthFill, RiLockFill, RiRefreshLine } from 'react-icons/ri';
-import { Result, Stats, Words } from '.';
+import { Result, Sound, Stats, Words } from '.';
 
 export default function Test() {
   const {
@@ -53,6 +53,7 @@ export default function Test() {
 
   return (
     <TypingTestProvider>
+      <Sound />
       <Transition className='row-start-2 row-end-3' transition={{ duration: 0.075 }}>
         <AnimatePresence mode='wait'>
           {isTestFinished ? (
