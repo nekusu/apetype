@@ -36,6 +36,7 @@
     "@commitlint/cli": "^17.5.1",
     "@commitlint/config-conventional": "^17.4.4",
     "@release-it/conventional-changelog": "^5.1.1",
+    "@total-typescript/ts-reset": "^0.4.2",
     "@types/node": "^18.15.11",
     "@types/react": "^18.0.33",
     "@types/react-dom": "^18.0.11",
