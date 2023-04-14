@@ -2,17 +2,18 @@
 
 import { Button, Text, Transition } from 'components/core';
 import { ButtonProps } from 'components/core/Button';
-import { FontFamily, Setting, Theme } from 'components/settings';
+import { FontFamily, Setting, SoundOnClick, Theme } from 'components/settings';
 import { useGlobal } from 'context/globalContext';
 import { useSettings } from 'context/settingsContext';
 import { motion } from 'framer-motion';
 import { ReactNode, useEffect, useMemo, useRef, useState } from 'react';
 import { twJoin } from 'tailwind-merge';
 import { replaceSpaces } from 'utils/misc';
-import { categories } from 'utils/settings';
+import { Settings, categories } from 'utils/settings';
 
 type Category = (typeof categories)[number];
 
+const CUSTOM_SETTINGS: (keyof Settings)[] = ['soundOnClick', 'fontFamily', 'theme'];
 const COMMON_BUTTON_PROPS: Omit<ButtonProps, 'ref'> = { className: 'w-full', variant: 'filled' };
 
 export default function Page() {
@@ -29,7 +30,7 @@ export default function Page() {
   const settingsComponents = useMemo(() => {
     const components = settingsListValues.reduce(
       (components, { id, command, description, options }) => {
-        if (['fontFamily', 'theme'].includes(id)) return components;
+        if (CUSTOM_SETTINGS.includes(id)) return components;
         components[id as keyof typeof settingsList] = (
           <Setting key={id} title={command} description={description} options={options}>
             {options.length < 16 ? (
@@ -57,6 +58,7 @@ export default function Page() {
       },
       {} as Record<keyof typeof settingsList, JSX.Element>
     );
+    components.soundOnClick = <SoundOnClick key='soundOnClick' />;
     components.fontFamily = <FontFamily key='fontFamily' />;
     components.theme = <Theme key='theme' />;
     return components;
