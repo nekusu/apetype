@@ -32,11 +32,11 @@ export default function Test() {
   const { language } = useLanguage(languageName);
 
   useEffect(() => {
-    if (isTestFinished) setGlobalValues((draft) => void (draft.isUserTyping = false));
-  }, [isTestFinished, setGlobalValues]);
-  useEffect(() => {
     return () => setGlobalValues((draft) => void (draft.isTestFinished = false));
   }, [setGlobalValues]);
+  useDidUpdate(() => {
+    if (isTestFinished) setGlobalValues((draft) => void (draft.isUserTyping = false));
+  }, [isTestFinished]);
   useDidUpdate(() => {
     if (language) restartTest();
   }, [language, mode, time, words]);
@@ -52,7 +52,7 @@ export default function Test() {
   });
 
   return (
-    <TypingTestProvider language={language}>
+    <TypingTestProvider>
       <Transition className='row-start-2 row-end-3' transition={{ duration: 0.075 }}>
         <AnimatePresence mode='wait'>
           {isTestFinished ? (

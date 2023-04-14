@@ -5,11 +5,11 @@ import { useSettings } from 'context/settingsContext';
 import { useTypingTest } from 'context/typingTestContext';
 import { Fragment, useMemo } from 'react';
 import { Letter as LetterType, accuracy as acc, consistency as con } from 'utils/typingTest';
-import { Chart, Letter } from './';
+import { Chart, Letter } from '.';
 
 export default function Result() {
-  const { mode, time, words: wordAmount, showDecimalPlaces } = useSettings();
-  const { language, words, currentStats, stats, elapsedTime } = useTypingTest();
+  const { mode, time, words: wordAmount, language, showDecimalPlaces } = useSettings();
+  const { words, currentStats, stats, elapsedTime } = useTypingTest();
   const { raw, wpm, characters, errors } = currentStats;
   const accuracy = acc(characters, errors);
   const consistency = useMemo(() => con(stats.raw), [stats.raw]);
@@ -52,7 +52,7 @@ export default function Result() {
           title='test type'
           values={[
             `${mode} ${mode === 'time' ? time : mode === 'words' ? wordAmount : ''}`,
-            language?.name,
+            language,
           ]}
           valueDirection='vertical'
           valueSize='sm'
