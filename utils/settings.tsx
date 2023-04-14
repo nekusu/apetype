@@ -393,6 +393,18 @@ export const settingsList = {
     description: <>Displays a warning when caps lock is on.</>,
     options: HIDE_SHOW_OPTIONS,
   }),
+  resetSettings: create<string>({
+    command: 'reset settings',
+    category: 'danger zone',
+    description: (
+      <>
+        Resets settings to their default values.
+        <br />
+        <span className='text-error'>You can&apos;t undo this action!</span>
+      </>
+    ),
+    options: [],
+  }),
 };
 
 export const defaultSettings: Settings = {
