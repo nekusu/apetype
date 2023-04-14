@@ -2,18 +2,23 @@
 
 import { Button, Text, Transition } from 'components/core';
 import { ButtonProps } from 'components/core/Button';
-import { FontFamily, Setting, SoundOnClick, Theme } from 'components/settings';
+import { FontFamily, ResetSettings, Setting, SoundOnClick, Theme } from 'components/settings';
 import { useGlobal } from 'context/globalContext';
 import { useSettings } from 'context/settingsContext';
 import { motion } from 'framer-motion';
 import { ReactNode, useEffect, useMemo, useRef, useState } from 'react';
 import { twJoin } from 'tailwind-merge';
 import { replaceSpaces } from 'utils/misc';
-import { Settings, categories } from 'utils/settings';
+import { categories, settingsList } from 'utils/settings';
 
 type Category = (typeof categories)[number];
 
-const CUSTOM_SETTINGS: (keyof Settings)[] = ['soundOnClick', 'fontFamily', 'theme'];
+const CUSTOM_SETTINGS: (keyof typeof settingsList)[] = [
+  'soundOnClick',
+  'fontFamily',
+  'theme',
+  'resetSettings',
+];
 const COMMON_BUTTON_PROPS: Omit<ButtonProps, 'ref'> = { className: 'w-full', variant: 'filled' };
 
 export default function Page() {
@@ -61,6 +66,7 @@ export default function Page() {
     components.soundOnClick = <SoundOnClick key='soundOnClick' />;
     components.fontFamily = <FontFamily key='fontFamily' />;
     components.theme = <Theme key='theme' />;
+    components.resetSettings = <ResetSettings key='resetSettings' />;
     return components;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [settings]);
