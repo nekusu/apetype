@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useWindowEvent } from '@mantine/hooks';
+import { compress, decompress } from 'lz-ts';
 import { useRef } from 'react';
 import { State } from 'swr';
 import { useDidMount } from './useDidMount';
@@ -10,13 +11,13 @@ export function useCacheProvider() {
   useDidMount(() => {
     const appCache = localStorage.getItem('app-cache');
     if (appCache) {
-      const map = new Map(JSON.parse(appCache) as Iterable<[string, State<any, any>]>);
+      const map = new Map(JSON.parse(decompress(appCache)) as Iterable<[string, State<any, any>]>);
       map.forEach((value, key) => cache.current.set(key, value));
     }
   });
   useWindowEvent('beforeunload', () => {
     const appCache = JSON.stringify(Array.from(cache.current.entries()));
-    localStorage.setItem('app-cache', appCache);
+    localStorage.setItem('app-cache', compress(appCache));
   });
 
   return () => cache.current;
