@@ -2,7 +2,14 @@
 
 import { Button, Text, Transition } from 'components/core';
 import { ButtonProps } from 'components/core/Button';
-import { FontFamily, ResetSettings, Setting, SoundOnClick, Theme } from 'components/settings';
+import {
+  FontFamily,
+  PersistentCache,
+  ResetSettings,
+  Setting,
+  SoundOnClick,
+  Theme,
+} from 'components/settings';
 import { useGlobal } from 'context/globalContext';
 import { useSettings } from 'context/settingsContext';
 import { motion } from 'framer-motion';
@@ -18,6 +25,7 @@ const CUSTOM_SETTINGS: (keyof typeof settingsList)[] = [
   'fontFamily',
   'theme',
   'resetSettings',
+  'persistentCache',
 ];
 const COMMON_BUTTON_PROPS: Omit<ButtonProps, 'ref'> = { className: 'w-full', variant: 'filled' };
 
@@ -67,6 +75,7 @@ export default function Page() {
     components.fontFamily = <FontFamily key='fontFamily' />;
     components.theme = <Theme key='theme' />;
     components.resetSettings = <ResetSettings key='resetSettings' />;
+    components.persistentCache = <PersistentCache key='persistentCache' />;
     return components;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [settings]);
@@ -97,9 +106,9 @@ export default function Page() {
               key={category}
               className={twJoin([
                 'group relative -my-0.5 px-0 py-1.5 transition-all',
-                currentCategory === category
-                  ? 'ml-2.5 text-sub-alt hover:text-sub-alt focus:text-sub-alt'
-                  : 'focus:text-sub',
+                category === 'danger zone' && 'hover:text-error',
+                currentCategory === category &&
+                  'ml-2.5 text-bg hover:text-bg focus-visible:text-bg',
               ])}
               onClick={() =>
                 document
@@ -109,7 +118,10 @@ export default function Page() {
             >
               {currentCategory === category && (
                 <motion.div
-                  className='absolute -z-10 box-content h-full w-full bg-main px-2.5 transition-colors group-hover:bg-text'
+                  className={twJoin([
+                    'absolute -z-10 box-content h-full w-full px-2.5 transition-colors group-hover:bg-text group-focus-visible:bg-text',
+                    currentCategory === 'danger zone' ? 'bg-error' : 'bg-main',
+                  ])}
                   layoutId='navigation-box'
                   style={{ borderRadius: 8 }}
                   transition={{ duration: 0.15 }}
@@ -119,7 +131,7 @@ export default function Page() {
             </Button>
           ))}
         </nav>
-        <main className='flex max-h-full flex-col gap-9 overflow-auto' ref={listRef}>
+        <main className='flex max-h-full flex-col gap-9 overflow-auto pb-2' ref={listRef}>
           {categories.map((category) => (
             <section key={category} className='flex flex-col gap-5' id={replaceSpaces(category)}>
               <Text

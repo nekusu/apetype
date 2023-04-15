@@ -1,9 +1,7 @@
 'use client';
 
-import { useCacheProvider } from 'hooks/useCacheProvider';
 import { useThrottle } from 'hooks/useThrottle';
 import { ReactNode, createContext, useContext, useMemo } from 'react';
-import { SWRConfig } from 'swr';
 import { Updater, useImmer } from 'use-immer';
 import { settingsList } from 'utils/settings';
 import { ThemeInfo } from 'utils/theme';
@@ -54,7 +52,6 @@ export function GlobalProvider({ children, languages, themes }: GlobalProviderPr
     },
     commandLine: { open: false },
   });
-  const provider = useCacheProvider();
   const handler: GlobalContext['commandLine']['handler'] = useMemo(
     () => ({
       open: (initialSetting) =>
@@ -89,15 +86,7 @@ export function GlobalProvider({ children, languages, themes }: GlobalProviderPr
         commandLine: { ...globalValues.commandLine, handler },
       }}
     >
-      <SWRConfig
-        value={{
-          fetcher: (input: RequestInfo | URL, init?: RequestInit) =>
-            fetch(input, init).then((res) => res.json()),
-          provider,
-        }}
-      >
-        {children}
-      </SWRConfig>
+      {children}
     </GlobalContext.Provider>
   );
 }

@@ -1,9 +1,11 @@
 'use client';
 
 import { useIsomorphicEffect, useLocalStorage } from '@mantine/hooks';
+import { useCacheProvider } from 'hooks/useCacheProvider';
 import { useDidMount } from 'hooks/useDidMount';
 import produce, { freeze } from 'immer';
 import { ReactNode, createContext, useCallback, useContext, useEffect } from 'react';
+import { SWRConfig } from 'swr';
 import { DraftFunction, Updater } from 'use-immer';
 import { Settings, defaultSettings } from 'utils/settings';
 import { useGlobal } from './globalContext';
@@ -31,6 +33,7 @@ export function SettingsProvider({ children }: SettingsProviderProps) {
     },
     [_setSettings]
   );
+  const provider = useCacheProvider(settings.persistentCache);
 
   useDidMount(() => {
     _setSettings((currentSettings) => ({ ...defaultSettings, ...currentSettings }));
@@ -53,7 +56,15 @@ export function SettingsProvider({ children }: SettingsProviderProps) {
 
   return (
     <SettingsContext.Provider value={{ setSettings, ...settings }}>
-      {children}
+      <SWRConfig
+        value={{
+          fetcher: (input: RequestInfo | URL, init?: RequestInit) =>
+            fetch(input, init).then((res) => res.json()),
+          provider,
+        }}
+      >
+        {children}
+      </SWRConfig>
     </SettingsContext.Provider>
   );
 }
