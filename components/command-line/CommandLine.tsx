@@ -20,7 +20,10 @@ export default function CommandLine() {
   const { modalOpen, settingsList, commandLine, setGlobalValues } = useGlobal();
   const { open, initialSetting, handler } = commandLine;
   const settingsListValues = useMemo(
-    () => Object.values(settingsList).filter(({ hidden }) => !hidden),
+    () =>
+      Object.values(settingsList).filter(
+        ({ category, hidden }) => category !== 'danger zone' && !hidden
+      ),
     [settingsList]
   );
   const settings = useSettings();
