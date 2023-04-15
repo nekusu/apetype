@@ -30,14 +30,13 @@ export function SoundButton({ alt, value }: SoundButtonProps) {
       <span className='col-start-2'>{alt ?? value}</span>
       {value && (
         <span className='pr-1 opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100'>
-          {soundOnClick === value &&
-            (state === 'playing' ? (
-              <RiVolumeUpFill />
-            ) : state === 'loading' ? (
-              <RiLoaderLine className='animate-spin' />
-            ) : (
-              <RiPlayFill />
-            ))}
+          {state === 'playing' ? (
+            <RiVolumeUpFill />
+          ) : state === 'loading' ? (
+            <RiLoaderLine className='animate-spin' />
+          ) : (
+            <RiPlayFill />
+          )}
         </span>
       )}
     </Button>
