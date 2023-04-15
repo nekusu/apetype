@@ -37,6 +37,7 @@ export type TimerProgress = boolean;
 export type KeyTips = boolean;
 export type OutOfFocusWarning = boolean;
 export type CapsLockWarning = boolean;
+export type PersistentCache = boolean;
 
 export interface Settings {
   mode: Mode;
@@ -73,6 +74,7 @@ export interface Settings {
   keyTips: KeyTips;
   outOfFocusWarning: OutOfFocusWarning;
   capsLockWarning: CapsLockWarning;
+  persistentCache: PersistentCache;
 }
 
 export interface SettingParams<T> {
@@ -405,6 +407,18 @@ export const settingsList = {
     ),
     options: [],
   }),
+  persistentCache: create<PersistentCache>({
+    command: 'persistent cache',
+    category: 'danger zone',
+    description: (
+      <>
+        When enabled, certain data will be saved to the browser&apos;s local storage. This avoids
+        repeated requests to the server, improving load times and reducing bandwidth usage. Large
+        cache may slow down site&apos;s initial load.
+      </>
+    ),
+    options: OFF_ON_OPTIONS,
+  }),
 };
 
 export const defaultSettings: Settings = {
@@ -442,4 +456,5 @@ export const defaultSettings: Settings = {
   keyTips: true,
   outOfFocusWarning: true,
   capsLockWarning: true,
+  persistentCache: true,
 };

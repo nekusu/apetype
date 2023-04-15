@@ -1,5 +1,6 @@
 export { default as CustomTheme } from './CustomTheme';
 export { default as FontFamily } from './FontFamily';
+export { default as PersistentCache } from './PersistentCache';
 export { default as ResetSettings } from './ResetSettings';
 export { default as Setting } from './Setting';
 export { default as SoundOnClick } from './SoundOnClick';
