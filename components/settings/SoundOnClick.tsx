@@ -1,7 +1,6 @@
 'use client';
 
 import { Button } from 'components/core';
-import { useGlobal } from 'context/globalContext';
 import { useSettings } from 'context/settingsContext';
 import { useSound } from 'hooks/useSound';
 import { RiLoaderLine, RiPlayFill, RiVolumeUpFill } from 'react-icons/ri';
@@ -44,14 +43,14 @@ export function SoundButton({ alt, value }: SoundButtonProps) {
 }
 
 export default function SoundOnClick() {
-  const { settingsList } = useGlobal();
-  const { command, description, options } = settingsList.soundOnClick;
-
   return (
-    <Setting title={command} description={description} options={options} gridColumns={4}>
-      {options.map((option) => (
-        <SoundButton key={option.value.toString()} {...option} />
-      ))}
-    </Setting>
+    <Setting
+      id='soundOnClick'
+      customButtons={({ alt, value }) => (
+        <SoundButton key={value.toString()} alt={alt} value={value as SoundOnClick} />
+      )}
+      columns={4}
+      fullWidth
+    />
   );
 }

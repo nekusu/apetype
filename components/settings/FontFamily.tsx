@@ -1,3 +1,5 @@
+'use client';
+
 import { useDisclosure, useInputState } from '@mantine/hooks';
 import { Button, Input, Modal, Text } from 'components/core';
 import { ButtonProps } from 'components/core/Button';
@@ -10,7 +12,7 @@ const COMMON_BUTTON_PROPS: Omit<ButtonProps, 'ref'> = { className: 'w-full', var
 
 export default function FontFamily() {
   const { settingsList } = useGlobal();
-  const { command, description, options } = settingsList.fontFamily;
+  const { options } = settingsList.fontFamily;
   const { fontFamily, setSettings } = useSettings();
   const [modalOpen, modalHandler] = useDisclosure(false);
   const [customFont, setCustomFont] = useInputState('');
@@ -19,23 +21,10 @@ export default function FontFamily() {
   return (
     <>
       <Setting
-        key='fontFamily'
-        title={command}
-        description={description}
-        options={options}
-        gridColumns={4}
+        id='fontFamily'
+        buttonProps={({ value }) => ({ style: { fontFamily: `var(${value.toString()})` } })}
+        columns={4}
       >
-        {options.map(({ alt, value }) => (
-          <Button
-            key={value}
-            active={fontFamily === value}
-            onClick={() => setSettings((draft) => void (draft.fontFamily = value))}
-            style={{ fontFamily: `var(${value})` }}
-            {...COMMON_BUTTON_PROPS}
-          >
-            {alt}
-          </Button>
-        ))}
         <Button active={isCustomFont} onClick={modalHandler.open} {...COMMON_BUTTON_PROPS}>
           custom {isCustomFont && `(${fontFamily})`}
         </Button>

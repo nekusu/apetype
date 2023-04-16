@@ -2,20 +2,17 @@
 
 import { useDisclosure } from '@mantine/hooks';
 import { Button, Modal, Text } from 'components/core';
-import { useGlobal } from 'context/globalContext';
 import { useSettings } from 'context/settingsContext';
 import { defaultSettings } from 'utils/settings';
 import Setting from './Setting';
 
 export default function ResetSettings() {
-  const { settingsList } = useGlobal();
   const { setSettings } = useSettings();
-  const { command, description, options } = settingsList.resetSettings;
   const [modalOpen, modalHandler] = useDisclosure(false);
 
   return (
     <>
-      <Setting title={command} description={description} options={options}>
+      <Setting id='resetSettings'>
         <Button className='w-full' onClick={modalHandler.open} variant='danger'>
           reset settings
         </Button>

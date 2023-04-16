@@ -1,7 +1,6 @@
 'use client';
 
 import { Button } from 'components/core';
-import { useGlobal } from 'context/globalContext';
 import { useSettings } from 'context/settingsContext';
 import { useDidMount } from 'hooks/useDidMount';
 import { useState } from 'react';
@@ -11,9 +10,7 @@ import { STATIC_URL } from 'utils/monkeytype';
 import Setting from './Setting';
 
 export default function PersistentCache() {
-  const { settingsList } = useGlobal();
-  const { command, description, options } = settingsList.persistentCache;
-  const { persistentCache, setSettings } = useSettings();
+  const { persistentCache } = useSettings();
   const { mutate } = useSWRConfig();
   const [cacheSize, setCacheSize] = useState(0);
 
@@ -23,30 +20,19 @@ export default function PersistentCache() {
 
   return (
     <Setting
-      title={command}
-      description={
+      id='persistentCache'
+      columns={2}
+      customDescription={(description) => (
         <>
           {description}
           {(persistentCache || cacheSize > 0) && (
             <div className='text-main'>Cache size: {formatFileSize(cacheSize, true)}</div>
           )}
         </>
-      }
-      options={options}
+      )}
     >
-      {options.map(({ alt, value }) => (
-        <Button
-          key={value.toString()}
-          active={persistentCache === value}
-          className='w-full'
-          onClick={() => setSettings((draft) => void (draft.persistentCache = value))}
-          variant='filled'
-        >
-          {alt}
-        </Button>
-      ))}
       <Button
-        className='col-span-2 w-full'
+        className='col-span-full w-full'
         onClick={() => {
           void mutate((key) => typeof key === 'string' && key.includes(STATIC_URL), undefined);
           localStorage.removeItem('app-cache');

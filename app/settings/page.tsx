@@ -1,7 +1,6 @@
 'use client';
 
 import { Button, Text, Transition } from 'components/core';
-import { ButtonProps } from 'components/core/Button';
 import {
   FontFamily,
   PersistentCache,
@@ -11,81 +10,49 @@ import {
   Theme,
 } from 'components/settings';
 import { useGlobal } from 'context/globalContext';
-import { useSettings } from 'context/settingsContext';
 import { motion } from 'framer-motion';
 import { ReactNode, useEffect, useMemo, useRef, useState } from 'react';
 import { twJoin } from 'tailwind-merge';
 import { replaceSpaces } from 'utils/misc';
 import { categories, settingsList } from 'utils/settings';
 
+type SettingsList = typeof settingsList;
 type Category = (typeof categories)[number];
 
-const CUSTOM_SETTINGS: (keyof typeof settingsList)[] = [
-  'soundOnClick',
-  'fontFamily',
-  'theme',
-  'resetSettings',
-  'persistentCache',
-];
-const COMMON_BUTTON_PROPS: Omit<ButtonProps, 'ref'> = { className: 'w-full', variant: 'filled' };
+const customComponents: Partial<Record<keyof SettingsList, ReactNode>> = {
+  soundOnClick: <SoundOnClick key='soundOnClick' />,
+  fontFamily: <FontFamily key='fontFamily' />,
+  theme: <Theme key='theme' />,
+  resetSettings: <ResetSettings key='resetSettings' />,
+  persistentCache: <PersistentCache key='persistentCache' />,
+};
 
 export default function Page() {
-  const { settingsList, commandLine } = useGlobal();
-  const settingsListValues = useMemo(
-    () => Object.values(settingsList).filter(({ hidden }) => !hidden),
+  const { settingsList } = useGlobal();
+  const settingsListEntries = useMemo(
+    () =>
+      Object.entries(settingsList).filter(([, { hidden }]) => !hidden) as [
+        keyof SettingsList,
+        SettingsList[keyof SettingsList]
+      ][],
     [settingsList]
   );
-  const settings = useSettings();
-  const { setSettings } = settings;
+  const settingsComponents = useMemo(() => {
+    const components = settingsListEntries.reduce((components, [id]) => {
+      if (!customComponents[id]) components[id] = <Setting key={id} id={id} />;
+      return components;
+    }, {} as Record<keyof SettingsList, ReactNode>);
+    return { ...components, ...customComponents };
+  }, [settingsListEntries]);
   const [currentCategory, setCurrentCategory] = useState<Category>(categories[0]);
   const listRef = useRef<HTMLDivElement>(null);
-
-  const settingsComponents = useMemo(() => {
-    const components = settingsListValues.reduce(
-      (components, { id, command, description, options }) => {
-        if (CUSTOM_SETTINGS.includes(id)) return components;
-        components[id as keyof typeof settingsList] = (
-          <Setting key={id} title={command} description={description} options={options}>
-            {options.length < 16 ? (
-              options.map(({ alt, value }) => (
-                <Button
-                  key={alt ?? value.toString()}
-                  active={settings[id] === value}
-                  onClick={() => setSettings((draft) => void (draft[id] = value as never))}
-                  {...COMMON_BUTTON_PROPS}
-                >
-                  {alt ?? value}
-                </Button>
-              ))
-            ) : (
-              <Button
-                onClick={() => commandLine.handler?.open(id as keyof typeof settingsList)}
-                {...COMMON_BUTTON_PROPS}
-              >
-                {settings[id] as ReactNode}
-              </Button>
-            )}
-          </Setting>
-        );
-        return components;
-      },
-      {} as Record<keyof typeof settingsList, JSX.Element>
-    );
-    components.soundOnClick = <SoundOnClick key='soundOnClick' />;
-    components.fontFamily = <FontFamily key='fontFamily' />;
-    components.theme = <Theme key='theme' />;
-    components.resetSettings = <ResetSettings key='resetSettings' />;
-    components.persistentCache = <PersistentCache key='persistentCache' />;
-    return components;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [settings]);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
         for (const { isIntersecting, target } of entries) {
           if (isIntersecting) {
-            setCurrentCategory(target.id.replace(/_/g, ' ') as (typeof categories)[number]);
+            setCurrentCategory(target.id.replace(/_/g, ' ') as Category);
             break;
           }
         }
@@ -143,9 +110,9 @@ export default function Page() {
               >
                 <h2>{category}</h2>
               </Text>
-              {settingsListValues
-                .filter((setting) => setting.category === category)
-                .map(({ id }) => settingsComponents[id as keyof typeof settingsList])}
+              {settingsListEntries
+                .filter(([, setting]) => setting.category === category)
+                .map(([id]) => settingsComponents[id])}
             </section>
           ))}
         </main>
