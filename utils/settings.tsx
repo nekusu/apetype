@@ -3,97 +3,57 @@ import { ReactNode } from 'react';
 import { toCamelCase } from './misc';
 import { CustomTheme } from './theme';
 
-export type Mode = 'time' | 'words';
-export type Time = number;
-export type Words = number;
-export type QuickRestart = false | 'tab' | 'esc';
-export type Language = string;
-export type FreedomMode = boolean;
-export type QuickEnd = boolean;
-export type IndicateTypos = false | 'below' | 'replace';
-export type HideExtraLetters = boolean;
-export type SoundVolume = 0.1 | 0.5 | 1;
 export type Sound = 'beep' | 'click' | 'hitmarker' | 'nk-creams' | 'osu' | 'pop' | 'typewriter';
-export type SoundOnClick = false | Sound;
-export type SoundOnError = boolean;
-export type SmoothCaret = boolean;
-export type CaretStyle = false | 'default' | 'block' | 'outline' | 'underline';
-export type TimerProgressStyle = 'text' | 'bar' | 'both';
-export type StatsColor = 'sub' | 'text' | 'main';
-export type StatsOpacity = 0.25 | 0.5 | 0.75 | 1;
-export type SmoothLineScroll = boolean;
-export type ShowDecimalPlaces = boolean;
-export type FontSize = 1 | 1.25 | 1.5 | 2 | 3 | 4;
-export type FontFamily = string;
-export type PageWidth = '1000px' | '1250px' | '1500px' | '2000px' | '100%';
-export type Keymap = false | 'static' | 'react' | 'next';
-export type KeymapLayout = string;
-export type KeymapStyle = 'staggered' | 'matrix' | 'split' | 'split matrix';
-export type KeymapLegendStyle = 'dynamic' | 'lowercase' | 'uppercase' | 'blank';
-export type KeymapShowTopRow = boolean | 'layout dependent';
-export type FlipTestColors = boolean;
-export type ColorfulMode = boolean;
-export type RandomizeTheme = boolean | 'light' | 'dark';
-export type ThemeType = 'preset' | 'custom';
-export type Theme = string;
-export type CustomThemeId = string;
-export type LiveWpm = boolean;
-export type LiveAccuracy = boolean;
-export type TimerProgress = boolean;
-export type KeyTips = boolean;
-export type OutOfFocusWarning = boolean;
-export type CapsLockWarning = boolean;
-export type PersistentCache = boolean;
 
 export interface Settings {
-  mode: Mode;
-  time: Time;
-  words: Words;
-  quickRestart: QuickRestart;
-  language: Language;
-  freedomMode: FreedomMode;
-  quickEnd: QuickEnd;
-  indicateTypos: IndicateTypos;
-  hideExtraLetters: HideExtraLetters;
-  soundVolume: SoundVolume;
-  soundOnClick: SoundOnClick;
-  soundOnError: SoundOnError;
-  smoothCaret: SmoothCaret;
-  caretStyle: CaretStyle;
-  timerProgressStyle: TimerProgressStyle;
-  statsColor: StatsColor;
-  statsOpacity: StatsOpacity;
-  smoothLineScroll: SmoothLineScroll;
-  showDecimalPlaces: ShowDecimalPlaces;
-  fontSize: FontSize;
-  fontFamily: FontFamily;
-  pageWidth: PageWidth;
-  keymap: Keymap;
-  keymapLayout: KeymapLayout;
-  keymapStyle: KeymapStyle;
-  keymapLegendStyle: KeymapLegendStyle;
-  keymapShowTopRow: KeymapShowTopRow;
-  flipTestColors: FlipTestColors;
-  colorfulMode: ColorfulMode;
-  randomizeTheme: RandomizeTheme;
-  themeType: ThemeType;
-  theme: Theme;
+  mode: 'time' | 'words';
+  time: number;
+  words: number;
+  quickRestart: false | 'tab' | 'esc';
+  language: string;
+  freedomMode: boolean;
+  quickEnd: boolean;
+  indicateTypos: false | 'below' | 'replace';
+  hideExtraLetters: boolean;
+  soundVolume: 0.1 | 0.5 | 1;
+  soundOnClick: false | Sound;
+  soundOnError: boolean;
+  smoothCaret: boolean;
+  caretStyle: false | 'default' | 'block' | 'outline' | 'underline';
+  timerProgressStyle: 'text' | 'bar' | 'both';
+  statsColor: 'sub' | 'text' | 'main';
+  statsOpacity: 0.25 | 0.5 | 0.75 | 1;
+  smoothLineScroll: boolean;
+  showDecimalPlaces: boolean;
+  fontSize: 1 | 1.25 | 1.5 | 2 | 3 | 4;
+  fontFamily: string;
+  pageWidth: '1000px' | '1250px' | '1500px' | '2000px' | '100%';
+  keymap: false | 'static' | 'react' | 'next';
+  keymapLayout: string;
+  keymapStyle: 'staggered' | 'matrix' | 'split' | 'split matrix';
+  keymapLegendStyle: 'dynamic' | 'lowercase' | 'uppercase' | 'blank';
+  keymapShowTopRow: boolean | 'layout dependent';
+  flipTestColors: boolean;
+  colorfulMode: boolean;
+  randomizeTheme: boolean | 'light' | 'dark';
+  themeType: 'preset' | 'custom';
+  theme: string;
   customThemes: CustomTheme[];
-  customTheme: CustomThemeId;
-  liveWpm: LiveWpm;
-  liveAccuracy: LiveAccuracy;
-  timerProgress: TimerProgress;
-  keyTips: KeyTips;
-  outOfFocusWarning: OutOfFocusWarning;
-  capsLockWarning: CapsLockWarning;
-  persistentCache: PersistentCache;
+  customTheme: string;
+  liveWpm: boolean;
+  liveAccuracy: boolean;
+  timerProgress: boolean;
+  keyTips: boolean;
+  outOfFocusWarning: boolean;
+  capsLockWarning: boolean;
+  persistentCache: boolean;
 }
 
-export interface SettingParams<T> {
+export interface SettingParams<T extends keyof Settings> {
   command: string;
   category?: (typeof categories)[number];
   description?: ReactNode;
-  options: { alt?: string; value: T }[];
+  options: { alt?: string; value: Settings[T] }[];
   custom?: boolean;
   hidden?: boolean;
 }
@@ -107,10 +67,12 @@ const HIDE_SHOW_OPTIONS = [
   { alt: 'show', value: true },
 ];
 
-function create<T>({
+function create<T extends keyof Settings = 'mode'>({
   options,
   ...params
-}: Omit<SettingParams<T>, 'options'> & { options?: (SettingParams<T>['options'][number] | T)[] }) {
+}: Omit<SettingParams<T>, 'options'> & {
+  options?: (SettingParams<T>['options'][number] | Settings[T])[];
+}) {
   return {
     id: toCamelCase(params.command) as keyof Settings,
     options:
@@ -133,21 +95,21 @@ export const categories = [
 ] as const;
 
 export const settingsList = {
-  mode: create<Mode>({
+  mode: create<'mode'>({
     command: 'mode',
     options: ['time', 'words'],
   }),
-  time: create<Time>({
+  time: create<'time'>({
     command: 'time',
     options: [15, 30, 60, 120],
     custom: true,
   }),
-  words: create<Words>({
+  words: create<'words'>({
     command: 'words',
     options: [10, 25, 50, 100],
     custom: true,
   }),
-  quickRestart: create<QuickRestart>({
+  quickRestart: create<'quickRestart'>({
     command: 'quick restart',
     category: 'behavior',
     description: (
@@ -159,19 +121,19 @@ export const settingsList = {
     ),
     options: [{ alt: 'off', value: false }, 'tab', 'esc'],
   }),
-  language: create<Language>({
+  language: create<'language'>({
     command: 'language',
     category: 'behavior',
     description: <>Change in which language you want to type.</>,
     options: [],
   }),
-  freedomMode: create<FreedomMode>({
+  freedomMode: create<'freedomMode'>({
     command: 'freedom mode',
     category: 'input',
     description: <>Allows you to delete any word, even if it was typed correctly.</>,
     options: OFF_ON_OPTIONS,
   }),
-  quickEnd: create<QuickEnd>({
+  quickEnd: create<'quickEnd'>({
     command: 'quick end',
     category: 'input',
     description: (
@@ -183,7 +145,7 @@ export const settingsList = {
     ),
     options: OFF_ON_OPTIONS,
   }),
-  indicateTypos: create<IndicateTypos>({
+  indicateTypos: create<'indicateTypos'>({
     command: 'indicate typos',
     category: 'input',
     description: (
@@ -194,7 +156,7 @@ export const settingsList = {
     ),
     options: [{ alt: 'off', value: false }, 'below', 'replace'],
   }),
-  hideExtraLetters: create<HideExtraLetters>({
+  hideExtraLetters: create<'hideExtraLetters'>({
     command: 'hide extra letters',
     category: 'input',
     description: (
@@ -205,7 +167,7 @@ export const settingsList = {
     ),
     options: OFF_ON_OPTIONS,
   }),
-  soundVolume: create<SoundVolume>({
+  soundVolume: create<'soundVolume'>({
     command: 'sound volume',
     category: 'sound',
     description: <>Change the volume of the sound effects.</>,
@@ -215,7 +177,7 @@ export const settingsList = {
       { alt: 'loud', value: 1 },
     ],
   }),
-  soundOnClick: create<SoundOnClick>({
+  soundOnClick: create<'soundOnClick'>({
     command: 'sound on click',
     category: 'sound',
     description: <>Plays a short sound when you press a key.</>,
@@ -230,19 +192,19 @@ export const settingsList = {
       'typewriter',
     ],
   }),
-  soundOnError: create<SoundOnError>({
+  soundOnError: create<'soundOnError'>({
     command: 'sound on error',
     category: 'sound',
     description: <>Plays a short sound if you press an incorrect key or press space too early.</>,
     options: OFF_ON_OPTIONS,
   }),
-  smoothCaret: create<SmoothCaret>({
+  smoothCaret: create<'smoothCaret'>({
     command: 'smooth caret',
     category: 'caret',
     description: <>When enabled, the caret will move smoothly between letters and words.</>,
     options: OFF_ON_OPTIONS,
   }),
-  caretStyle: create<CaretStyle>({
+  caretStyle: create<'caretStyle'>({
     command: 'caret style',
     category: 'caret',
     description: <>Change the style of the caret during the test.</>,
@@ -254,19 +216,19 @@ export const settingsList = {
       { alt: '_', value: 'underline' },
     ],
   }),
-  timerProgressStyle: create<TimerProgressStyle>({
+  timerProgressStyle: create<'timerProgressStyle'>({
     command: 'timer/progress style',
     category: 'appearance',
     description: <>Change the style of the timer/progress-bar during a test.</>,
     options: ['text', 'bar', 'both'],
   }),
-  statsColor: create<StatsColor>({
+  statsColor: create<'statsColor'>({
     command: 'stats color',
     category: 'appearance',
     description: <>Change the color of the timer/progress-bar, live wpm, and accuracy stats.</>,
     options: ['sub', 'text', 'main'],
   }),
-  statsOpacity: create<StatsOpacity>({
+  statsOpacity: create<'statsOpacity'>({
     command: 'stats opacity',
     category: 'appearance',
     description: <>Change the opacity of the timer/progress-bar, live wpm, and accuracy stats.</>,
@@ -277,25 +239,25 @@ export const settingsList = {
       { alt: '100%', value: 1 },
     ],
   }),
-  smoothLineScroll: create<SmoothLineScroll>({
+  smoothLineScroll: create<'smoothLineScroll'>({
     command: 'smooth line scroll',
     category: 'appearance',
     description: <>When enabled, the line transition will be animated.</>,
     options: OFF_ON_OPTIONS,
   }),
-  showDecimalPlaces: create<ShowDecimalPlaces>({
+  showDecimalPlaces: create<'showDecimalPlaces'>({
     command: 'show decimal places',
     category: 'appearance',
     description: <>Always shows decimal places for values on the result page.</>,
     options: OFF_ON_OPTIONS,
   }),
-  fontSize: create<FontSize>({
+  fontSize: create<'fontSize'>({
     command: 'font size',
     category: 'appearance',
     description: <>Change the font size of the test words.</>,
     options: [1, 1.25, 1.5, 2, 3, 4],
   }),
-  fontFamily: create<FontFamily>({
+  fontFamily: create<'fontFamily'>({
     command: 'font family',
     category: 'appearance',
     options: [
@@ -315,7 +277,7 @@ export const settingsList = {
     ],
     custom: true,
   }),
-  pageWidth: create<PageWidth>({
+  pageWidth: create<'pageWidth'>({
     command: 'page width',
     category: 'appearance',
     description: <>Change the width of the content.</>,
@@ -327,33 +289,33 @@ export const settingsList = {
       { alt: 'max', value: '100%' },
     ],
   }),
-  keymap: create<Keymap>({
+  keymap: create<'keymap'>({
     command: 'keymap',
     category: 'appearance',
     description: <>Controls which layout is displayed on the keymap.</>,
     options: [{ alt: 'off', value: false }, 'static', 'react', 'next'],
   }),
-  keymapLayout: create<KeymapLayout>({
+  keymapLayout: create<'keymapLayout'>({
     command: 'keymap layout',
     category: 'appearance',
     options: [],
   }),
-  keymapStyle: create<KeymapStyle>({
+  keymapStyle: create<'keymapStyle'>({
     command: 'keymap style',
     category: 'appearance',
     options: ['staggered', 'matrix', 'split', 'split matrix'],
   }),
-  keymapLegendStyle: create<KeymapLegendStyle>({
+  keymapLegendStyle: create<'keymapLegendStyle'>({
     command: 'keymap legend style',
     category: 'appearance',
     options: ['dynamic', 'lowercase', 'uppercase', 'blank'],
   }),
-  keymapShowTopRow: create<KeymapShowTopRow>({
+  keymapShowTopRow: create<'keymapShowTopRow'>({
     command: 'keymap show top row',
     category: 'appearance',
     options: [{ alt: 'always', value: true }, 'layout dependent', { alt: 'never', value: false }],
   }),
-  flipTestColors: create<FlipTestColors>({
+  flipTestColors: create<'flipTestColors'>({
     command: 'flip test colors',
     category: 'theme',
     description: (
@@ -364,7 +326,7 @@ export const settingsList = {
     ),
     options: OFF_ON_OPTIONS,
   }),
-  colorfulMode: create<ColorfulMode>({
+  colorfulMode: create<'colorfulMode'>({
     command: 'colorful mode',
     category: 'theme',
     description: (
@@ -375,7 +337,7 @@ export const settingsList = {
     ),
     options: OFF_ON_OPTIONS,
   }),
-  randomizeTheme: create<RandomizeTheme>({
+  randomizeTheme: create<'randomizeTheme'>({
     command: 'randomize theme',
     category: 'theme',
     description: (
@@ -387,42 +349,42 @@ export const settingsList = {
     ),
     options: [...OFF_ON_OPTIONS, 'light', 'dark'],
   }),
-  theme: create<Theme>({
+  theme: create<'theme'>({
     command: 'theme',
     category: 'theme',
     options: [],
   }),
-  customTheme: create<CustomThemeId>({
+  customTheme: create<'customTheme'>({
     command: 'custom theme',
     category: 'theme',
     options: [],
     hidden: true,
   }),
-  liveWpm: create<LiveWpm>({
+  liveWpm: create<'liveWpm'>({
     command: 'live wpm',
     category: 'hide elements',
     description: <>Displays a live WPM speed during the test. Updates once every second.</>,
     options: HIDE_SHOW_OPTIONS,
   }),
-  liveAccuracy: create<LiveAccuracy>({
+  liveAccuracy: create<'liveAccuracy'>({
     command: 'live accuracy',
     category: 'hide elements',
     description: <>Displays live accuracy during the test.</>,
     options: HIDE_SHOW_OPTIONS,
   }),
-  timerProgress: create<TimerProgress>({
+  timerProgress: create<'timerProgress'>({
     command: 'timer/progress',
     category: 'hide elements',
     description: <>Displays a live timer for timed tests and progress for words/custom tests.</>,
     options: HIDE_SHOW_OPTIONS,
   }),
-  keyTips: create<KeyTips>({
+  keyTips: create<'keyTips'>({
     command: 'key tips',
     category: 'hide elements',
     description: <>Shows keybind tips throughout the website.</>,
     options: HIDE_SHOW_OPTIONS,
   }),
-  outOfFocusWarning: create<OutOfFocusWarning>({
+  outOfFocusWarning: create<'outOfFocusWarning'>({
     command: 'out of focus warning',
     category: 'hide elements',
     description: (
@@ -433,19 +395,19 @@ export const settingsList = {
     ),
     options: HIDE_SHOW_OPTIONS,
   }),
-  capsLockWarning: create<CapsLockWarning>({
+  capsLockWarning: create<'capsLockWarning'>({
     command: 'caps lock warning',
     category: 'hide elements',
     description: <>Displays a warning when caps lock is on.</>,
     options: HIDE_SHOW_OPTIONS,
   }),
-  importExportSettings: create<string>({
+  importExportSettings: create({
     command: 'import/export settings',
     category: 'danger zone',
     description: <>Import or export settings as JSON.</>,
     options: [],
   }),
-  resetSettings: create<string>({
+  resetSettings: create({
     command: 'reset settings',
     category: 'danger zone',
     description: (
@@ -457,7 +419,7 @@ export const settingsList = {
     ),
     options: [],
   }),
-  persistentCache: create<PersistentCache>({
+  persistentCache: create<'persistentCache'>({
     command: 'persistent cache',
     category: 'danger zone',
     description: (

@@ -2,7 +2,7 @@ import { useDidUpdate } from '@mantine/hooks';
 import { Earwurm, ManagerConfig, StackState } from 'earwurm';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { getRandomNumber } from 'utils/misc';
-import { Sound, SoundOnClick } from 'utils/settings';
+import { Sound } from 'utils/settings';
 
 const SOUNDS: Record<Sound, number> = {
   beep: 3,
@@ -23,7 +23,7 @@ const soundStacks = Object.entries(SOUNDS).reduce((stacks, [sound, count]) => {
   return stacks;
 }, {} as Record<Sound, { id: string; path: string }[]>);
 
-export function useSound(sound?: SoundOnClick | `${string}.webm`, config: ManagerConfig = {}) {
+export function useSound(sound?: false | Sound | `${string}.webm`, config: ManagerConfig = {}) {
   const manager = useRef<Earwurm>();
   const [state, setState] = useState<StackState>();
 

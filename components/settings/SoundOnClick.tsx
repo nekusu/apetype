@@ -4,12 +4,12 @@ import { Button } from 'components/core';
 import { useSettings } from 'context/settingsContext';
 import { useSound } from 'hooks/useSound';
 import { RiLoaderLine, RiPlayFill, RiVolumeUpFill } from 'react-icons/ri';
-import { SoundOnClick } from 'utils/settings';
+import { Settings } from 'utils/settings';
 import Setting from './Setting';
 
 export interface SoundButtonProps {
   alt?: string;
-  value: SoundOnClick;
+  value: Settings['soundOnClick'];
 }
 
 export function SoundButton({ alt, value }: SoundButtonProps) {
@@ -47,7 +47,7 @@ export default function SoundOnClick() {
     <Setting
       id='soundOnClick'
       customButtons={({ alt, value }) => (
-        <SoundButton key={value.toString()} alt={alt} value={value as SoundOnClick} />
+        <SoundButton key={value.toString()} alt={alt} value={value as Settings['soundOnClick']} />
       )}
       columns={4}
       fullWidth

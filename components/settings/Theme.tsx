@@ -7,12 +7,11 @@ import { useGlobal } from 'context/globalContext';
 import { useSettings } from 'context/settingsContext';
 import { useTheme } from 'context/themeContext';
 import { useMemo } from 'react';
-import { ThemeType } from 'utils/settings';
-import CustomTheme from './CustomTheme';
-import ThemeButton from './ThemeButton';
+import { Settings } from 'utils/settings';
+import { CustomTheme, ThemeButton } from '.';
 
 extend([a11yPlugin]);
-const THEME_TYPES: ThemeType[] = ['preset', 'custom'];
+const THEME_TYPES: Settings['themeType'][] = ['preset', 'custom'];
 
 export default function Theme() {
   const { settingsList } = useGlobal();

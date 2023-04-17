@@ -16,11 +16,11 @@ import {
 } from 'react';
 import { twJoin, twMerge } from 'tailwind-merge';
 import { replaceSpaces } from 'utils/misc';
-import type { Keymap } from 'utils/settings';
+import { Settings } from 'utils/settings';
 
 interface KeyProps extends ComponentPropsWithoutRef<'div'> {
   bump?: boolean;
-  keymap?: Keymap;
+  keymap?: Settings['keymap'];
   order?: number;
   status: boolean | 'error';
 }
