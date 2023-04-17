@@ -5,7 +5,7 @@ import { getRandomWords, parseWords } from 'utils/typingTest';
 import { useLanguage } from './useLanguage';
 
 export function useWords() {
-  const { mode, language: languageName, quickEnd } = useSettings();
+  const { mode, language: languageName, freedomMode, quickEnd } = useSettings();
   const { setValues } = useTypingTest();
   const { language } = useLanguage(languageName);
 
@@ -79,11 +79,10 @@ export function useWords() {
         // the next word will be selected
         if (!input) {
           draft.inputValue = ' ';
+          const previousWord = words[wordIndex - 1];
 
-          if (wordIndex > 0) {
-            // Get the previous word and reset the status of any letters that were not typed
-            const previousWord = words[wordIndex - 1];
-
+          if (wordIndex > 0 && (!previousWord.isCorrect || freedomMode)) {
+            // Reset the status of any letters that were not typed
             previousWord.letters.forEach((letter) => {
               if (!letter.typed) {
                 letter.status = undefined;
@@ -115,7 +114,7 @@ export function useWords() {
         }
       });
     },
-    [mode, quickEnd, setValues]
+    [freedomMode, mode, quickEnd, setValues]
   );
 
   return useMemo(() => ({ add, update }), [add, update]);

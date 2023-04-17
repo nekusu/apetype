@@ -8,6 +8,7 @@ export type Time = number;
 export type Words = number;
 export type QuickRestart = false | 'tab' | 'esc';
 export type Language = string;
+export type FreedomMode = boolean;
 export type QuickEnd = boolean;
 export type IndicateTypos = false | 'below' | 'replace';
 export type HideExtraLetters = boolean;
@@ -50,6 +51,7 @@ export interface Settings {
   words: Words;
   quickRestart: QuickRestart;
   language: Language;
+  freedomMode: FreedomMode;
   quickEnd: QuickEnd;
   indicateTypos: IndicateTypos;
   hideExtraLetters: HideExtraLetters;
@@ -162,6 +164,12 @@ export const settingsList = {
     category: 'behavior',
     description: <>Change in which language you want to type.</>,
     options: [],
+  }),
+  freedomMode: create<FreedomMode>({
+    command: 'freedom mode',
+    category: 'input',
+    description: <>Allows you to delete any word, even if it was typed correctly.</>,
+    options: OFF_ON_OPTIONS,
   }),
   quickEnd: create<QuickEnd>({
     command: 'quick end',
@@ -469,6 +477,7 @@ export const defaultSettings: Settings = {
   words: 50,
   quickRestart: 'tab',
   language: 'english',
+  freedomMode: false,
   quickEnd: true,
   indicateTypos: 'replace',
   hideExtraLetters: false,
@@ -507,12 +516,16 @@ export const defaultSettings: Settings = {
 };
 
 export function validateSettings(settings: Settings) {
-  const expectedProperties = {
+  const expectedProperties: Record<
+    keyof Settings,
+    ('boolean' | 'number' | 'string' | 'object') | (boolean | number | string)[]
+  > = {
     mode: ['time', 'words'],
     time: 'number',
     words: 'number',
     quickRestart: [false, 'tab', 'esc'],
     language: 'string',
+    freedomMode: 'boolean',
     quickEnd: 'boolean',
     indicateTypos: [false, 'below', 'replace'],
     hideExtraLetters: 'boolean',
@@ -548,7 +561,7 @@ export function validateSettings(settings: Settings) {
     outOfFocusWarning: 'boolean',
     capsLockWarning: 'boolean',
     persistentCache: 'boolean',
-  } as const;
+  };
   const missing: (keyof Settings)[] = [];
   const invalid: (keyof Settings)[] = [];
   const unknown: (keyof Settings)[] = [];
