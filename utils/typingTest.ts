@@ -3,6 +3,18 @@ export interface Language {
   words: string[];
 }
 
+export interface KeymapLayout {
+  keymapShowTopRow: boolean;
+  type: 'ansi' | 'iso';
+  keys: {
+    row1: string[];
+    row2: string[];
+    row3: string[];
+    row4: string[];
+    row5: string[];
+  };
+}
+
 export interface Letter {
   original?: string;
   typed?: string;

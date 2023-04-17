@@ -25,6 +25,11 @@ export type ShowDecimalPlaces = boolean;
 export type FontSize = 1 | 1.25 | 1.5 | 2 | 3 | 4;
 export type FontFamily = string;
 export type PageWidth = '1000px' | '1250px' | '1500px' | '2000px' | '100%';
+export type Keymap = false | 'static' | 'react' | 'next';
+export type KeymapLayout = string;
+export type KeymapStyle = 'staggered' | 'matrix' | 'split' | 'split matrix';
+export type KeymapLegendStyle = 'dynamic' | 'lowercase' | 'uppercase' | 'blank';
+export type KeymapShowTopRow = boolean | 'layout dependent';
 export type FlipTestColors = boolean;
 export type ColorfulMode = boolean;
 export type RandomizeTheme = boolean | 'light' | 'dark';
@@ -61,6 +66,11 @@ export interface Settings {
   fontSize: FontSize;
   fontFamily: FontFamily;
   pageWidth: PageWidth;
+  keymap: Keymap;
+  keymapLayout: KeymapLayout;
+  keymapStyle: KeymapStyle;
+  keymapLegendStyle: KeymapLegendStyle;
+  keymapShowTopRow: KeymapShowTopRow;
   flipTestColors: FlipTestColors;
   colorfulMode: ColorfulMode;
   randomizeTheme: RandomizeTheme;
@@ -309,6 +319,32 @@ export const settingsList = {
       { alt: 'max', value: '100%' },
     ],
   }),
+  keymap: create<Keymap>({
+    command: 'keymap',
+    category: 'appearance',
+    description: <>Controls which layout is displayed on the keymap.</>,
+    options: [{ alt: 'off', value: false }, 'static', 'react', 'next'],
+  }),
+  keymapLayout: create<KeymapLayout>({
+    command: 'keymap layout',
+    category: 'appearance',
+    options: [],
+  }),
+  keymapStyle: create<KeymapStyle>({
+    command: 'keymap style',
+    category: 'appearance',
+    options: ['staggered', 'matrix', 'split', 'split matrix'],
+  }),
+  keymapLegendStyle: create<KeymapLegendStyle>({
+    command: 'keymap legend style',
+    category: 'appearance',
+    options: ['dynamic', 'lowercase', 'uppercase', 'blank'],
+  }),
+  keymapShowTopRow: create<KeymapShowTopRow>({
+    command: 'keymap show top row',
+    category: 'appearance',
+    options: [{ alt: 'always', value: true }, 'layout dependent', { alt: 'never', value: false }],
+  }),
   flipTestColors: create<FlipTestColors>({
     command: 'flip test colors',
     category: 'theme',
@@ -443,6 +479,11 @@ export const defaultSettings: Settings = {
   fontSize: 1.5,
   fontFamily: '--font-lexend-deca',
   pageWidth: '1250px',
+  keymap: false,
+  keymapLayout: 'qwerty',
+  keymapStyle: 'staggered',
+  keymapLegendStyle: 'dynamic',
+  keymapShowTopRow: 'layout dependent',
   flipTestColors: false,
   colorfulMode: true,
   randomizeTheme: false,

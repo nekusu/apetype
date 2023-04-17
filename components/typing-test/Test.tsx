@@ -9,7 +9,7 @@ import { AnimatePresence } from 'framer-motion';
 import { useLanguage } from 'hooks/useLanguage';
 import { useEffect } from 'react';
 import { RiArrowRightLine, RiEarthFill, RiLockFill, RiRefreshLine } from 'react-icons/ri';
-import { Result, Sound, Stats, Words } from '.';
+import { Keymap, Result, Sound, Stats, Words } from '.';
 
 export default function Test() {
   const {
@@ -27,6 +27,7 @@ export default function Test() {
     words,
     quickRestart,
     language: languageName,
+    keymap,
     capsLockWarning,
   } = useSettings();
   const { language } = useLanguage(languageName);
@@ -99,6 +100,7 @@ export default function Test() {
                 </Button>
               )}
               <Words />
+              {keymap && <Keymap />}
               {!quickRestart && (
                 <Tooltip label='Restart test' offset={8}>
                   <Button

@@ -5,6 +5,7 @@ import { ReactNode, createContext, useContext, useMemo } from 'react';
 import { Updater, useImmer } from 'use-immer';
 import { settingsList } from 'utils/settings';
 import { ThemeInfo } from 'utils/theme';
+import { KeymapLayout } from 'utils/typingTest';
 
 export interface GlobalValues {
   testId?: string;
@@ -12,6 +13,7 @@ export interface GlobalValues {
   isUserTyping: boolean;
   isTestFinished: boolean;
   modalOpen: boolean;
+  keymapLayouts: Record<string, KeymapLayout>;
   settingsList: typeof settingsList;
   commandLine: {
     open: boolean;
@@ -30,23 +32,29 @@ export interface GlobalContext extends GlobalValues {
 
 interface GlobalProviderProps {
   children: ReactNode;
+  layouts: Record<string, KeymapLayout>;
   languages: string[];
   themes: ThemeInfo[];
 }
 
 export const GlobalContext = createContext<GlobalContext | null>(null);
 
-export function GlobalProvider({ children, languages, themes }: GlobalProviderProps) {
+export function GlobalProvider({ children, languages, layouts, themes }: GlobalProviderProps) {
   const [globalValues, setGlobalValues] = useImmer<GlobalValues>({
     capsLock: false,
     isUserTyping: false,
     isTestFinished: false,
     modalOpen: false,
+    keymapLayouts: layouts,
     settingsList: {
       ...settingsList,
       language: {
         ...settingsList.language,
         options: languages.map((language) => ({ value: language })),
+      },
+      keymapLayout: {
+        ...settingsList.keymapLayout,
+        options: Object.keys(layouts).map((layout) => ({ value: layout.replaceAll('_', ' ') })),
       },
       theme: { ...settingsList.theme, options: themes.map(({ name }) => ({ value: name })) },
     },

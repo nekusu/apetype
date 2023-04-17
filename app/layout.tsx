@@ -21,6 +21,7 @@ import {
 import { twJoin } from 'tailwind-merge';
 import { STATIC_URL } from 'utils/monkeytype';
 import { ThemeInfo } from 'utils/theme';
+import { KeymapLayout } from 'utils/typingTest';
 import './globals.css';
 
 const firaCode = Fira_Code({ variable: '--font-fira-code', subsets: ['latin'] });
@@ -71,6 +72,11 @@ async function getLanguages() {
   const languages = (await res.json()) as string[];
   return languages.map((name) => name.replaceAll('_', ' '));
 }
+async function getLayouts() {
+  const res = await fetch(`${STATIC_URL}/layouts/_list.json`);
+  const layouts = (await res.json()) as Record<string, KeymapLayout>;
+  return layouts;
+}
 async function getThemes() {
   const res = await fetch(`${STATIC_URL}/themes/_list.json`);
   const themes = (await res.json()) as ThemeInfo[];
@@ -81,13 +87,14 @@ async function getThemes() {
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const languages = await getLanguages();
+  const layouts = await getLayouts();
   const themes = await getThemes();
 
   return (
     <html lang='en' className={twJoin(fonts.map((font) => font.variable))}>
       <head />
       <body className='flex justify-center overflow-y-hidden bg-bg font transition-colors selection:bg-main selection:text-sub-alt'>
-        <GlobalProvider languages={languages} themes={themes}>
+        <GlobalProvider languages={languages} layouts={layouts} themes={themes}>
           <SettingsProvider>
             <ThemeProvider previewDelay={250} themes={themes}>
               <MainLayout>{children}</MainLayout>
