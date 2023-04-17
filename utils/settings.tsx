@@ -431,6 +431,12 @@ export const settingsList = {
     description: <>Displays a warning when caps lock is on.</>,
     options: HIDE_SHOW_OPTIONS,
   }),
+  importExportSettings: create<string>({
+    command: 'import/export settings',
+    category: 'danger zone',
+    description: <>Import or export settings as JSON.</>,
+    options: [],
+  }),
   resetSettings: create<string>({
     command: 'reset settings',
     category: 'danger zone',
