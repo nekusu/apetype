@@ -431,6 +431,12 @@ export const settingsList = {
     description: <>Displays a warning when caps lock is on.</>,
     options: HIDE_SHOW_OPTIONS,
   }),
+  importExportSettings: create<string>({
+    command: 'import/export settings',
+    category: 'danger zone',
+    description: <>Import or export settings as JSON.</>,
+    options: [],
+  }),
   resetSettings: create<string>({
     command: 'reset settings',
     category: 'danger zone',
@@ -499,3 +505,79 @@ export const defaultSettings: Settings = {
   capsLockWarning: true,
   persistentCache: true,
 };
+
+export function validateSettings(settings: Settings) {
+  const expectedProperties = {
+    mode: ['time', 'words'],
+    time: 'number',
+    words: 'number',
+    quickRestart: [false, 'tab', 'esc'],
+    language: 'string',
+    quickEnd: 'boolean',
+    indicateTypos: [false, 'below', 'replace'],
+    hideExtraLetters: 'boolean',
+    soundVolume: [0.1, 0.5, 1],
+    soundOnClick: [false, 'beep', 'click', 'hitmarker', 'nk-creams', 'osu', 'pop', 'typewriter'],
+    soundOnError: 'boolean',
+    smoothCaret: 'boolean',
+    caretStyle: [false, 'default', 'block', 'outline', 'underline'],
+    timerProgressStyle: ['text', 'bar', 'both'],
+    statsColor: ['sub', 'text', 'main'],
+    statsOpacity: [0.25, 0.5, 0.75, 1],
+    smoothLineScroll: 'boolean',
+    showDecimalPlaces: 'boolean',
+    fontSize: [1, 1.25, 1.5, 2, 3, 4],
+    fontFamily: 'string',
+    pageWidth: ['1000px', '1250px', '1500px', '2000px', '100%'],
+    keymap: [false, 'static', 'react', 'next'],
+    keymapLayout: 'string',
+    keymapStyle: ['staggered', 'matrix', 'split', 'split matrix'],
+    keymapLegendStyle: ['dynamic', 'lowercase', 'uppercase', 'blank'],
+    keymapShowTopRow: [true, 'layout dependent', false],
+    flipTestColors: 'boolean',
+    colorfulMode: 'boolean',
+    randomizeTheme: [false, true, 'light', 'dark'],
+    themeType: ['preset', 'custom'],
+    theme: 'string',
+    customThemes: 'object',
+    customTheme: 'string',
+    liveWpm: 'boolean',
+    liveAccuracy: 'boolean',
+    timerProgress: 'boolean',
+    keyTips: 'boolean',
+    outOfFocusWarning: 'boolean',
+    capsLockWarning: 'boolean',
+    persistentCache: 'boolean',
+  } as const;
+  const missing: (keyof Settings)[] = [];
+  const invalid: (keyof Settings)[] = [];
+  const unknown: (keyof Settings)[] = [];
+  const newSettings: Settings = { ...settings };
+
+  for (const property in expectedProperties) {
+    const key = property as keyof Settings;
+    const expectedValue = expectedProperties[key];
+    const actualValue = settings[key];
+
+    if (
+      (Array.isArray(expectedValue) && !expectedValue.some((val) => val === actualValue)) ||
+      (typeof expectedValue === 'string' && typeof actualValue !== expectedValue)
+    ) {
+      if (actualValue === undefined) missing.push(key);
+      else invalid.push(key);
+      newSettings[key] = defaultSettings[key] as never;
+    }
+  }
+  for (const property in newSettings) {
+    const key = property as keyof Settings;
+    if (!expectedProperties[key]) {
+      unknown.push(key);
+      delete newSettings[key];
+    }
+  }
+
+  return [newSettings, { missing, invalid, unknown }] as [
+    Settings,
+    { missing: typeof missing; invalid: typeof invalid; unknown: typeof unknown }
+  ];
+}

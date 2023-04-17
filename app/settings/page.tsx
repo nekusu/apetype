@@ -3,6 +3,7 @@
 import { Button, Text, Transition } from 'components/core';
 import {
   FontFamily,
+  ImportExportSettings,
   PersistentCache,
   ResetSettings,
   Setting,
@@ -23,6 +24,7 @@ const customComponents: Partial<Record<keyof SettingsList, ReactNode>> = {
   soundOnClick: <SoundOnClick key='soundOnClick' />,
   fontFamily: <FontFamily key='fontFamily' />,
   theme: <Theme key='theme' />,
+  importExportSettings: <ImportExportSettings key='importExportSettings' />,
   resetSettings: <ResetSettings key='resetSettings' />,
   persistentCache: <PersistentCache key='persistentCache' />,
 };
