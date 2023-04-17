@@ -1,14 +1,23 @@
 'use client';
 
 import { useDidUpdate, useWindowEvent } from '@mantine/hooks';
-import { Button, Tooltip, Transition } from 'components/core';
+import { Button, Text, Tooltip, Transition } from 'components/core';
 import { useGlobal } from 'context/globalContext';
 import { useSettings } from 'context/settingsContext';
+import { useTheme } from 'context/themeContext';
 import { TypingTestProvider } from 'context/typingTestContext';
+import dayjs from 'dayjs';
 import { AnimatePresence } from 'framer-motion';
 import { useLanguage } from 'hooks/useLanguage';
-import { useEffect } from 'react';
-import { RiArrowRightLine, RiEarthFill, RiLockFill, RiRefreshLine } from 'react-icons/ri';
+import { toPng } from 'html-to-image';
+import { useEffect, useRef, useState } from 'react';
+import {
+  RiArrowRightLine,
+  RiEarthFill,
+  RiImageFill,
+  RiLockFill,
+  RiRefreshLine,
+} from 'react-icons/ri';
 import { Keymap, Result, Sound, Stats, Words } from '.';
 
 export default function Test() {
@@ -30,7 +39,29 @@ export default function Test() {
     keymap,
     capsLockWarning,
   } = useSettings();
+  const { colors } = useTheme();
   const { language } = useLanguage(languageName);
+  const [showResultDate, setShowResultDate] = useState(false);
+  const resultRef = useRef<HTMLDivElement>(null);
+
+  const saveScreenshot = () => {
+    setShowResultDate(true);
+    setTimeout(() => {
+      if (!resultRef.current) return;
+      void toPng(resultRef.current, {
+        backgroundColor: colors.custom?.bg ?? colors.preset?.bg,
+        height: resultRef.current.clientHeight + 80,
+        width: resultRef.current.clientWidth + 80,
+        style: { padding: '40px' },
+      }).then((dataUrl) => {
+        const link = document.createElement('a');
+        link.href = dataUrl;
+        link.download = 'typing-test.png';
+        link.click();
+        setShowResultDate(false);
+      });
+    }, 0);
+  };
 
   useEffect(() => {
     return () => setGlobalValues((draft) => void (draft.isTestFinished = false));
@@ -63,11 +94,28 @@ export default function Test() {
               className='flex flex-col gap-8'
               transition={{ duration: 0.075 }}
             >
-              <Result />
+              <div ref={resultRef} className='flex flex-col gap-8'>
+                <Result />
+                {showResultDate && (
+                  <div className='flex items-end justify-between gap-2'>
+                    <Text className='font-[family-name:var(--font-lexend-deca)] text-3xl' dimmed>
+                      apetype
+                    </Text>
+                    <Text className='text-2xl' dimmed>
+                      {dayjs().format('DD MMM YYYY HH:mm')}
+                    </Text>
+                  </div>
+                )}
+              </div>
               <div className='flex w-full justify-center gap-4'>
                 <Tooltip label='Next test' offset={8}>
                   <Button className='px-8 py-4 text-xl' variant='subtle' onClick={restartTest}>
                     <RiArrowRightLine />
+                  </Button>
+                </Tooltip>
+                <Tooltip label='Save screenshot' offset={8}>
+                  <Button className='px-8 py-4 text-xl' variant='subtle' onClick={saveScreenshot}>
+                    <RiImageFill />
                   </Button>
                 </Tooltip>
               </div>

@@ -19,12 +19,18 @@ dependencies:
   colord:
     specifier: ^2.9.3
     version: 2.9.3
+  dayjs:
+    specifier: ^1.11.7
+    version: 1.11.7
   earwurm:
     specifier: ^0.3.0
     version: 0.3.0(emitten@0.4.3)
   framer-motion:
     specifier: ^10.11.2
     version: 10.11.2(react-dom@18.2.0)(react@18.2.0)
+  html-to-image:
+    specifier: ^1.11.11
+    version: 1.11.11
   immer:
     specifier: ^9.0.21
     version: 9.0.21
@@ -1851,6 +1857,10 @@ packages:
     resolution: {integrity: sha512-jyCETtSl3VMZMWeRo7iY1FL19ges1t55hMo5yaam4Jrsm5EPL89UQkoQRyiI+Yf4k8r2ZpdngkV8hr1lIdjb3Q==}
     dev: true
 
+  /dayjs@1.11.7:
+    resolution: {integrity: sha512-+Yw9U6YO5TQohxLcIkrXBeY73WP3ejHWVvx8XCk3gxvQDCTEmS48ZrSZCKciI7Bhl/uCMyxYtE9UqRILmFphkQ==}
+    dev: false
+
   /debug@2.6.9:
     resolution: {integrity: sha512-bC7ElrdJaJnPbAP+1EotYvqZsb3ecl5wi6Bfi6BJTUcNowp6cvspg0jXznRTKDjm/E7AdgFBVeAPVMNcKGsHMA==}
     peerDependencies:
@@ -3018,6 +3028,10 @@ packages:
     dependencies:
       lru-cache: 6.0.0
     dev: true
+
+  /html-to-image@1.11.11:
+    resolution: {integrity: sha512-9gux8QhvjRO/erSnDPv28noDZcPZmYE7e1vFsBLKLlRlKDSqNJYebj6Qz1TGd5lsRV+X+xYyjCKjuZdABinWjA==}
+    dev: false
 
   /http-cache-semantics@4.1.1:
     resolution: {integrity: sha512-er295DKPVsV82j5kw1Gjt+ADA/XYHsajl82cGNQG2eyoPkvgUhX+nDIyelzhIWbbsXP39EHcI6l5tYs2FYqYXQ==}
