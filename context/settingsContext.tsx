@@ -7,7 +7,7 @@ import produce, { freeze } from 'immer';
 import { ReactNode, createContext, useCallback, useContext, useEffect } from 'react';
 import { SWRConfig } from 'swr';
 import { DraftFunction, Updater } from 'use-immer';
-import { Settings, defaultSettings } from 'utils/settings';
+import { Settings, defaultSettings, validateSettings } from 'utils/settings';
 import { useGlobal } from './globalContext';
 
 export interface SettingsContext extends Settings {
@@ -36,7 +36,7 @@ export function SettingsProvider({ children }: SettingsProviderProps) {
   const provider = useCacheProvider(settings.persistentCache);
 
   useDidMount(() => {
-    _setSettings((currentSettings) => ({ ...defaultSettings, ...currentSettings }));
+    _setSettings((settings) => validateSettings(settings)[0]);
   });
   useEffect(() => {
     setGlobalValues(
