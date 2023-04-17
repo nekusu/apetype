@@ -28,7 +28,7 @@ function getVariantStyles(variant: NonNullable<ButtonProps['variant']>) {
     case 'subtle':
       return twMerge([
         className,
-        'focus-visible:bg-text focus-visible:text-bg active:scale-[.925]',
+        'focus-visible:bg-text focus-visible:text-bg active:bg-text active:text-bg active:scale-[.925]',
       ]);
     case 'text':
       return twMerge([className, 'focus-visible:text-text active:translate-y-0.5']);
