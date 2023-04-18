@@ -100,13 +100,13 @@ export default function Page() {
             </Button>
           ))}
         </nav>
-        <main className='flex max-h-full flex-col gap-9 overflow-auto pb-2' ref={listRef}>
+        <main className='flex max-h-full flex-col gap-10 overflow-auto pb-2' ref={listRef}>
           {categories.map((category) => (
-            <section key={category} className='flex flex-col gap-5' id={replaceSpaces(category)}>
+            <section key={category} className='flex flex-col gap-6' id={replaceSpaces(category)}>
               <Text
                 asChild
                 className={twJoin([
-                  'pt-1 text-[28px] leading-none',
+                  '-mb-1 pt-1 text-[28px] leading-none',
                   category === 'danger zone' ? 'text-error' : 'text-main',
                 ])}
               >

@@ -36,27 +36,21 @@ export default function Setting({
   const settings = useSettings();
   const { setSettings } = settings;
   const childrenCount = options.length < 16 ? Children.count(children) + options.length : 1;
+  const twoColumns = (fullWidth == null && !!description) || childrenCount === 1;
 
   return (
-    <div className='grid auto-rows-auto grid-cols-[2fr_1.2fr] gap-x-5 gap-y-1.5'>
-      <Text asChild className={twJoin(['text-lg', !!description && 'col-span-full'])}>
+    <div className={twJoin(['grid gap-x-5 gap-y-1.5', twoColumns && 'grid-cols-[2fr_1.2fr]'])}>
+      <Text asChild className='text-lg'>
         <h3>{command}</h3>
       </Text>
       {description && (
-        <Text className='text-sm' dimmed>
+        <Text className={twJoin(['text-sm', twoColumns && 'row-start-2'])} dimmed>
           {description}
         </Text>
       )}
       <div
-        className={twJoin([
-          'grid h-fit gap-2 self-center',
-          childrenCount === 1
-            ? 'col-start-2'
-            : (fullWidth != null ? fullWidth : !description) && 'col-span-2',
-        ])}
-        style={{
-          gridTemplateColumns: `repeat(${columns ? columns : childrenCount}, 1fr)`,
-        }}
+        className={twJoin(['grid gap-2 self-center', twoColumns && !!description && 'row-span-2'])}
+        style={{ gridTemplateColumns: `repeat(${columns ? columns : childrenCount}, 1fr)` }}
       >
         {options.length < 16 ? (
           options.map(({ alt, value }) => {
