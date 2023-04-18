@@ -5,7 +5,7 @@ import { getRandomWords, parseWords } from 'utils/typingTest';
 import { useLanguage } from './useLanguage';
 
 export function useWords() {
-  const { mode, language: languageName, freedomMode, quickEnd } = useSettings();
+  const { mode, language: languageName, freedomMode, strictSpace, quickEnd } = useSettings();
   const { setValues } = useTypingTest();
   const { language } = useLanguage(languageName);
 
@@ -26,7 +26,8 @@ export function useWords() {
     (input: string) => {
       setValues((draft) => {
         const { words, currentStats, wordIndex } = draft;
-        const trimmedInput = input.trim();
+        let trimmedInput = input.replace(/^\s/, '');
+        if (!strictSpace || input.length > 2) trimmedInput = trimmedInput.replace(/\s$/, '');
         const inputLetters = trimmedInput.split('');
         const word = words[wordIndex];
         const { letters } = word;
@@ -90,14 +91,13 @@ export function useWords() {
             });
             // Set the new input value to the typed value of the previous word and
             // decrement the word index
-            draft.inputValue = previousWord.typed ?? '';
+            draft.inputValue = ` ${previousWord.typed ?? ''}`;
             draft.wordIndex--;
           }
         } else if (input.length > 1 && input.endsWith(' ')) {
           // First check if the input string has more than one character and ends with a space,
           // this resets the input string in case there are two spaces between words
-          draft.inputValue = ' ';
-
+          if (!strictSpace) draft.inputValue = ' ';
           if (input.length > 2) {
             // If the input string has more than two characters (leading and trailing space, 1+ letters),
             // set the status of any missed letters in the current word and increment the word index
@@ -110,11 +110,12 @@ export function useWords() {
             if (letters.at(-1)?.status === 'missed') currentStats.errors++;
             if (nextWord) currentStats.characters++;
             draft.wordIndex++;
+            draft.inputValue = ' ';
           }
         }
       });
     },
-    [freedomMode, mode, quickEnd, setValues]
+    [freedomMode, mode, quickEnd, setValues, strictSpace]
   );
 
   return useMemo(() => ({ add, update }), [add, update]);

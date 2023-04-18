@@ -12,6 +12,7 @@ export interface Settings {
   quickRestart: false | 'tab' | 'esc';
   language: string;
   freedomMode: boolean;
+  strictSpace: boolean;
   quickEnd: boolean;
   indicateTypos: false | 'below' | 'replace';
   hideExtraLetters: boolean;
@@ -131,6 +132,17 @@ export const settingsList = {
     command: 'freedom mode',
     category: 'input',
     description: <>Allows you to delete any word, even if it was typed correctly.</>,
+    options: OFF_ON_OPTIONS,
+  }),
+  strictSpace: create<'strictSpace'>({
+    command: 'strict space',
+    category: 'input',
+    description: (
+      <>
+        Pressing space at the beginning of a word will insert a space character when this mode is
+        enabled.
+      </>
+    ),
     options: OFF_ON_OPTIONS,
   }),
   quickEnd: create<'quickEnd'>({
@@ -440,6 +452,7 @@ export const defaultSettings: Settings = {
   quickRestart: 'tab',
   language: 'english',
   freedomMode: false,
+  strictSpace: false,
   quickEnd: true,
   indicateTypos: 'replace',
   hideExtraLetters: false,
@@ -488,6 +501,7 @@ export function validateSettings(settings: Settings) {
     quickRestart: [false, 'tab', 'esc'],
     language: 'string',
     freedomMode: 'boolean',
+    strictSpace: 'boolean',
     quickEnd: 'boolean',
     indicateTypos: [false, 'below', 'replace'],
     hideExtraLetters: 'boolean',

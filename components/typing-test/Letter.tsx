@@ -35,7 +35,7 @@ const Letter = forwardRef<HTMLSpanElement, LetterProps>(function Letter(
       ])}
       ref={ref}
     >
-      {indicateTypos === 'replace' ? typed ?? original : original}
+      {indicateTypos === 'replace' && typed && typed !== ' ' ? typed : original}
       {indicateTypos === 'below' && status === 'incorrect' && (
         <span className='absolute left-0 top-[1.35em] flex w-full justify-center text-[.75em] text-text opacity-50'>
           {typed}
