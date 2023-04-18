@@ -1,5 +1,6 @@
 export interface Language {
   name: string;
+  noLazyMode?: boolean;
   words: string[];
 }
 

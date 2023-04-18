@@ -5,7 +5,14 @@ import { getRandomWords, parseWords } from 'utils/typingTest';
 import { useLanguage } from './useLanguage';
 
 export function useWords() {
-  const { mode, language: languageName, freedomMode, strictSpace, quickEnd } = useSettings();
+  const {
+    mode,
+    language: languageName,
+    freedomMode,
+    strictSpace,
+    quickEnd,
+    lazyMode,
+  } = useSettings();
   const { setValues } = useTypingTest();
   const { language } = useLanguage(languageName);
 
@@ -14,12 +21,17 @@ export function useWords() {
       if (language) {
         setValues(({ words }) => {
           const lastWord = words.at(-1)?.original;
-          const newWords = parseWords(getRandomWords(count, language, lastWord));
+          const randomWords = getRandomWords(count, language, lastWord);
+          const newWords = parseWords(
+            lazyMode && !language?.noLazyMode
+              ? randomWords.map((word) => word.normalize('NFD').replace(/[\u0300-\u036f]/g, ''))
+              : randomWords
+          );
           words.push(...newWords);
         });
       }
     },
-    [language, setValues]
+    [language, lazyMode, setValues]
   );
 
   const update = useCallback(

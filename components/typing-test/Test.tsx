@@ -17,6 +17,7 @@ import {
   RiImageFill,
   RiLockFill,
   RiRefreshLine,
+  RiZzzLine,
 } from 'react-icons/ri';
 import { Keymap, Result, Sound, Stats, Words } from '.';
 
@@ -36,6 +37,7 @@ export default function Test() {
     words,
     quickRestart,
     language: languageName,
+    lazyMode,
     keymap,
     capsLockWarning,
   } = useSettings();
@@ -71,7 +73,7 @@ export default function Test() {
   }, [isTestFinished]);
   useDidUpdate(() => {
     if (language) restartTest();
-  }, [language, mode, time, words]);
+  }, [language, lazyMode, mode, time, words]);
   useDidUpdate(() => {
     if (isUserTyping) document.body.requestPointerLock();
     else document.exitPointerLock();
@@ -128,11 +130,17 @@ export default function Test() {
               <Stats />
               <AnimatePresence>
                 {!isUserTyping && (
-                  <Transition className='absolute top-0 flex w-full justify-center gap-4'>
+                  <Transition className='absolute top-0 flex w-full justify-center gap-5'>
                     <Button className='p-0' onClick={() => commandLine.handler?.open('language')}>
                       <RiEarthFill />
                       {languageName}
                     </Button>
+                    {lazyMode && !language?.noLazyMode && (
+                      <Button className='p-0' onClick={() => commandLine.handler?.open('lazyMode')}>
+                        <RiZzzLine />
+                        lazy
+                      </Button>
+                    )}
                   </Transition>
                 )}
               </AnimatePresence>

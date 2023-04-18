@@ -16,6 +16,7 @@ export interface Settings {
   quickEnd: boolean;
   indicateTypos: false | 'below' | 'replace';
   hideExtraLetters: boolean;
+  lazyMode: boolean;
   soundVolume: 0.1 | 0.5 | 1;
   soundOnClick: false | Sound;
   soundOnError: boolean;
@@ -176,6 +177,14 @@ export const settingsList = {
         Hides extra letters. This will completely avoid words jumping lines (due to changing width),
         but might feel a bit confusing when you press a key and nothing happens.
       </>
+    ),
+    options: OFF_ON_OPTIONS,
+  }),
+  lazyMode: create<'lazyMode'>({
+    command: 'lazy mode',
+    category: 'input',
+    description: (
+      <>Replaces accents / diacritics / special characters with their normal letter equivalents.</>
     ),
     options: OFF_ON_OPTIONS,
   }),
@@ -456,6 +465,7 @@ export const defaultSettings: Settings = {
   quickEnd: true,
   indicateTypos: 'replace',
   hideExtraLetters: false,
+  lazyMode: false,
   soundVolume: 0.5,
   soundOnClick: false,
   soundOnError: true,
@@ -505,6 +515,7 @@ export function validateSettings(settings: Settings) {
     quickEnd: 'boolean',
     indicateTypos: [false, 'below', 'replace'],
     hideExtraLetters: 'boolean',
+    lazyMode: 'boolean',
     soundVolume: [0.1, 0.5, 1],
     soundOnClick: [false, 'beep', 'click', 'hitmarker', 'nk-creams', 'osu', 'pop', 'typewriter'],
     soundOnError: 'boolean',

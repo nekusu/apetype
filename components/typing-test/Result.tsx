@@ -3,14 +3,23 @@
 import { Group, Tooltip } from 'components/core';
 import { useSettings } from 'context/settingsContext';
 import { useTypingTest } from 'context/typingTestContext';
+import { useLanguage } from 'hooks/useLanguage';
 import { Fragment, useMemo } from 'react';
 import { Letter as LetterType, accuracy as acc, consistency as con } from 'utils/typingTest';
 import { Chart, Letter } from '.';
 
 export default function Result() {
-  const { mode, time, words: wordAmount, language, showDecimalPlaces } = useSettings();
+  const {
+    mode,
+    time,
+    words: wordAmount,
+    language: languageName,
+    lazyMode,
+    showDecimalPlaces,
+  } = useSettings();
   const { words, currentStats, stats, elapsedTime } = useTypingTest();
   const { raw, wpm, characters, errors } = currentStats;
+  const { language } = useLanguage(languageName);
   const accuracy = acc(characters, errors);
   const consistency = useMemo(() => con(stats.raw), [stats.raw]);
   const characterStats = useMemo(() => {
@@ -51,8 +60,11 @@ export default function Result() {
         <Group
           title='test type'
           values={[
-            `${mode} ${mode === 'time' ? time : mode === 'words' ? wordAmount : ''}`,
-            language,
+            <>
+              {mode} {mode === 'time' ? time : mode === 'words' ? wordAmount : ''}
+            </>,
+            languageName,
+            lazyMode && !language?.noLazyMode && 'lazy',
           ]}
           valueDirection='vertical'
           valueSize='sm'
