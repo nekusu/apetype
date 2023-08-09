@@ -16,7 +16,7 @@ import {
 } from 'react-icons/ri';
 import { twJoin, twMerge } from 'tailwind-merge';
 import { formatFileSize } from 'utils/misc';
-import { Settings, validateSettings } from 'utils/settings';
+import { Settings } from 'utils/settings';
 import Setting from './Setting';
 
 interface WarningProps {
@@ -51,10 +51,10 @@ function Warning({ children, icon: Icon, keys, type }: WarningProps) {
 
 function ImportSettingsModal({ className, ...props }: ModalProps) {
   const { open, onClose } = props;
-  const { setSettings } = useSettings();
+  const { setSettings, validate } = useSettings();
   const [file, setFile] = useState<File | undefined>();
   const [[settings, { missing, invalid, unknown }], setValidation] = useState<
-    [Settings | undefined, Partial<ReturnType<typeof validateSettings>[1]>]
+    [Settings | undefined, Partial<ReturnType<typeof validate>[1]>]
   >([undefined, {}]);
   const [error, setError] = useState('');
   const formRef = useRef<HTMLFormElement>(null);
@@ -74,7 +74,7 @@ function ImportSettingsModal({ className, ...props }: ModalProps) {
     }
     void file.text().then((text) => {
       const settings = JSON.parse(text) as Settings;
-      setValidation(validateSettings(settings));
+      setValidation(validate(settings));
     });
   };
 
