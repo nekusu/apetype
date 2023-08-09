@@ -132,7 +132,7 @@ export default function Keymap() {
         {Object.values(layout.keys).map((row, rowIndex) => (
           <div
             key={rowIndex}
-            className={twJoin([
+            className={twMerge([
               'flex',
               rowIndex === 4 ? 'justify-center gap-10' : 'gap-1',
               !rowIndex && hideTopRow && 'hidden',
