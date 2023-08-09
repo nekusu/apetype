@@ -1,27 +1,26 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@unocss all;
 
-@layer base {
-  input[type='number']::-webkit-outer-spin-button,
-  input[type='number']::-webkit-inner-spin-button,
-  input[type='number'] {
-    -webkit-appearance: none;
-    margin: 0;
-    -moz-appearance: textfield !important;
-    appearance: none;
-  }
+input[type='number']::-webkit-outer-spin-button,
+input[type='number']::-webkit-inner-spin-button,
+input[type='number'] {
+  -webkit-appearance: none;
+  -moz-appearance: textfield !important;
+  appearance: none;
+  @apply m-0;
+}
 
-  ::-webkit-scrollbar {
-    width: 8px;
-  }
-  ::-webkit-scrollbar-thumb {
-    background: theme('colors.main');
-    border-radius: theme('borderRadius.md');
-  }
-  ::-webkit-scrollbar-thumb:hover {
-    background: theme('colors.text');
-  }
+::-webkit-scrollbar {
+  @apply w-2;
+}
+::-webkit-scrollbar-thumb {
+  @apply bg-main rounded-md;
+}
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-text;
+}
+
+::selection {
+  @apply bg-main text-sub-alt;
 }
 
 :root {
