@@ -68,8 +68,8 @@ export default function Page() {
 
   return (
     <Transition className='relative cursor-default'>
-      <div className='absolute inset-0 flex h-full gap-x-5'>
-        <nav className='relative flex flex-shrink-0 flex-col gap-3 overflow-y-auto overflow-x-hidden py-1 pr-2.5'>
+      <div className='absolute inset-0 h-full flex gap-x-5'>
+        <nav className='relative flex flex-shrink-0 flex-col gap-3 overflow-x-hidden overflow-y-auto py-1 pr-2.5'>
           {categories.map((category) => (
             <Button
               key={category}
@@ -100,7 +100,7 @@ export default function Page() {
             </Button>
           ))}
         </nav>
-        <main className='flex max-h-full flex-col gap-10 overflow-auto pb-2' ref={listRef}>
+        <main className='max-h-full flex flex-col gap-10 overflow-auto pb-2' ref={listRef}>
           {categories.map((category) => (
             <section key={category} className='flex flex-col gap-6' id={replaceSpaces(category)}>
               <Text

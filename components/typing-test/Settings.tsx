@@ -83,7 +83,7 @@ export default function Settings() {
         </Button>
       )}
       <Modal
-        className='w-full max-w-sm cursor-default'
+        className='max-w-sm w-full cursor-default'
         open={modalOpen}
         onClose={modalHandler.close}
         centered

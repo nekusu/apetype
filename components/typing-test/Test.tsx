@@ -100,7 +100,7 @@ export default function Test() {
                 <Result />
                 {showResultDate && (
                   <div className='flex items-end justify-between gap-2'>
-                    <Text className='font-[family-name:var(--font-lexend-deca)] text-3xl' dimmed>
+                    <Text className='text-3xl font-[var(--font-lexend-deca)]' dimmed>
                       apetype
                     </Text>
                     <Text className='text-2xl' dimmed>
@@ -109,7 +109,7 @@ export default function Test() {
                   </div>
                 )}
               </div>
-              <div className='flex w-full justify-center gap-4'>
+              <div className='w-full flex justify-center gap-4'>
                 <Tooltip label='Next test' offset={8}>
                   <Button className='px-8 py-4 text-xl' variant='subtle' onClick={restartTest}>
                     <RiArrowRightLine />
@@ -124,13 +124,13 @@ export default function Test() {
             </Transition>
           ) : (
             <Transition
-              className='relative flex w-full select-none flex-col items-stretch justify-center gap-3'
+              className='relative w-full flex flex-col select-none items-stretch justify-center gap-3'
               transition={{ duration: 0.075 }}
             >
               <Stats />
               <AnimatePresence>
                 {!isUserTyping && (
-                  <Transition className='absolute top-0 flex w-full justify-center gap-5'>
+                  <Transition className='absolute top-0 w-full flex justify-center gap-5'>
                     <Button className='p-0' onClick={() => commandLine.handler?.open('language')}>
                       <RiEarthFill />
                       {languageName}
@@ -147,7 +147,7 @@ export default function Test() {
               {capsLockWarning && capsLock && (
                 <Button
                   active
-                  className='absolute inset-x-0 -top-16 mx-auto px-3.5 py-3'
+                  className='absolute inset-x-0 mx-auto px-3.5 py-3 -top-16'
                   variant='filled'
                   onClick={() => commandLine.handler?.open('capsLockWarning')}
                 >

@@ -91,7 +91,7 @@ export default function Words() {
       onClick={focusWords}
     >
       <input
-        className='absolute -z-10 opacity-0'
+        className='absolute opacity-0 -z-10'
         onBlur={blurWords}
         onChange={handleInput}
         onFocus={(e) => {

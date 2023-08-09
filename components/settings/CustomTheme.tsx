@@ -65,7 +65,7 @@ interface ReadabilityModalProps {
 function ReadabilityModal({ open, onClose }: ReadabilityModalProps) {
   return (
     <Modal centered open={open} onClose={onClose}>
-      <div className='flex max-w-sm flex-col gap-3.5 text-sm'>
+      <div className='max-w-sm flex flex-col gap-3.5 text-sm'>
         <Text asChild className='text-2xl'>
           <h3>Readability</h3>
         </Text>
@@ -182,7 +182,7 @@ export default function CustomTheme({ className, ...props }: HTMLMotionProps<'di
           <div className='relative'>
             <div className='absolute inset-0 flex flex-col gap-4'>
               <CreateThemeButton className='w-full' />
-              <div className='flex h-full flex-col gap-2 overflow-y-auto pt-0.5'>
+              <div className='h-full flex flex-col gap-2 overflow-y-auto pt-0.5'>
                 <AnimatePresence>
                   {customThemes.map(({ id, name, colors }) => (
                     <Transition key={id} layoutId={id}>

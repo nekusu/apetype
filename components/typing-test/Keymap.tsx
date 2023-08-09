@@ -128,7 +128,7 @@ export default function Keymap() {
 
   return (
     <div className='flex justify-center'>
-      <div className='mt-1 flex select-none flex-col justify-center gap-1'>
+      <div className='mt-1 flex flex-col select-none justify-center gap-1'>
         {Object.values(layout.keys).map((row, rowIndex) => (
           <div
             key={rowIndex}
