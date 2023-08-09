@@ -49,17 +49,14 @@
     "@typescript-eslint/parser": "^5.57.1",
     "@unocss/eslint-config": "^0.55.0",
     "@unocss/postcss": "^0.55.0",
-    "autoprefixer": "^10.4.14",
     "eslint": "^8.38.0",
     "eslint-config-next": "^13.3.0",
     "eslint-config-prettier": "^8.8.0",
     "genversion": "^3.1.1",
     "husky": "^8.0.3",
-    "postcss": "^8.4.21",
     "prettier": "^2.8.7",
     "prettier-plugin-tailwindcss": "^0.2.7",
     "release-it": "^15.10.1",
-    "tailwindcss": "^3.3.1",
     "typescript": "^5.0.4",
     "unocss": "^0.55.0"
   }
