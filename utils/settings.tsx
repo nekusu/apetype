@@ -1,5 +1,6 @@
 import { Key } from 'components/core';
 import { ReactNode } from 'react';
+import { ZodIssue, z } from 'zod';
 import { toCamelCase } from './misc';
 import { CustomTheme } from './theme';
 
@@ -127,7 +128,6 @@ export const settingsList = {
     command: 'language',
     category: 'behavior',
     description: <>Change in which language you want to type.</>,
-    options: [],
   }),
   freedomMode: create<'freedomMode'>({
     command: 'freedom mode',
@@ -319,7 +319,6 @@ export const settingsList = {
   keymapLayout: create<'keymapLayout'>({
     command: 'keymap layout',
     category: 'appearance',
-    options: [],
   }),
   keymapStyle: create<'keymapStyle'>({
     command: 'keymap style',
@@ -373,12 +372,10 @@ export const settingsList = {
   theme: create<'theme'>({
     command: 'theme',
     category: 'theme',
-    options: [],
   }),
   customTheme: create<'customTheme'>({
     command: 'custom theme',
     category: 'theme',
-    options: [],
     hidden: true,
   }),
   liveWpm: create<'liveWpm'>({
@@ -426,7 +423,6 @@ export const settingsList = {
     command: 'import/export settings',
     category: 'danger zone',
     description: <>Import or export settings as JSON.</>,
-    options: [],
   }),
   resetSettings: create({
     command: 'reset settings',
@@ -438,7 +434,6 @@ export const settingsList = {
         <span className='text-error'>You can&apos;t undo this action!</span>
       </>
     ),
-    options: [],
   }),
   persistentCache: create<'persistentCache'>({
     command: 'persistent cache',
@@ -500,80 +495,117 @@ export const defaultSettings: Settings = {
   persistentCache: true,
 };
 
-export function validateSettings(settings: Settings) {
-  const expectedProperties: Record<
-    keyof Settings,
-    ('boolean' | 'number' | 'string' | 'object') | (boolean | number | string)[]
-  > = {
-    mode: ['time', 'words'],
-    time: 'number',
-    words: 'number',
-    quickRestart: [false, 'tab', 'esc'],
-    language: 'string',
-    freedomMode: 'boolean',
-    strictSpace: 'boolean',
-    quickEnd: 'boolean',
-    indicateTypos: [false, 'below', 'replace'],
-    hideExtraLetters: 'boolean',
-    lazyMode: 'boolean',
-    soundVolume: [0.1, 0.5, 1],
-    soundOnClick: [false, 'beep', 'click', 'hitmarker', 'nk-creams', 'osu', 'pop', 'typewriter'],
-    soundOnError: 'boolean',
-    smoothCaret: 'boolean',
-    caretStyle: [false, 'default', 'block', 'outline', 'underline'],
-    timerProgressStyle: ['text', 'bar', 'both'],
-    statsColor: ['sub', 'text', 'main'],
-    statsOpacity: [0.25, 0.5, 0.75, 1],
-    smoothLineScroll: 'boolean',
-    showDecimalPlaces: 'boolean',
-    fontSize: [1, 1.25, 1.5, 2, 3, 4],
-    fontFamily: 'string',
-    pageWidth: ['1000px', '1250px', '1500px', '2000px', '100%'],
-    keymap: [false, 'static', 'react', 'next'],
-    keymapLayout: 'string',
-    keymapStyle: ['staggered', 'matrix', 'split', 'split matrix'],
-    keymapLegendStyle: ['dynamic', 'lowercase', 'uppercase', 'blank'],
-    keymapShowTopRow: [true, 'layout dependent', false],
-    flipTestColors: 'boolean',
-    colorfulMode: 'boolean',
-    randomizeTheme: [false, true, 'light', 'dark'],
-    themeType: ['preset', 'custom'],
-    theme: 'string',
-    customThemes: 'object',
-    customTheme: 'string',
-    liveWpm: 'boolean',
-    liveAccuracy: 'boolean',
-    timerProgress: 'boolean',
-    keyTips: 'boolean',
-    outOfFocusWarning: 'boolean',
-    capsLockWarning: 'boolean',
-    persistentCache: 'boolean',
+export function validateSettings(
+  settings: Partial<Settings>,
+  customProperties?: Partial<Record<keyof Settings, z.ZodType>>
+) {
+  const customThemeIds = settings.customThemes?.map(({ id }) => id) ?? [];
+  const schemaProperties: Record<keyof Settings, z.ZodType> = {
+    mode: z.enum(['time', 'words']),
+    time: z.number().positive(),
+    words: z.number().positive(),
+    quickRestart: z.union([z.literal(false), z.enum(['tab', 'esc'])]),
+    language: z.string(),
+    freedomMode: z.boolean(),
+    strictSpace: z.boolean(),
+    quickEnd: z.boolean(),
+    indicateTypos: z.union([z.literal(false), z.enum(['below', 'replace'])]),
+    hideExtraLetters: z.boolean(),
+    lazyMode: z.boolean(),
+    soundVolume: z.union([z.literal(0.1), z.literal(0.5), z.literal(1)]),
+    soundOnClick: z.union([
+      z.literal(false),
+      z.enum(['beep', 'click', 'hitmarker', 'nk-creams', 'osu', 'pop', 'typewriter']),
+    ]),
+    soundOnError: z.boolean(),
+    smoothCaret: z.boolean(),
+    caretStyle: z.union([z.literal(false), z.enum(['default', 'block', 'outline', 'underline'])]),
+    timerProgressStyle: z.enum(['text', 'bar', 'both']),
+    statsColor: z.enum(['sub', 'text', 'main']),
+    statsOpacity: z.union([z.literal(0.25), z.literal(0.5), z.literal(0.75), z.literal(1)]),
+    smoothLineScroll: z.boolean(),
+    showDecimalPlaces: z.boolean(),
+    fontSize: z.union([
+      z.literal(1),
+      z.literal(1.25),
+      z.literal(1.5),
+      z.literal(2),
+      z.literal(3),
+      z.literal(4),
+    ]),
+    fontFamily: z.string(),
+    pageWidth: z.enum(['1000px', '1250px', '1500px', '2000px', '100%']),
+    keymap: z.union([z.literal(false), z.enum(['static', 'react', 'next'])]),
+    keymapLayout: z.string(),
+    keymapStyle: z.enum(['staggered', 'matrix', 'split', 'split matrix']),
+    keymapLegendStyle: z.enum(['dynamic', 'lowercase', 'uppercase', 'blank']),
+    keymapShowTopRow: z.union([z.boolean(), z.literal('layout dependent')]),
+    flipTestColors: z.boolean(),
+    colorfulMode: z.boolean(),
+    randomizeTheme: z.union([z.boolean(), z.enum(['light', 'dark'])]),
+    themeType: z.enum(['preset', 'custom']),
+    theme: z.string(),
+    customThemes: z
+      .object({
+        id: z.string(),
+        name: z.string(),
+        colors: z.object({
+          bg: z.string(),
+          main: z.string(),
+          caret: z.string(),
+          sub: z.string(),
+          subAlt: z.string(),
+          text: z.string(),
+          error: z.string(),
+          errorExtra: z.string(),
+          colorfulError: z.string(),
+          colorfulErrorExtra: z.string(),
+        }),
+      })
+      .strict()
+      .array(),
+    customTheme: z.enum(['', ...customThemeIds]),
+    liveWpm: z.boolean(),
+    liveAccuracy: z.boolean(),
+    timerProgress: z.boolean(),
+    keyTips: z.boolean(),
+    outOfFocusWarning: z.boolean(),
+    capsLockWarning: z.boolean(),
+    persistentCache: z.boolean(),
+    ...customProperties,
   };
+  const schema = z.object(schemaProperties).strict().required();
+  const result = schema.safeParse(settings);
   const missing: (keyof Settings)[] = [];
   const invalid: (keyof Settings)[] = [];
-  const unknown: (keyof Settings)[] = [];
-  const newSettings: Settings = { ...settings };
+  const unknown: string[] = [];
+  const newSettings = settings;
 
-  for (const property in expectedProperties) {
-    const key = property as keyof Settings;
-    const expectedValue = expectedProperties[key];
-    const actualValue = settings[key];
+  if (!result.success) {
+    result.error.issues.forEach((issue) => {
+      if (issue.code === 'unrecognized_keys')
+        issue.keys.forEach((key) => {
+          unknown.push(key);
+          delete newSettings[key as keyof Settings];
+        });
+      else {
+        const isMissing = (issue: ZodIssue) =>
+          (issue.code === 'invalid_type' && issue.received === 'undefined') ||
+          (issue.code === 'invalid_literal' && issue.received === undefined);
 
-    if (
-      (Array.isArray(expectedValue) && !expectedValue.some((val) => val === actualValue)) ||
-      (typeof expectedValue === 'string' && typeof actualValue !== expectedValue)
-    ) {
-      if (actualValue === undefined) missing.push(key);
-      else invalid.push(key);
-      newSettings[key] = defaultSettings[key] as never;
-    }
-  }
-  for (const property in newSettings) {
-    const key = property as keyof Settings;
-    if (!expectedProperties[key]) {
-      unknown.push(key);
-      delete newSettings[key];
-    }
+        issue.path.forEach((path) => {
+          const key = path as keyof Settings;
+          if (
+            isMissing(issue) ||
+            (issue.code === 'invalid_union' &&
+              issue.unionErrors.some((error) => error.issues.some(isMissing)))
+          )
+            missing.push(key);
+          else invalid.push(key);
+          newSettings[key] = defaultSettings[key] as never;
+        });
+      }
+    });
   }
 
   return [newSettings, { missing, invalid, unknown }] as [

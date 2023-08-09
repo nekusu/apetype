@@ -6,12 +6,14 @@ import { useDidMount } from 'hooks/useDidMount';
 import produce, { freeze } from 'immer';
 import { ReactNode, createContext, useCallback, useContext, useEffect } from 'react';
 import { SWRConfig } from 'swr';
-import { DraftFunction, Updater } from 'use-immer';
+import { Updater } from 'use-immer';
 import { Settings, defaultSettings, validateSettings } from 'utils/settings';
+import { z } from 'zod';
 import { useGlobal } from './globalContext';
 
 export interface SettingsContext extends Settings {
   setSettings: Updater<Settings>;
+  validate: typeof validateSettings;
 }
 
 interface SettingsProviderProps {
@@ -21,22 +23,38 @@ interface SettingsProviderProps {
 export const SettingsContext = createContext<SettingsContext | null>(null);
 
 export function SettingsProvider({ children }: SettingsProviderProps) {
-  const { setGlobalValues } = useGlobal();
+  const { settingsList, setGlobalValues } = useGlobal();
   const [settings, _setSettings] = useLocalStorage<Settings>({
     key: 'settings',
     defaultValue: freeze(defaultSettings),
   });
+  const provider = useCacheProvider(settings.persistentCache);
+
   const setSettings: SettingsContext['setSettings'] = useCallback(
-    (updater: Settings | DraftFunction<Settings>) => {
+    (updater) => {
       if (typeof updater === 'function') _setSettings(produce(updater));
       else _setSettings(freeze(updater));
     },
     [_setSettings]
   );
-  const provider = useCacheProvider(settings.persistentCache);
+  const validate: typeof validateSettings = useCallback(
+    (settings, customProperties) => {
+      type StringTuple = [string, ...string[]];
+      const languages = settingsList.language.options.map(({ value }) => value) as StringTuple;
+      const layouts = settingsList.keymapLayout.options.map(({ value }) => value) as StringTuple;
+      const themes = settingsList.theme.options.map(({ value }) => value) as StringTuple;
+      return validateSettings(settings, {
+        language: z.enum(languages),
+        keymapLayout: z.enum(layouts),
+        theme: z.enum(themes),
+        ...customProperties,
+      });
+    },
+    [settingsList]
+  );
 
   useDidMount(() => {
-    _setSettings((settings) => validateSettings(settings)[0]);
+    _setSettings((settings) => validate(settings)[0]);
   });
   useEffect(() => {
     setGlobalValues(
@@ -55,11 +73,10 @@ export function SettingsProvider({ children }: SettingsProviderProps) {
   }, [settings.fontFamily]);
 
   return (
-    <SettingsContext.Provider value={{ setSettings, ...settings }}>
+    <SettingsContext.Provider value={{ setSettings, validate, ...settings }}>
       <SWRConfig
         value={{
-          fetcher: (input: RequestInfo | URL, init?: RequestInit) =>
-            fetch(input, init).then((res) => res.json()),
+          fetcher: ((input, init) => fetch(input, init).then((res) => res.json())) as typeof fetch,
           provider,
         }}
       >
