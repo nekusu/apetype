@@ -1,4 +1,3 @@
-import '@unocss/reset/tailwind.css';
 import { CommandLine } from 'components/command-line';
 import { MainLayout } from 'components/layout';
 import { GlobalProvider } from 'context/globalContext';

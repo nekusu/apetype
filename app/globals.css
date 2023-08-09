@@ -1,3 +1,4 @@
+@import '@unocss/reset/tailwind.css';
 @unocss all;
 
 input[type='number']::-webkit-outer-spin-button,
