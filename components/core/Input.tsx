@@ -65,7 +65,7 @@ const Input = forwardRef<ElementRef<'input'>, InputProps>(function Input(
       <Tooltip className='bg-error text-bg' label={error} disabled={!isErrorVisible}>
         <div
           className={twMerge([
-            'flex w-full cursor-text items-center rounded-lg bg-sub-alt px-3 py-2 text-sub caret-main outline-none -outline-offset-2 transition focus-within:text-text focus-within:outline-2 focus-within:outline-main active:translate-y-0.5',
+            'flex w-full cursor-text items-center rounded-lg bg-sub-alt px-3 py-2 text-sub caret-main focus-within:outline-solid transition focus-within:text-text outline-2 outline-main -outline-offset-2 active:translate-y-0.5',
             className,
           ])}
           onClick={() => inputRef.current?.focus()}
@@ -74,7 +74,7 @@ const Input = forwardRef<ElementRef<'input'>, InputProps>(function Input(
           <input
             ref={mergedRef}
             className={twMerge([
-              'h-full w-full bg-transparent outline-none placeholder:text-sub',
+              'h-full w-full bg-transparent outline-0 placeholder:text-sub',
               error && 'text-error',
               leftNode && 'pl-2',
               (rightNode || isErrorVisible) && 'pr-2',

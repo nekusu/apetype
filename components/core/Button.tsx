@@ -18,20 +18,20 @@ function getVariantStyles(variant: NonNullable<ButtonProps['variant']>) {
     case 'danger':
       return twMerge([
         className,
-        'outline-2 outline-error hover:bg-error hover:text-bg focus:bg-error focus:text-bg',
+        'outline-2 outline-solid outline-error hover:bg-error hover:text-bg focus-visible:bg-error focus-visible:text-bg',
       ]);
     case 'filled':
-      return twMerge([
-        className,
-        'hover:bg-text hover:text-bg focus:outline-2 focus-visible:outline-text',
-      ]);
+      return twMerge([className, 'hover:bg-text hover:text-bg focus-visible:outline-solid']);
     case 'subtle':
       return twMerge([
         className,
         'focus-visible:bg-text focus-visible:text-bg active:bg-text active:text-bg active:scale-[.925]',
       ]);
     case 'text':
-      return twMerge([className, 'focus-visible:text-text active:translate-y-0.5']);
+      return twMerge([
+        className,
+        'focus-visible:text-text focus-visible:outline-0 active:translate-y-0.5',
+      ]);
   }
 }
 
@@ -44,7 +44,7 @@ const Button = forwardRef<ElementRef<'button'>, ButtonProps>(function Button(
     <Component
       ref={ref}
       className={twMerge([
-        'flex w-max cursor-pointer select-none items-center justify-center gap-1.5 rounded-lg p-2 text-center text-base leading-tight outline-none transition',
+        'flex w-max cursor-pointer select-none items-center justify-center gap-1.5 rounded-lg p-2 text-center text-base leading-tight transition outline-2 outline-text',
         getVariantStyles(variant),
         variant === 'filled' && active && 'bg-main text-bg',
         variant === 'text' && active && 'text-main',
