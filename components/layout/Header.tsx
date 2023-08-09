@@ -26,9 +26,9 @@ export default function Header() {
   const pathname = usePathname();
 
   return (
-    <div className='relative z-10 grid w-full select-none grid-cols-[auto_1fr_auto] gap-3'>
+    <div className='relative z-10 grid grid-cols-[auto_1fr_auto] w-full select-none gap-3'>
       <div
-        className='flex items-center gap-2 font-[family-name:var(--font-lexend-deca)] transition-transform active:translate-y-0.5'
+        className='flex items-center gap-2 font-[var(--font-lexend-deca)] transition-transform active:translate-y-0.5'
         onClick={() => {
           if (pathname === '/') restartTest();
           else router.push('/');

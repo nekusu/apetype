@@ -142,7 +142,7 @@ export default function CommandLine() {
 
   return (
     <Modal
-      className='flex w-[700px] flex-col overflow-hidden p-0'
+      className='w-[700px] flex flex-col overflow-hidden p-0'
       open={open}
       onClose={handler?.close}
       closeOnEscape={false}
@@ -155,7 +155,7 @@ export default function CommandLine() {
         {setting?.command ? (
           <Button
             asChild
-            className='-ml-1 px-2.5 py-1.5 text-xs font-semibold'
+            className='px-2.5 py-1.5 text-xs font-semibold -ml-1'
             variant='filled'
             active
             onClick={() => setSetting(undefined)}
@@ -168,7 +168,7 @@ export default function CommandLine() {
         {isThemeSetting && (setting.id === 'customTheme' || !!customThemes.length) && (
           <Button
             asChild
-            className='-ml-1 px-2.5 py-1.5 text-xs'
+            className='px-2.5 py-1.5 text-xs -ml-1'
             variant='filled'
             onClick={toggleThemeType}
           >
@@ -180,7 +180,7 @@ export default function CommandLine() {
         )}
         <motion.input
           ref={focusLockRef}
-          className='flex-1 bg-transparent py-3.5 text-text caret-caret outline-none transition-colors placeholder:text-sub'
+          className='flex-1 bg-transparent py-3.5 text-text caret-caret outline-0 transition-colors placeholder:text-sub'
           min={0}
           type={setting?.custom && typeof setting.options[0].value === 'number' ? 'number' : 'text'}
           placeholder={`type ${setting ? 'value' : 'command'}`}

@@ -7,7 +7,7 @@ export default function Tips() {
   const { time, quickRestart } = useSettings();
 
   return (
-    <div className='flex select-none flex-col items-center gap-1.5'>
+    <div className='flex flex-col select-none items-center gap-1.5'>
       {!time && (
         <Text className='text-xs' dimmed>
           <Key>shift</Key> + <Key>enter</Key> - stop test

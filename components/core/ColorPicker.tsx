@@ -32,7 +32,7 @@ export default function ColorPicker({
         <HexAlphaColorPicker
           color={hexString}
           onChange={onChange}
-          className='!h-40 !w-40 rounded-lg shadow-lg'
+          className='rounded-lg shadow-lg !h-40 !w-40'
         />
       </Popover.Content>
     </Popover.Root>

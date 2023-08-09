@@ -40,7 +40,7 @@ export default function Result() {
   }, [words]);
 
   return (
-    <div className='grid cursor-default grid-cols-[min-content_1fr] grid-rows-[fit-content_1fr] items-center gap-5'>
+    <div className='grid grid-cols-[min-content_1fr] grid-rows-[fit-content_1fr] cursor-default items-center gap-5'>
       <div className='flex flex-wrap gap-2'>
         <Group
           title='wpm'

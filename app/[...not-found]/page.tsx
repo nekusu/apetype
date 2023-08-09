@@ -4,7 +4,7 @@ import { RiKeyboardBoxFill } from 'react-icons/ri';
 
 export default function NotFound() {
   return (
-    <Transition className='flex cursor-default flex-col items-center gap-6 self-center'>
+    <Transition className='flex flex-col cursor-default items-center self-center gap-6'>
       <Text className='text-[120px] font-bold leading-none' dimmed>
         404
       </Text>

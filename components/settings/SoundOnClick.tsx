@@ -19,7 +19,7 @@ export function SoundButton({ alt, value }: SoundButtonProps) {
   return (
     <Button
       active={soundOnClick === value}
-      className='group grid w-full grid-cols-[1fr_auto_1fr] justify-items-end'
+      className='group grid grid-cols-[1fr_auto_1fr] w-full justify-items-end'
       variant='filled'
       onClick={() => {
         setSettings((draft) => void (draft.soundOnClick = value));
@@ -28,7 +28,7 @@ export function SoundButton({ alt, value }: SoundButtonProps) {
     >
       <span className='col-start-2'>{alt ?? value}</span>
       {value && (
-        <span className='pr-1 opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100'>
+        <span className='pr-1 opacity-0 transition-opacity group-focus-visible:opacity-100 group-hover:opacity-100'>
           {state === 'playing' ? (
             <RiVolumeUpFill />
           ) : state === 'loading' ? (

@@ -39,7 +39,7 @@ function Warning({ children, icon: Icon, keys, type }: WarningProps) {
           offset={6}
           placement='top'
         >
-          <span className='cursor-pointer border-b border-dashed border-main transition hover:border-text hover:text-text'>
+          <span className='cursor-pointer border-b border-main border-dashed transition hover:border-text hover:text-text'>
             {keys.length} {type} setting{keys.length > 1 && 's'}
           </span>
         </Tooltip>

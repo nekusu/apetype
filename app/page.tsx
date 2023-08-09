@@ -12,7 +12,7 @@ export default function Home() {
   const { keyTips } = useSettings();
 
   return (
-    <Transition className='relative grid w-full grid-rows-[1fr_auto_1.25fr] gap-3'>
+    <Transition className='relative grid grid-rows-[1fr_auto_1.25fr] w-full gap-3'>
       <AnimatePresence>
         {!isUserTyping && !isTestFinished && <Settings key='settings' />}
         <AnimatePresence mode='wait'>
