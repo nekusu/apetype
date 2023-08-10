@@ -25,7 +25,8 @@ export default function Caret({ width = '.5em', x, y }: CaretProps) {
         top: y,
         transition: {
           opacity: { repeat: Infinity, ease: 'easeInOut', duration: 1 },
-          default: { ease: 'linear', duration: smoothCaret ? 0.1 : 0 },
+          width: { ease: 'linear', duration: smoothCaret ? 0.1 : 0 },
+          default: { ease: 'easeOut', duration: smoothCaret ? 0.08 : 0 },
         },
       }}
       className={twJoin([
