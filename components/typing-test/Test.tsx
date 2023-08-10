@@ -41,6 +41,7 @@ export default function Test() {
     language: languageName,
     lazyMode,
     keymap,
+    themeType,
     capsLockWarning,
   } = useSettings();
   const { colors } = useTheme();
@@ -53,7 +54,7 @@ export default function Test() {
     setTimeout(() => {
       if (!resultRef.current) return;
       void toPng(resultRef.current, {
-        backgroundColor: colors.custom?.bg ?? colors.preset?.bg,
+        backgroundColor: themeType === 'custom' ? colors.custom?.bg : colors.preset?.bg,
         height: resultRef.current.clientHeight + 80,
         width: resultRef.current.clientWidth + 80,
         style: { padding: '40px' },
