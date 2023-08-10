@@ -13,6 +13,7 @@ export default function Result() {
     mode,
     time,
     words: wordAmount,
+    blindMode,
     language: languageName,
     lazyMode,
     showDecimalPlaces,
@@ -29,9 +30,7 @@ export default function Result() {
           if (!status) return;
           if (status === 'correct') {
             if (word.isCorrect) characters.correct++;
-          } else {
-            characters[status]++;
-          }
+          } else characters[status]++;
         });
         return characters;
       },
@@ -60,10 +59,9 @@ export default function Result() {
         <Group
           title='test type'
           values={[
-            <>
-              {mode} {mode === 'time' ? time : mode === 'words' ? wordAmount : ''}
-            </>,
+            `${mode} ${mode === 'time' ? time : mode === 'words' ? wordAmount : ''}`,
             languageName,
+            blindMode && 'blind',
             lazyMode && !language?.noLazyMode && 'lazy',
           ]}
           valueDirection='vertical'

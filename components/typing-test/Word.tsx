@@ -7,7 +7,10 @@ import { Letter as LetterType } from 'utils/typingTest';
 import Letter from './Letter';
 
 export interface WordProps
-  extends Pick<Settings, 'indicateTypos' | 'hideExtraLetters' | 'flipTestColors' | 'colorfulMode'> {
+  extends Pick<
+    Settings,
+    'blindMode' | 'indicateTypos' | 'hideExtraLetters' | 'flipTestColors' | 'colorfulMode'
+  > {
   letters: LetterType[];
   letterRef: MutableRefObject<HTMLSpanElement>;
   error: boolean;
@@ -32,7 +35,7 @@ const Word = forwardRef<HTMLDivElement, WordProps>(function Word(
     <div
       className={twJoin([
         'm-[.25em] flex border-b-2',
-        error ? 'border-colorful-error' : 'border-transparent',
+        !settings.blindMode && error ? 'border-colorful-error' : 'border-transparent',
       ])}
       ref={ref}
     >

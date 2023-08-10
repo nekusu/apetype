@@ -11,6 +11,7 @@ export interface Settings {
   time: number;
   words: number;
   quickRestart: false | 'tab' | 'esc';
+  blindMode: boolean;
   language: string;
   freedomMode: boolean;
   strictSpace: boolean;
@@ -123,6 +124,17 @@ export const settingsList = {
       </>
     ),
     options: [{ alt: 'off', value: false }, 'tab', 'esc'],
+  }),
+  blindMode: create<'blindMode'>({
+    command: 'blind mode',
+    category: 'behavior',
+    description: (
+      <>
+        No errors or incorrect words are highlighted. Helps you to focus on raw speed. If enabled,
+        quick end is recommended.
+      </>
+    ),
+    options: OFF_ON_OPTIONS,
   }),
   language: create<'language'>({
     command: 'language',
@@ -454,6 +466,7 @@ export const defaultSettings: Settings = {
   time: 60,
   words: 50,
   quickRestart: 'tab',
+  blindMode: false,
   language: 'english',
   freedomMode: false,
   strictSpace: false,
@@ -505,6 +518,7 @@ export function validateSettings(
     time: z.number().positive(),
     words: z.number().positive(),
     quickRestart: z.union([z.literal(false), z.enum(['tab', 'esc'])]),
+    blindMode: z.boolean(),
     language: z.string(),
     freedomMode: z.boolean(),
     strictSpace: z.boolean(),

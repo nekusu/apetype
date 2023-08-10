@@ -20,6 +20,7 @@ export default function Words() {
     mode,
     time,
     words: wordAmount,
+    blindMode,
     indicateTypos,
     hideExtraLetters,
     caretStyle,
@@ -122,6 +123,7 @@ export default function Words() {
             letters={letters}
             letterRef={letterRef}
             error={wordIndex > index && !isCorrect}
+            blindMode={blindMode}
             indicateTypos={indicateTypos}
             hideExtraLetters={hideExtraLetters}
             flipTestColors={flipTestColors}

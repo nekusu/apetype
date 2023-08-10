@@ -7,12 +7,12 @@ import { useSound } from 'hooks/useSound';
 import { useRef } from 'react';
 
 export default function Sound() {
-  const { soundVolume: volume, soundOnClick, soundOnError } = useSettings();
+  const { blindMode, soundVolume: volume, soundOnClick, soundOnError } = useSettings();
   const { inputValue, currentStats } = useTypingTest();
   const { errors } = currentStats;
   const lastErrorCount = useRef(0);
   const { play: playClick } = useSound(soundOnClick, { volume });
-  const { play: playError } = useSound(soundOnError && 'error.webm', { volume });
+  const { play: playError } = useSound(!blindMode && soundOnError && 'error.webm', { volume });
 
   useDidUpdate(() => {
     if (errors > lastErrorCount.current) {

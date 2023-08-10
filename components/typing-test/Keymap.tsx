@@ -20,6 +20,7 @@ import { Settings } from 'utils/settings';
 
 interface KeyProps extends ComponentPropsWithoutRef<'div'> {
   bump?: boolean;
+  blindMode: Settings['blindMode'];
   keymap?: Settings['keymap'];
   order?: number;
   status: boolean | 'error';
@@ -27,7 +28,7 @@ interface KeyProps extends ComponentPropsWithoutRef<'div'> {
 
 const Key = memo(
   forwardRef<ElementRef<'div'>, KeyProps>(function Key(
-    { bump, children, className, keymap, order, status, style, ...props },
+    { bump, children, className, blindMode, keymap, order, status, style, ...props },
     ref
   ) {
     const [state, setState] = useState<typeof status>(false);
@@ -50,7 +51,7 @@ const Key = memo(
           keymap !== 'next' && 'duration-300',
           state && 'border-main bg-main text-bg duration-0',
           state && keymap === 'react' && 'scale-[.925]',
-          state === 'error' && 'border-error bg-error',
+          !blindMode && state === 'error' && 'border-error bg-error',
           className,
         ])}
         style={{ order, ...style }}
@@ -69,7 +70,8 @@ const Key = memo(
 
 export default function Keymap() {
   const { isUserTyping, keymapLayouts, commandLine } = useGlobal();
-  const { keymap, keymapLayout, keymapStyle, keymapLegendStyle, keymapShowTopRow } = useSettings();
+  const { blindMode, keymap, keymapLayout, keymapStyle, keymapLegendStyle, keymapShowTopRow } =
+    useSettings();
   const { words, wordIndex, currentStats } = useTypingTest();
   const { characters, errors } = currentStats;
   const [pressed, setPressed] = useState<{ key?: string; error?: boolean } | null>(null);
@@ -154,6 +156,7 @@ export default function Keymap() {
                         isSplit ? (isMatrix ? 'w-[104px]' : 'w-28') : isMatrix ? 'w-36' : 'w-56',
                         !isMatrix && '-ml-5',
                       ])}
+                      blindMode={blindMode}
                       keymap={keymap}
                       onClick={() => commandLine.handler?.open('keymapLayout')}
                       status={getStatus(key)}
@@ -166,6 +169,7 @@ export default function Keymap() {
                   {isSplit && (
                     <Key
                       className={twJoin(isMatrix ? 'w-[104px]' : 'w-28')}
+                      blindMode={blindMode}
                       keymap={keymap}
                       status={getStatus(key)}
                     />
@@ -181,6 +185,7 @@ export default function Keymap() {
                       : layout.type === 'ansi' && rowIndex === 1 && 'last-of-type:hidden'
                   )}
                   bump={rowIndex === 2 && [3, 6].includes(keyIndex)}
+                  blindMode={blindMode}
                   keymap={keymap}
                   order={keyIndex}
                   status={getStatus(key)}

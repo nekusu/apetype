@@ -14,6 +14,7 @@ import { useEffect, useRef, useState } from 'react';
 import {
   RiArrowRightLine,
   RiEarthFill,
+  RiEyeOffFill,
   RiImageFill,
   RiLockFill,
   RiRefreshLine,
@@ -36,6 +37,7 @@ export default function Test() {
     time,
     words,
     quickRestart,
+    blindMode,
     language: languageName,
     lazyMode,
     keymap,
@@ -130,11 +132,20 @@ export default function Test() {
               <Stats />
               <AnimatePresence>
                 {!isUserTyping && (
-                  <Transition className='absolute top-0 w-full flex justify-center gap-5'>
+                  <Transition className='absolute top-0 w-full flex justify-center gap-6'>
                     <Button className='p-0' onClick={() => commandLine.handler?.open('language')}>
                       <RiEarthFill />
                       {languageName}
                     </Button>
+                    {blindMode && (
+                      <Button
+                        className='p-0'
+                        onClick={() => commandLine.handler?.open('blindMode')}
+                      >
+                        <RiEyeOffFill />
+                        blind
+                      </Button>
+                    )}
                     {lazyMode && !language?.noLazyMode && (
                       <Button className='p-0' onClick={() => commandLine.handler?.open('lazyMode')}>
                         <RiZzzLine />
