@@ -1,6 +1,6 @@
 'use client';
 
-import { useDidUpdate, useWindowEvent } from '@mantine/hooks';
+import { useDidUpdate, useMergedRef, useTimeout, useWindowEvent } from '@mantine/hooks';
 import { Tooltip } from 'components/core';
 import { useGlobal } from 'context/globalContext';
 import { useSettings } from 'context/settingsContext';
@@ -31,38 +31,47 @@ const Key = memo(
     { bump, children, className, blindMode, keymap, order, status, style, ...props },
     ref
   ) {
-    const [state, setState] = useState<typeof status>(false);
+    const keyRef = useRef<HTMLDivElement>(null);
+    const bumpRef = useRef<HTMLSpanElement>(null);
+    const mergedRef = useMergedRef(ref, keyRef);
+
+    const setActive = (active: boolean) => {
+      if (!keyRef.current) return;
+      const getColor = (color: string) =>
+        !blindMode && status === 'error' ? 'var(--error-color)' : `var(--${color}-color)`;
+      const { style } = keyRef.current;
+      style.transitionDuration = active ? '0s' : keymap === 'react' ? '300ms' : '150ms';
+      style.borderColor = active ? getColor('main') : 'var(--sub-color)';
+      style.backgroundColor = active ? getColor('main') : 'transparent';
+      style.color = active ? getColor('bg') : 'var(--sub-color)';
+      style.transform = active && keymap === 'react' ? 'scale(.925)' : 'none';
+      if (!bumpRef.current) return;
+      bumpRef.current.style.backgroundColor = `var(--${active ? 'bg' : 'sub'}-color)`;
+    };
+    const { start, clear } = useTimeout(() => setActive(false), 50);
 
     useDidUpdate(() => {
       if (keymap === 'react') {
         if (status) {
-          setState(status);
-          setTimeout(() => setState(false), 50);
+          clear();
+          setActive(true);
+          start();
         }
-      }
-      setState(status);
+      } else setActive(!!status);
     }, [status]);
 
     return (
       <div
-        ref={ref}
+        ref={mergedRef}
         className={twMerge([
           'relative flex h-8 w-8 items-center justify-center rounded-lg border border-sub text-sub transition',
-          keymap !== 'next' && 'duration-300',
-          state && 'border-main bg-main text-bg duration-0',
-          state && keymap === 'react' && 'scale-[.925]',
-          !blindMode && state === 'error' && 'border-error bg-error',
           className,
         ])}
         style={{ order, ...style }}
         {...props}
       >
         {children}
-        {bump && (
-          <span
-            className={twJoin(['absolute bottom-[0.2rem] h-px w-2', state ? 'bg-bg' : 'bg-sub'])}
-          />
-        )}
+        {bump && <span ref={bumpRef} className='bump absolute bottom-[0.2rem] h-px w-2' />}
       </div>
     );
   })
