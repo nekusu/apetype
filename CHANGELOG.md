@@ -1,5 +1,35 @@
 # Changelog
 
+## [0.6.0](https://github.com/nekusu/apetype/compare/v0.5.0...v0.6.0) (2023-08-11)
+
+
+### New Features
+
+* add keymap in typing test ([#33](https://github.com/nekusu/apetype/issues/33)) ([736b114](https://github.com/nekusu/apetype/commit/736b114338356d1d4a5a649daa5fbb702ea36efe))
+* add typing sounds ([#30](https://github.com/nekusu/apetype/issues/30)) ([7dbe9b4](https://github.com/nekusu/apetype/commit/7dbe9b46f73ec7d957d378ee6c1273b520542d40))
+* **settings:** add blind mode setting ([ae042f3](https://github.com/nekusu/apetype/commit/ae042f37bd1f6edbdc7e1b92da1d8089057ee34b))
+* **settings:** add freedom mode setting ([01bfea4](https://github.com/nekusu/apetype/commit/01bfea4362266ccbc41ce9f78b6381987f684aca))
+* **settings:** add import/export settings ([#34](https://github.com/nekusu/apetype/issues/34)) ([d6d10f3](https://github.com/nekusu/apetype/commit/d6d10f3e8e6208420983be66529703e027578578))
+* **settings:** add lazy mode setting ([e87d0d4](https://github.com/nekusu/apetype/commit/e87d0d406ae9da5625a03b4ff4fce46dfcf50966))
+* **settings:** add persistent cache setting ([#32](https://github.com/nekusu/apetype/issues/32)) ([085f0be](https://github.com/nekusu/apetype/commit/085f0be4a1bda9bb429bce364a5e2aee64e44f2e))
+* **settings:** add reset button ([#31](https://github.com/nekusu/apetype/issues/31)) ([d4a76a4](https://github.com/nekusu/apetype/commit/d4a76a404c64d249720c1cba5a4c9d13f89e1d62))
+* **settings:** add stop on error setting ([568fc60](https://github.com/nekusu/apetype/commit/568fc609b86e7839dbcaae0b6f20cf2db4f7912a))
+* **settings:** add strict space setting ([20e8056](https://github.com/nekusu/apetype/commit/20e80569d4336148ddb2fccde2b69b588e5454ab))
+* **settings:** improve settings validation ([#36](https://github.com/nekusu/apetype/issues/36)) ([a8e6600](https://github.com/nekusu/apetype/commit/a8e66009d9a495bc28377e663683ea931a8c621e))
+* **test:** add screenshot button to result page ([#35](https://github.com/nekusu/apetype/issues/35)) ([57bf528](https://github.com/nekusu/apetype/commit/57bf52846b4a36ea9ec5173cec389bb93e5b5335))
+
+
+### Performance Improvements
+
+* implement local storage cache compression ([#29](https://github.com/nekusu/apetype/issues/29)) ([635b9e8](https://github.com/nekusu/apetype/commit/635b9e8d67b2fe976da214e7d227729a2e73d739))
+
+
+### Bug Fixes
+
+* wrong background color on screenshot ([8d0ef6d](https://github.com/nekusu/apetype/commit/8d0ef6d61f5c9f581015daa42291ec196a29b6d3))
+* **keymap:** 'show top row' setting not working ([fa4d335](https://github.com/nekusu/apetype/commit/fa4d335a2078a9b0fca55858e66997a01180f4bd))
+* **keymap:** keys not activating when pressed ([99dc0cd](https://github.com/nekusu/apetype/commit/99dc0cdf4faf5d9d456983d5cb74079ed0b92e65))
+
 ## [0.5.0](https://github.com/nekusu/apetype/compare/v0.4.0...v0.5.0) (2023-04-12)
 
 
