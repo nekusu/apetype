@@ -81,7 +81,7 @@ export default function Keymap() {
   const { isUserTyping, keymapLayouts, commandLine } = useGlobal();
   const { blindMode, keymap, keymapLayout, keymapStyle, keymapLegendStyle, keymapShowTopRow } =
     useSettings();
-  const { words, wordIndex, currentStats } = useTypingTest();
+  const { words, wordIndex, lastCharacter, currentStats } = useTypingTest();
   const { characters, errors } = currentStats;
   const [pressed, setPressed] = useState<{ key?: string; error?: boolean } | null>(null);
   const [{ capsLock, shift }, setModifiers] = useState({ capsLock: false, shift: false });
@@ -123,8 +123,7 @@ export default function Keymap() {
     setPressed(null);
     if (keymap === 'react') {
       if (characters > lastCharacterCount.current) {
-        const pressedKey = letters.findLast(({ typed }) => typed)?.typed ?? ' ';
-        setPressed({ key: pressedKey, error: errors > lastErrorCount.current });
+        setPressed({ key: lastCharacter, error: errors > lastErrorCount.current });
         setTimeout(() => setPressed(null), 0);
         lastCharacterCount.current = characters;
         lastErrorCount.current = errors;

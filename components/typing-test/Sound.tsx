@@ -19,7 +19,7 @@ export default function Sound() {
       playError();
       lastErrorCount.current = errors;
     } else playClick();
-  }, [inputValue]);
+  }, [inputValue, errors]);
 
   return null;
 }

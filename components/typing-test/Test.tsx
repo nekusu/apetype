@@ -17,6 +17,7 @@ import {
   RiEyeOffFill,
   RiImageFill,
   RiLockFill,
+  RiPauseCircleFill,
   RiRefreshLine,
   RiZzzLine,
 } from 'react-icons/ri';
@@ -39,6 +40,7 @@ export default function Test() {
     quickRestart,
     blindMode,
     language: languageName,
+    stopOnError,
     lazyMode,
     keymap,
     themeType,
@@ -76,7 +78,7 @@ export default function Test() {
   }, [isTestFinished]);
   useDidUpdate(() => {
     if (language) restartTest();
-  }, [language, lazyMode, mode, time, words]);
+  }, [mode, time, words, blindMode, language, stopOnError, lazyMode]);
   useDidUpdate(() => {
     if (isUserTyping) document.body.requestPointerLock();
     else document.exitPointerLock();
@@ -145,6 +147,15 @@ export default function Test() {
                       >
                         <RiEyeOffFill />
                         blind
+                      </Button>
+                    )}
+                    {stopOnError && (
+                      <Button
+                        className='p-0'
+                        onClick={() => commandLine.handler?.open('stopOnError')}
+                      >
+                        <RiPauseCircleFill />
+                        stop on {stopOnError}
                       </Button>
                     )}
                     {lazyMode && !language?.noLazyMode && (

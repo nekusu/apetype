@@ -33,6 +33,7 @@ export interface TypingTestValues {
   words: Word[];
   wordIndex: number;
   inputValue: string;
+  lastCharacter: string;
   currentStats: {
     raw: number;
     wpm: number;
@@ -55,6 +56,7 @@ export const initialValues: TypingTestValues = {
   words: [],
   wordIndex: 0,
   inputValue: ' ',
+  lastCharacter: ' ',
   currentStats: {
     raw: 0,
     wpm: 0,

@@ -15,6 +15,7 @@ export default function Result() {
     words: wordAmount,
     blindMode,
     language: languageName,
+    stopOnError,
     lazyMode,
     showDecimalPlaces,
   } = useSettings();
@@ -62,6 +63,7 @@ export default function Result() {
             `${mode} ${mode === 'time' ? time : mode === 'words' ? wordAmount : ''}`,
             languageName,
             blindMode && 'blind',
+            stopOnError && `stop on ${stopOnError}`,
             lazyMode && !language?.noLazyMode && 'lazy',
           ]}
           valueDirection='vertical'

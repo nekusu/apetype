@@ -15,6 +15,7 @@ export interface Settings {
   language: string;
   freedomMode: boolean;
   strictSpace: boolean;
+  stopOnError: false | 'letter' | 'word';
   quickEnd: boolean;
   indicateTypos: false | 'below' | 'replace';
   hideExtraLetters: boolean;
@@ -157,6 +158,17 @@ export const settingsList = {
       </>
     ),
     options: OFF_ON_OPTIONS,
+  }),
+  stopOnError: create<'stopOnError'>({
+    command: 'stop on error',
+    category: 'input',
+    description: (
+      <>
+        Letter mode will stop input when pressing any incorrect letters. Word mode will not allow
+        you to continue to the next word until you correct all mistakes.
+      </>
+    ),
+    options: [{ alt: 'off', value: false }, 'letter', 'word'],
   }),
   quickEnd: create<'quickEnd'>({
     command: 'quick end',
@@ -470,6 +482,7 @@ export const defaultSettings: Settings = {
   language: 'english',
   freedomMode: false,
   strictSpace: false,
+  stopOnError: false,
   quickEnd: true,
   indicateTypos: 'replace',
   hideExtraLetters: false,
@@ -522,6 +535,7 @@ export function validateSettings(
     language: z.string(),
     freedomMode: z.boolean(),
     strictSpace: z.boolean(),
+    stopOnError: z.union([z.literal(false), z.enum(['letter', 'word'])]),
     quickEnd: z.boolean(),
     indicateTypos: z.union([z.literal(false), z.enum(['below', 'replace'])]),
     hideExtraLetters: z.boolean(),
