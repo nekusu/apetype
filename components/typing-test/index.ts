@@ -1,6 +1,5 @@
 export { default as Caret } from './Caret';
 export { default as Chart } from './Chart';
-export { default as ChartTooltip } from './ChartTooltip';
 export { default as Keymap } from './Keymap';
 export { default as Letter } from './Letter';
 export { default as Result } from './Result';

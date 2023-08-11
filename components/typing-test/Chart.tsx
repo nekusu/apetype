@@ -5,6 +5,7 @@ import {
   ChartData,
   Chart as ChartJS,
   ChartOptions,
+  ChartTypeRegistry,
   Filler,
   LineController,
   LineElement,
@@ -12,13 +13,16 @@ import {
   PointElement,
   ScatterController,
   Tooltip,
+  TooltipModel,
 } from 'chart.js';
+import { Text } from 'components/core';
 import { useSettings } from 'context/settingsContext';
 import { useTheme } from 'context/themeContext';
 import { useTypingTest } from 'context/typingTestContext';
+import { motion } from 'framer-motion';
 import { Chart as MultitypeChart } from 'react-chartjs-2';
+import { twJoin } from 'tailwind-merge';
 import { useImmer } from 'use-immer';
-import ChartTooltip, { ChartTooltipProps } from './ChartTooltip';
 
 ChartJS.register(
   CategoryScale,
@@ -33,6 +37,43 @@ ChartJS.register(
 
 function getFontFamily() {
   return getComputedStyle(document.body).getPropertyValue('--font');
+}
+
+export interface ChartTooltipProps {
+  position: { top: number; left: number };
+  data?: TooltipModel<keyof ChartTypeRegistry>;
+  disabled: boolean;
+}
+
+function ChartTooltip({ position: { top, left }, data, disabled }: ChartTooltipProps) {
+  return (
+    <motion.div
+      className={twJoin([
+        'pointer-events-none absolute rounded-lg bg-sub-alt py-2.5 px-3 shadow-md transition',
+        disabled ? 'opacity-0' : 'opacity-100',
+      ])}
+      animate={{ top, left }}
+      transition={{ ease: 'easeOut', duration: 0.2 }}
+    >
+      {data && (
+        <>
+          <div className='flex flex-col gap-1'>
+            {data.dataPoints.map((data) => (
+              <div key={data?.dataset.label ?? ''} className='flex items-center gap-1.5'>
+                <Text
+                  className='text-[13px] leading-none'
+                  style={{ color: data?.dataset.borderColor as string }}
+                >
+                  {data?.dataset.label ?? ''}
+                </Text>
+                <Text className='text-[13px] leading-none'>{data?.parsed.y}</Text>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+    </motion.div>
+  );
 }
 
 export default function Chart() {
