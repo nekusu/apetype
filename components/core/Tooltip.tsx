@@ -27,10 +27,10 @@ export interface TooltipProps extends HTMLMotionProps<'div'> {
 
 const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(function Tooltip(
   { children, className, disabled, label, offset = 4, style, placement = 'bottom', ...props },
-  ref
+  ref,
 ) {
   const [open, setOpen] = useState(false);
-  const { context, x, y, reference, floating, strategy } = useFloating({
+  const { context, x, y, refs, strategy } = useFloating({
     open,
     onOpenChange: setOpen,
     placement: placement,
@@ -40,11 +40,11 @@ const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(function Tooltip(
   const hover = useHover(context);
   const focus = useFocus(context);
   const { getReferenceProps, getFloatingProps } = useInteractions([hover, focus]);
-  const mergedRef = useMergedRef(ref, floating);
+  const mergedRef = useMergedRef(ref, refs.setFloating);
 
   return (
     <>
-      {cloneElement(children as JSX.Element, getReferenceProps({ ref: reference }))}
+      {cloneElement(children as JSX.Element, getReferenceProps({ ref: refs.setReference }))}
       <FloatingPortal>
         <AnimatePresence>
           {open && !disabled && (

@@ -3,7 +3,7 @@
 import { useIsomorphicEffect, useLocalStorage } from '@mantine/hooks';
 import { useCacheProvider } from 'hooks/useCacheProvider';
 import { useDidMount } from 'hooks/useDidMount';
-import produce, { freeze } from 'immer';
+import { freeze, produce } from 'immer';
 import { ReactNode, createContext, useCallback, useContext, useEffect } from 'react';
 import { SWRConfig } from 'swr';
 import { Updater } from 'use-immer';
