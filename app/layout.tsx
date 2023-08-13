@@ -3,6 +3,7 @@ import { MainLayout } from 'components/layout';
 import { GlobalProvider } from 'context/globalContext';
 import { SettingsProvider } from 'context/settingsContext';
 import { ThemeProvider } from 'context/themeContext';
+import { Metadata } from 'next';
 import {
   Fira_Code,
   Inconsolata,
@@ -67,6 +68,12 @@ const fonts = [
   ubuntuMono,
 ];
 
+export const metadata: Metadata = {
+  title: 'Apetype',
+  description:
+    'Experience the ultimate typing practice platform, Apetype, where customization meets sleek design and a wide range of features. Take on various typing challenges, track your progress, and enhance your typing speed like never before.',
+};
+
 async function getLanguages() {
   const res = await fetch(`${STATIC_URL}/languages/_list.json`);
   const languages = (await res.json()) as string[];
@@ -92,7 +99,6 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
   return (
     <html lang='en' className={twJoin(fonts.map((font) => font.variable))}>
-      <head />
       <body className='flex justify-center overflow-y-hidden bg-bg font-default transition-colors'>
         <GlobalProvider languages={languages} layouts={layouts} themes={themes}>
           <SettingsProvider>
