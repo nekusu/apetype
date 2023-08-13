@@ -2,15 +2,17 @@
 
 import { Button, Text, Tooltip, Transition } from 'components/core';
 import { useGlobal } from 'context/globalContext';
-import { AnimatePresence } from 'framer-motion';
+import { AnimatePresence, useAnimation } from 'framer-motion';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 import {
   RiInformationFill,
   RiKeyboardBoxFill,
   RiSettingsFill,
   RiVipCrownFill,
 } from 'react-icons/ri';
+import { twJoin } from 'tailwind-merge';
 import LogoIcon from './LogoIcon';
 
 const BUTTONS = [
@@ -21,9 +23,18 @@ const BUTTONS = [
 ];
 
 export default function Header() {
-  const { isUserTyping, restartTest } = useGlobal();
+  const { testId, isUserTyping, restartTest } = useGlobal();
   const router = useRouter();
   const pathname = usePathname();
+  const animationControls = useAnimation();
+
+  useEffect(() => {
+    if (!isUserTyping)
+      void animationControls.start({
+        pathOffset: [0, 1, 2],
+        transition: { duration: 1 },
+      });
+  }, [isUserTyping, animationControls, testId]);
 
   return (
     <div className='relative z-10 grid grid-cols-[auto_1fr_auto] w-full select-none gap-3'>
@@ -34,13 +45,11 @@ export default function Header() {
           else router.push('/');
         }}
       >
-        <LogoIcon />
-        <Transition
-          variants={{
-            hidden: { opacity: 0 },
-            visible: { opacity: 1, transition: { duration: 0.75 } },
-          }}
-        >
+        <LogoIcon
+          className={twJoin(['animate-fade-in', isUserTyping ? 'stroke-sub' : 'stroke-main'])}
+          controls={animationControls}
+        />
+        <Transition transition={{ duration: 0.75 }}>
           <Text className='relative mb-[7px] text-[32px] leading-none' dimmed={isUserTyping}>
             <AnimatePresence>
               {!isUserTyping && (
