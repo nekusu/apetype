@@ -10,6 +10,7 @@ import { useSettings } from 'context/settingsContext';
 import { useTheme } from 'context/themeContext';
 import { AnimatePresence, HTMLMotionProps } from 'framer-motion';
 import { useEffect, useRef } from 'react';
+import { toast } from 'react-hot-toast';
 import { RiAlertLine, RiDeleteBin7Line } from 'react-icons/ri';
 import { twMerge } from 'tailwind-merge';
 import { useImmer } from 'use-immer';
@@ -130,7 +131,10 @@ export default function CustomTheme({ className, ...props }: HTMLMotionProps<'di
   };
   const shareTheme = () => {
     const encodedTheme = Buffer.from(JSON.stringify(customTheme)).toString('base64');
-    void navigator.clipboard.writeText(`${window.location.origin}?customTheme=${encodedTheme}`);
+    void navigator.clipboard
+      .writeText(`${window.location.origin}?customTheme=${encodedTheme}`)
+      .then(() => toast.success('URL copied to clipboard!'))
+      .catch(() => toast.error('Failed to copy URL to clipboard. Please try again.'));
   };
   const saveTheme = () => {
     setSettings((draft) => {
