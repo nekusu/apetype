@@ -1,9 +1,12 @@
 'use client';
 
+import { Toast } from 'components/core';
 import { useGlobal } from 'context/globalContext';
 import { useSettings } from 'context/settingsContext';
 import { AnimatePresence } from 'framer-motion';
 import { ReactNode } from 'react';
+import { Toaster } from 'react-hot-toast';
+import { RiCheckboxCircleFill, RiErrorWarningFill, RiLoaderLine } from 'react-icons/ri';
 import Footer from './Footer';
 import Header from './Header';
 
@@ -19,6 +22,18 @@ export default function MainLayout({ children }: { children: ReactNode }) {
       <Header />
       {children}
       <AnimatePresence>{!isUserTyping && <Footer />}</AnimatePresence>
+      <Toaster
+        containerClassName='!inset-6'
+        position='top-right'
+        gutter={12}
+        toastOptions={{
+          error: { icon: <RiErrorWarningFill /> },
+          success: { duration: 4000, icon: <RiCheckboxCircleFill /> },
+          loading: { icon: <RiLoaderLine className='animate-spin' /> },
+        }}
+      >
+        {(t) => <Toast t={t} />}
+      </Toaster>
     </div>
   );
 }
