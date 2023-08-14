@@ -14,6 +14,7 @@ import { toast } from 'react-hot-toast';
 import { RiAlertLine, RiDeleteBin7Line } from 'react-icons/ri';
 import { twMerge } from 'tailwind-merge';
 import { useImmer } from 'use-immer';
+import { toCamelCase } from 'utils/misc';
 import { CustomTheme, ThemeColors, themeColorVariables } from 'utils/theme';
 import ThemeButton from './ThemeButton';
 
@@ -39,18 +40,28 @@ const initialColors = Object.keys(themeColorVariables).reduce((colors, key) => {
   return colors;
 }, {} as ThemeColors);
 
+function validateColor(value: string = '', colors?: ThemeColors) {
+  let color = value;
+  const variableRegex = /^var\((--(.*)-color)\)$/;
+  const match = value.match(variableRegex);
+  if (match) color = validateColor(colors?.[toCamelCase(match[2])], colors).color;
+  return { color, isValid: colord(color).isValid() };
+}
+
 interface ColorInputProps extends InputProps {
   colorKey: Color;
   value: string;
+  computedValue?: string;
   setValue: (value: string) => void;
 }
 
-function ColorInput({ colorKey, value, setValue, ...props }: ColorInputProps) {
+function ColorInput({ colorKey, value, computedValue, setValue, ...props }: ColorInputProps) {
   return (
     <Input
-      error={!colord(value).isValid() && 'Invalid color'}
       label={LABELS[colorKey]}
-      leftNode={<ColorPicker color={value} onChange={(color) => setValue(color)} />}
+      leftNode={
+        <ColorPicker color={computedValue ?? value} onChange={(color) => setValue(color)} />
+      }
       value={value}
       onChange={({ target: { value } }) => setValue(value)}
       {...props}
@@ -227,26 +238,35 @@ export default function CustomTheme({ className, ...props }: HTMLMotionProps<'di
               value={name}
               onChange={setName}
             />
-            {Object.entries(inputColors).map(([key, value]) => (
-              <ColorInput
-                key={key}
-                colorKey={key}
-                value={value}
-                setValue={(value) => setInputColors((draft) => void (draft[key] = value))}
-                rightNode={
-                  ['main', 'sub', 'text'].includes(key) &&
-                  colord(value).isValid() &&
-                  colord(value).contrast(inputColors.bg) < 2 && (
-                    <Tooltip label='Poor contrast ratio' offset={14}>
-                      <Button className='p-0 text-main' tabIndex={-1} onClick={modalHandler.open}>
-                        <RiAlertLine />
-                      </Button>
-                    </Tooltip>
-                  )
-                }
-              />
-            ))}
-            <div className='col-span-full mt-3 flex gap-2'>
+            {Object.entries(inputColors).map(([key, value]) => {
+              const { color, isValid } = validateColor(value, inputColors);
+              return (
+                <ColorInput
+                  key={key}
+                  colorKey={key}
+                  value={value}
+                  computedValue={color}
+                  error={!isValid && 'Invalid color'}
+                  setValue={(value) => setInputColors((draft) => void (draft[key] = value))}
+                  rightNode={
+                    ['main', 'sub', 'text'].includes(key) &&
+                    isValid &&
+                    colord(color).contrast(inputColors.bg) < 2 && (
+                      <Tooltip label='Poor contrast ratio' offset={14}>
+                        <Button className='p-0 text-main' tabIndex={-1} onClick={modalHandler.open}>
+                          <RiAlertLine />
+                        </Button>
+                      </Tooltip>
+                    )
+                  }
+                />
+              );
+            })}
+            <Text className='col-span-full text-sm' dimmed>
+              tip: you can use css variables to reference other colors (e.g.{' '}
+              <code className='rounded bg-sub-alt px-1 py-0.5 font-default'>var(--bg-color)</code>)
+            </Text>
+            <div className='col-span-full mt-2 flex gap-2'>
               <Button
                 className='w-full'
                 variant='danger'
@@ -263,7 +283,10 @@ export default function CustomTheme({ className, ...props }: HTMLMotionProps<'di
               <Button
                 type='submit'
                 disabled={
-                  !name || Object.values(inputColors).some((color) => !colord(color).isValid())
+                  !name ||
+                  Object.values(inputColors).some(
+                    (color) => !validateColor(color, inputColors).isValid,
+                  )
                 }
                 {...COMMON_BUTTON_PROPS}
               >
