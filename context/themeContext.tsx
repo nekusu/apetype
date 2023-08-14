@@ -4,6 +4,8 @@ import { useDidUpdate, useIsomorphicEffect, useTimeout } from '@mantine/hooks';
 import { colord } from 'colord';
 import { useDidMount } from 'hooks/useDidMount';
 import { ReactNode, createContext, useCallback, useContext, useMemo, useState } from 'react';
+import { toast } from 'react-hot-toast';
+import { RiAlertFill } from 'react-icons/ri';
 import useSWRImmutable from 'swr/immutable';
 import { Updater, useImmer } from 'use-immer';
 import { getRandomNumber, replaceSpaces } from 'utils/misc';
@@ -53,10 +55,13 @@ export function ThemeProvider({ children, previewDelay, themes }: ThemeProviderP
     setSettings,
   } = useSettings();
   const [themeValues, setThemeValues] = useImmer<ThemeValues>({
-    themes: themes.reduce((themes, { name, bgColor, mainColor, subColor, textColor }) => {
-      themes[name] = { bg: bgColor, main: mainColor, sub: subColor, text: textColor };
-      return themes;
-    }, {} as ThemeContext['themes']),
+    themes: themes.reduce(
+      (themes, { name, bgColor, mainColor, subColor, textColor }) => {
+        themes[name] = { bg: bgColor, main: mainColor, sub: subColor, text: textColor };
+        return themes;
+      },
+      {} as ThemeContext['themes'],
+    ),
     colors: {},
   });
   const [presetName, setPresetName] = useState(replaceSpaces(theme));
@@ -68,11 +73,11 @@ export function ThemeProvider({ children, previewDelay, themes }: ThemeProviderP
   const { data: presetColors, isLoading } = useSWRImmutable<ThemeColors, Error>(
     `${STATIC_URL}/themes/${presetName}.css`,
     (url: string) => fetch(url).then(async (res) => extractThemeColors(await res.text())),
-    { keepPreviousData: true }
+    { keepPreviousData: true },
   );
   const customTheme = useMemo(
     () => customThemes.find(({ id }) => id === (previewThemeId ?? customThemeId)),
-    [customThemeId, customThemes, previewThemeId]
+    [customThemeId, customThemes, previewThemeId],
   );
   const previewTheme = useCallback(
     (id?: string) => {
@@ -82,7 +87,7 @@ export function ThemeProvider({ children, previewDelay, themes }: ThemeProviderP
         start(id);
       } else setPreviewThemeId(id);
     },
-    [clear, start, themeType]
+    [clear, start, themeType],
   );
   const clearPreview = useCallback(() => {
     clear();
@@ -94,16 +99,29 @@ export function ThemeProvider({ children, previewDelay, themes }: ThemeProviderP
     const params = new URLSearchParams(document.location.search);
     const encodedCustomTheme = params.get('customTheme');
     if (encodedCustomTheme) {
+      const toastId = toast.loading('Loading custom theme...');
       const customTheme = JSON.parse(
-        Buffer.from(encodedCustomTheme, 'base64').toString()
+        Buffer.from(encodedCustomTheme, 'base64').toString(),
       ) as CustomTheme;
-      if (!customThemes.find(({ id }) => id === customTheme.id))
+
+      window.history.replaceState('', '', '/');
+      setTimeout(() => {
         setSettings((draft) => {
-          draft.themeType = 'custom';
-          draft.customThemes.push(customTheme);
-          draft.customThemes.sort((a, b) => a.name.localeCompare(b.name));
-          draft.customTheme = customTheme.id;
+          if (!draft.customThemes.find(({ id }) => id === customTheme.id)) {
+            draft.themeType = 'custom';
+            draft.customThemes.push(customTheme);
+            draft.customThemes.sort((a, b) => a.name.localeCompare(b.name));
+            draft.customTheme = customTheme.id;
+            toast.success(`Added '${customTheme.name}' custom theme successfully!`, {
+              id: toastId,
+            });
+          } else
+            toast(`Custom theme '${customTheme.name}' already exists!`, {
+              id: toastId,
+              icon: <RiAlertFill />,
+            });
         });
+      }, 500);
     }
   });
   useDidUpdate(() => {
@@ -124,7 +142,7 @@ export function ThemeProvider({ children, previewDelay, themes }: ThemeProviderP
             name !== theme &&
             (randomizeTheme === true ||
               (randomizeTheme === 'light' && colord(bgColor).isLight()) ||
-              (randomizeTheme === 'dark' && colord(bgColor).isDark()))
+              (randomizeTheme === 'dark' && colord(bgColor).isDark())),
         );
         const randomTheme = themeList[getRandomNumber(themeList.length - 1)];
         setSettings((draft) => void (randomTheme && (draft.theme = randomTheme.name)));
@@ -134,7 +152,7 @@ export function ThemeProvider({ children, previewDelay, themes }: ThemeProviderP
             id !== customThemeId &&
             (randomizeTheme === true ||
               (randomizeTheme === 'light' && colord(bg).isLight()) ||
-              (randomizeTheme === 'dark' && colord(bg).isDark()))
+              (randomizeTheme === 'dark' && colord(bg).isDark())),
         );
         const randomTheme = themeList[getRandomNumber(themeList.length - 1)];
         setSettings((draft) => void (randomTheme && (draft.customTheme = randomTheme.id)));

@@ -11,6 +11,7 @@ import { AnimatePresence } from 'framer-motion';
 import { useLanguage } from 'hooks/useLanguage';
 import { toPng } from 'html-to-image';
 import { useEffect, useRef, useState } from 'react';
+import { toast } from 'react-hot-toast';
 import {
   RiArrowRightLine,
   RiEarthFill,
@@ -66,6 +67,7 @@ export default function Test() {
         link.download = 'typing-test.png';
         link.click();
         setShowResultDate(false);
+        toast.success('Screenshot saved successfully!');
       });
     }, 0);
   };
