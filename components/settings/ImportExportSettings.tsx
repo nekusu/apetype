@@ -6,6 +6,7 @@ import { ButtonProps } from 'components/core/Button';
 import { ModalProps } from 'components/core/Modal';
 import { useSettings } from 'context/settingsContext';
 import { ChangeEvent, ReactNode, useEffect, useRef, useState } from 'react';
+import { toast } from 'react-hot-toast';
 import { IconType } from 'react-icons';
 import {
   RiAlertLine,
@@ -161,7 +162,11 @@ export default function ImportExportSettings() {
           import
         </Button>
         <Button asChild {...COMMON_BUTTON_PROPS}>
-          <a href={settingsURL} download='settings.json'>
+          <a
+            href={settingsURL}
+            download='settings.json'
+            onClick={() => toast.success('Settings exported successfully!')}
+          >
             export
           </a>
         </Button>
