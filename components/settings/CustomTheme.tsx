@@ -1,9 +1,16 @@
 'use client';
 
-import { useDidUpdate, useDisclosure, useInputState } from '@mantine/hooks';
+import {
+  useDidUpdate,
+  useDisclosure,
+  useEyeDropper,
+  useFocusWithin,
+  useInputState,
+  useMergedRef,
+} from '@mantine/hooks';
 import { colord, extend } from 'colord';
 import a11yPlugin from 'colord/plugins/a11y';
-import { Button, ColorPicker, Input, Modal, Text, Tooltip, Transition } from 'components/core';
+import { Button, ColorPicker, Input, Key, Modal, Text, Tooltip, Transition } from 'components/core';
 import { ButtonProps } from 'components/core/Button';
 import { InputProps } from 'components/core/Input';
 import { useSettings } from 'context/settingsContext';
@@ -11,7 +18,7 @@ import { useTheme } from 'context/themeContext';
 import { AnimatePresence, HTMLMotionProps } from 'framer-motion';
 import { useEffect, useRef } from 'react';
 import { toast } from 'react-hot-toast';
-import { RiAlertLine, RiDeleteBin7Line } from 'react-icons/ri';
+import { RiAlertLine, RiDeleteBin7Line, RiFocus3Line, RiForbidFill } from 'react-icons/ri';
 import { twMerge } from 'tailwind-merge';
 import { useImmer } from 'use-immer';
 import { toCamelCase } from 'utils/misc';
@@ -55,12 +62,61 @@ interface ColorInputProps extends InputProps {
   setValue: (value: string) => void;
 }
 
-function ColorInput({ colorKey, value, computedValue, setValue, ...props }: ColorInputProps) {
+function ColorInput({
+  colorKey,
+  value,
+  computedValue,
+  rightNode,
+  setValue,
+  ...props
+}: ColorInputProps) {
+  const { supported, open } = useEyeDropper();
+  const { ref, focused } = useFocusWithin();
+  const inputRef = useRef<HTMLInputElement>(null);
+  const mergedRef = useMergedRef(ref, inputRef);
+
+  const pickColor = async () => {
+    const toastId = toast(
+      (t) => (
+        <div className='flex items-center gap-2.5 -mb-0.5'>
+          <span className='shrink-0 text-size-lg text-main'>{t.icon}</span>
+          <Text className='leading-tight'>
+            Press <Key className='text-sm'>esc</Key> to cancel selection.
+          </Text>
+        </div>
+      ),
+      { duration: Infinity, icon: <RiForbidFill /> },
+    );
+    try {
+      const { sRGBHex } = await open();
+      setValue(sRGBHex);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      inputRef.current?.focus();
+      toast.dismiss(toastId);
+    }
+  };
+
   return (
     <Input
+      ref={mergedRef}
+      tabIndex={0}
       label={LABELS[colorKey]}
       leftNode={
         <ColorPicker color={computedValue ?? value} onChange={(color) => setValue(color)} />
+      }
+      rightNode={
+        <div className='flex gap-1.5'>
+          {supported && focused && (
+            <Tooltip label='Pick color'>
+              <Button className='p-0' tabIndex={-1} onMouseDown={() => void pickColor()}>
+                <RiFocus3Line />
+              </Button>
+            </Tooltip>
+          )}
+          {rightNode}
+        </div>
       }
       value={value}
       onChange={({ target: { value } }) => setValue(value)}
