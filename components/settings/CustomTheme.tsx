@@ -69,12 +69,12 @@ function ColorInput({ colorKey, value, computedValue, setValue, ...props }: Colo
   );
 }
 
-interface ReadabilityModalProps {
+interface ModalProps {
   open: boolean;
   onClose: () => void;
 }
 
-function ReadabilityModal({ open, onClose }: ReadabilityModalProps) {
+function ReadabilityModal({ open, onClose }: ModalProps) {
   return (
     <Modal centered open={open} onClose={onClose}>
       <div className='max-w-sm flex flex-col gap-3.5 text-sm'>
@@ -115,13 +115,13 @@ export default function CustomTheme({ className, ...props }: HTMLMotionProps<'di
   const themeButtonRef = useRef<HTMLButtonElement>(null);
   const customTheme = customThemes.find(({ id }) => id === customThemeId);
 
-  const addTheme = (theme: Omit<CustomTheme, 'id'>) => {
-    const id = crypto.randomUUID();
+  const addTheme = (theme: Optional<CustomTheme, 'id'>) => {
+    const id = theme.id ?? crypto.randomUUID();
     setSettings((draft) => {
       if (!draft.customThemes.some((theme) => theme.id === id)) {
         draft.customThemes.push({ ...theme, id });
         draft.customThemes.sort((a, b) => a.name.localeCompare(b.name));
-        draft.customTheme = id;
+        if (!theme.id) draft.customTheme = id;
       }
     });
   };
@@ -133,6 +133,24 @@ export default function CustomTheme({ className, ...props }: HTMLMotionProps<'di
       }
       draft.customThemes = draft.customThemes.filter((theme) => theme.id !== id);
     });
+  };
+  const showRestoreThemeToast = (theme: CustomTheme) => {
+    toast(
+      (t) => (
+        <div className='flex flex-col gap-2'>
+          <Text className='leading-tight'>Custom theme &apos;{theme.name}&apos; deleted!</Text>
+          <div className='flex gap-2'>
+            <Button className='w-full' variant='subtle' onClick={() => toast.dismiss(t.id)}>
+              dismiss
+            </Button>
+            <Button active className='w-full' variant='filled' onClick={() => addTheme(theme)}>
+              restore theme
+            </Button>
+          </div>
+        </div>
+      ),
+      { duration: 8000 },
+    );
   };
   const duplicateTheme = () => {
     if (!customTheme) return;
@@ -209,6 +227,7 @@ export default function CustomTheme({ className, ...props }: HTMLMotionProps<'di
                             size={16}
                             onClick={(e) => {
                               e.stopPropagation();
+                              showRestoreThemeToast({ id, name, colors });
                               deleteTheme(id);
                             }}
                           />
@@ -264,13 +283,21 @@ export default function CustomTheme({ className, ...props }: HTMLMotionProps<'di
             })}
             <Text className='col-span-full text-sm' dimmed>
               tip: you can use css variables to reference other colors (e.g.{' '}
-              <code className='rounded bg-sub-alt px-1 py-0.5 font-default'>var(--bg-color)</code>)
+              <code className='rounded bg-sub-alt px-1 py-0.5 font-default transition-colors'>
+                var(--bg-color)
+              </code>
+              )
             </Text>
             <div className='col-span-full mt-2 flex gap-2'>
               <Button
                 className='w-full'
                 variant='danger'
-                onClick={() => customThemeId && deleteTheme(customThemeId)}
+                onClick={() => {
+                  if (customTheme) {
+                    showRestoreThemeToast(customTheme);
+                    deleteTheme(customThemeId);
+                  }
+                }}
               >
                 delete
               </Button>
