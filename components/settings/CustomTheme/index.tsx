@@ -1,47 +1,29 @@
 'use client';
 
-import {
-  useDidUpdate,
-  useDisclosure,
-  useEyeDropper,
-  useFocusWithin,
-  useInputState,
-  useMergedRef,
-} from '@mantine/hooks';
+import { useDidUpdate, useDisclosure, useInputState } from '@mantine/hooks';
 import { colord, extend } from 'colord';
 import a11yPlugin from 'colord/plugins/a11y';
-import { Button, ColorPicker, Input, Key, Modal, Text, Tooltip, Transition } from 'components/core';
+import { Button, Input, Text, Tooltip, Transition } from 'components/core';
 import { ButtonProps } from 'components/core/Button';
-import { InputProps } from 'components/core/Input';
+import { ThemeButton } from 'components/settings';
 import { useSettings } from 'context/settingsContext';
 import { useTheme } from 'context/themeContext';
 import { AnimatePresence, HTMLMotionProps } from 'framer-motion';
 import { useEffect, useRef } from 'react';
 import { toast } from 'react-hot-toast';
-import { RiAlertLine, RiDeleteBin7Line, RiFocus3Line, RiForbidFill } from 'react-icons/ri';
+import { RiAlertLine, RiDeleteBin7Line } from 'react-icons/ri';
 import { twMerge } from 'tailwind-merge';
 import { useImmer } from 'use-immer';
 import { toCamelCase } from 'utils/misc';
 import { CustomTheme, ThemeColors, themeColorVariables } from 'utils/theme';
-import ThemeButton from './ThemeButton';
+import ColorInput from './ColorInput';
+import ReadabilityModal from './ReadabilityModal';
 
 type Color = keyof ThemeColors;
 
 extend([a11yPlugin]);
 
 const COMMON_BUTTON_PROPS: Omit<ButtonProps, 'ref'> = { className: 'w-full', variant: 'filled' };
-const LABELS: ThemeColors = {
-  bg: 'background',
-  main: 'main',
-  caret: 'caret',
-  sub: 'sub',
-  subAlt: 'sub alt',
-  text: 'text',
-  error: 'error',
-  errorExtra: 'error extra',
-  colorfulError: 'colorful error',
-  colorfulErrorExtra: 'colorful error extra',
-};
 const initialColors = Object.keys(themeColorVariables).reduce((colors, key) => {
   colors[key as Color] = '';
   return colors;
@@ -53,113 +35,6 @@ function validateColor(value: string = '', colors?: ThemeColors) {
   const match = value.match(variableRegex);
   if (match) color = validateColor(colors?.[toCamelCase(match[2])], colors).color;
   return { color, isValid: colord(color).isValid() };
-}
-
-interface ColorInputProps extends InputProps {
-  colorKey: Color;
-  value: string;
-  computedValue?: string;
-  setValue: (value: string) => void;
-}
-
-function ColorInput({
-  colorKey,
-  value,
-  computedValue,
-  rightNode,
-  setValue,
-  ...props
-}: ColorInputProps) {
-  const { supported, open } = useEyeDropper();
-  const { ref, focused } = useFocusWithin();
-  const inputRef = useRef<HTMLInputElement>(null);
-  const mergedRef = useMergedRef(ref, inputRef);
-
-  const pickColor = async () => {
-    const toastId = toast(
-      (t) => (
-        <div className='flex items-center gap-2.5 -mb-0.5'>
-          <span className='shrink-0 text-size-lg text-main'>{t.icon}</span>
-          <Text className='leading-tight'>
-            Press <Key className='text-sm'>esc</Key> to cancel selection.
-          </Text>
-        </div>
-      ),
-      { duration: Infinity, icon: <RiForbidFill /> },
-    );
-    try {
-      const { sRGBHex } = await open();
-      setValue(sRGBHex);
-    } catch (e) {
-      console.error(e);
-    } finally {
-      inputRef.current?.focus();
-      toast.dismiss(toastId);
-    }
-  };
-
-  return (
-    <Input
-      ref={mergedRef}
-      tabIndex={0}
-      label={LABELS[colorKey]}
-      leftNode={
-        <ColorPicker color={computedValue ?? value} onChange={(color) => setValue(color)} />
-      }
-      rightNode={
-        <div className='flex gap-1.5'>
-          {supported && focused && (
-            <Tooltip label='Pick color'>
-              <Button className='p-0' tabIndex={-1} onMouseDown={() => void pickColor()}>
-                <RiFocus3Line />
-              </Button>
-            </Tooltip>
-          )}
-          {rightNode}
-        </div>
-      }
-      value={value}
-      onChange={({ target: { value } }) => setValue(value)}
-      {...props}
-    />
-  );
-}
-
-interface ModalProps {
-  open: boolean;
-  onClose: () => void;
-}
-
-function ReadabilityModal({ open, onClose }: ModalProps) {
-  return (
-    <Modal centered open={open} onClose={onClose}>
-      <div className='max-w-sm flex flex-col gap-3.5 text-sm'>
-        <Text asChild className='text-2xl'>
-          <h3>Readability</h3>
-        </Text>
-        <Text className='text-[length:inherit]' dimmed>
-          This color may have a negative impact on readability. For optimal results, make sure the
-          main, sub, and text colors have a contrast ratio of at least 2:1 with the background
-          color.
-        </Text>
-        <Text className='text-[length:inherit]' dimmed>
-          While a 2:1 contrast ratio is recommended, this does not meet the{' '}
-          <a
-            className='text-main hover:underline'
-            href='https://www.w3.org/WAI/WCAG21/Understanding/contrast-minimum.html'
-            target='_blank'
-          >
-            WCAG 2.1 accessibility guidelines
-          </a>
-          , which require a minimum of 4.5:1 for normal text and 3:1 for large text. To ensure
-          maximum legibility, consider using a higher contrast ratio.
-        </Text>
-        <Button className='w-full' variant='filled' onClick={onClose}>
-          ok
-        </Button>
-      </div>
-    </Modal>
-  );
 }
 
 export default function CustomTheme({ className, ...props }: HTMLMotionProps<'div'>) {
