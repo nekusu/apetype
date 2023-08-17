@@ -20,9 +20,11 @@ import { useSettings } from 'context/settingsContext';
 import { useTheme } from 'context/themeContext';
 import { useTypingTest } from 'context/typingTestContext';
 import { motion } from 'framer-motion';
+import { useMemo } from 'react';
 import { Chart as MultitypeChart } from 'react-chartjs-2';
 import { twJoin } from 'tailwind-merge';
 import { useImmer } from 'use-immer';
+import { ThemeColors, validateColor } from 'utils/theme';
 
 ChartJS.register(
   CategoryScale,
@@ -32,7 +34,7 @@ ChartJS.register(
   LineElement,
   PointElement,
   ScatterController,
-  Tooltip
+  Tooltip,
 );
 
 function getFontFamily() {
@@ -79,13 +81,21 @@ function ChartTooltip({ position: { top, left }, data, disabled }: ChartTooltipP
 export default function Chart() {
   const { showDecimalPlaces, themeType } = useSettings();
   const theme = useTheme();
-  const colors = theme.colors[themeType];
   const { stats, elapsedTime } = useTypingTest();
   const { raw, wpm, errors } = stats;
   const [tooltip, setTooltip] = useImmer<ChartTooltipProps>({
     position: { top: 0, left: 0 },
     disabled: true,
   });
+  const colors = useMemo(
+    () =>
+      Object.entries(theme.colors[themeType] ?? {}).reduce((colors, [key, color]) => {
+        colors[key] = validateColor(color).color;
+        console.log(colors[key]);
+        return colors;
+      }, {} as ThemeColors),
+    [theme.colors, themeType],
+  );
 
   const labels = Array.from({ length: stats.raw.length }, (_, i) => i + 1);
   if (stats.raw.length > elapsedTime) labels[stats.raw.length - 1] = elapsedTime;

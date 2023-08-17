@@ -14,8 +14,7 @@ import { toast } from 'react-hot-toast';
 import { RiAlertLine, RiDeleteBin7Line, RiPaintBrushFill, RiSparklingFill } from 'react-icons/ri';
 import { twMerge } from 'tailwind-merge';
 import { useImmer } from 'use-immer';
-import { toCamelCase } from 'utils/misc';
-import { CustomTheme, ThemeColors, themeColorVariables } from 'utils/theme';
+import { CustomTheme, ThemeColors, themeColorVariables, validateColor } from 'utils/theme';
 import AIThemeGenerationModal from './AIThemeGenerationModal';
 import ColorInput from './ColorInput';
 import ReadabilityModal from './ReadabilityModal';
@@ -29,14 +28,6 @@ const initialColors = Object.keys(themeColorVariables).reduce((colors, key) => {
   colors[key as Color] = '';
   return colors;
 }, {} as ThemeColors);
-
-function validateColor(value: string = '', colors?: ThemeColors) {
-  let color = value;
-  const variableRegex = /^var\((--(.*)-color)\)$/;
-  const match = value.match(variableRegex);
-  if (match) color = validateColor(colors?.[toCamelCase(match[2])], colors).color;
-  return { color, isValid: colord(color).isValid() };
-}
 
 export default function CustomTheme({ className, ...props }: HTMLMotionProps<'div'>) {
   const { theme, customThemes, customTheme: customThemeId, setSettings } = useSettings();

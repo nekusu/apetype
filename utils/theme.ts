@@ -1,3 +1,6 @@
+import { colord } from 'colord';
+import { toCamelCase } from './misc';
+
 export interface ThemeInfo {
   name: string;
   bgColor: string;
@@ -52,20 +55,34 @@ export function extractThemeColors(string: string) {
 
 export function getThemeColors() {
   const style = getComputedStyle(document.body);
-  return Object.entries(themeColorVariables).reduce((variables, [key, value]) => {
-    variables[key as keyof typeof themeColorVariables] = style?.getPropertyValue(value) ?? '';
-    return variables;
-  }, {} as typeof themeColorVariables);
+  return Object.entries(themeColorVariables).reduce(
+    (variables, [key, value]) => {
+      variables[key as keyof typeof themeColorVariables] = style?.getPropertyValue(value) ?? '';
+      return variables;
+    },
+    {} as typeof themeColorVariables,
+  );
 }
 
 export function setThemeColors(colors: ThemeColors, element = document.body) {
   Object.entries(colors).forEach(([key, value]) =>
-    element.style.setProperty(themeColorVariables[key as keyof typeof themeColorVariables], value)
+    element.style.setProperty(themeColorVariables[key as keyof typeof themeColorVariables], value),
   );
 }
 
 export function removeThemeColors() {
   Object.entries(themeColorVariables).forEach(([, value]) =>
-    document.body.style.removeProperty(value)
+    document.body.style.removeProperty(value),
   );
+}
+
+export function validateColor(value: string = '', colors?: ThemeColors) {
+  let color = value;
+  const variableRegex = /^var\((--(.*)-color)\)$/;
+  const match = value.match(variableRegex);
+  if (match) {
+    if (colors) color = validateColor(colors[toCamelCase(match[2])], colors).color;
+    else color = getComputedStyle(document.body).getPropertyValue(match[1]);
+  }
+  return { color, isValid: colord(color).isValid() };
 }
