@@ -1,6 +1,6 @@
 'use client';
 
-import { useDidUpdate, useDisclosure, useInputState } from '@mantine/hooks';
+import { useDidUpdate, useDisclosure, useInputState, useToggle } from '@mantine/hooks';
 import { colord, extend } from 'colord';
 import a11yPlugin from 'colord/plugins/a11y';
 import { Button, Input, Text, Tooltip, Transition } from 'components/core';
@@ -11,11 +11,12 @@ import { useTheme } from 'context/themeContext';
 import { AnimatePresence, HTMLMotionProps } from 'framer-motion';
 import { useEffect, useRef } from 'react';
 import { toast } from 'react-hot-toast';
-import { RiAlertLine, RiDeleteBin7Line } from 'react-icons/ri';
+import { RiAlertLine, RiDeleteBin7Line, RiPaintBrushFill, RiSparklingFill } from 'react-icons/ri';
 import { twMerge } from 'tailwind-merge';
 import { useImmer } from 'use-immer';
 import { toCamelCase } from 'utils/misc';
 import { CustomTheme, ThemeColors, themeColorVariables } from 'utils/theme';
+import AIThemeGenerationModal from './AIThemeGenerationModal';
 import ColorInput from './ColorInput';
 import ReadabilityModal from './ReadabilityModal';
 
@@ -40,9 +41,11 @@ function validateColor(value: string = '', colors?: ThemeColors) {
 export default function CustomTheme({ className, ...props }: HTMLMotionProps<'div'>) {
   const { theme, customThemes, customTheme: customThemeId, setSettings } = useSettings();
   const { colors } = useTheme();
+  const [themeCreation, toggleThemeCreation] = useToggle(['AI', 'preset']);
   const [name, setName] = useInputState('');
   const [inputColors, setInputColors] = useImmer(initialColors);
-  const [modalOpen, modalHandler] = useDisclosure(false);
+  const [themeModalOpen, themeModalHandler] = useDisclosure(false);
+  const [readabilityModalOpen, readabilityModalHandler] = useDisclosure(false);
   const themeButtonRef = useRef<HTMLButtonElement>(null);
   const customTheme = customThemes.find(({ id }) => id === customThemeId);
 
@@ -107,19 +110,29 @@ export default function CustomTheme({ className, ...props }: HTMLMotionProps<'di
     });
   };
 
-  const CreateThemeButton = ({ className }: ButtonProps) => (
-    <Button
-      className={className}
-      variant='filled'
-      onClick={() => {
-        if (!colors.preset) return;
-        setName(theme);
-        setInputColors(colors.preset);
-        addTheme({ name: theme, colors: colors.preset });
-      }}
-    >
-      create theme
-    </Button>
+  const CreateThemeButton = () => (
+    <div className='flex gap-2'>
+      <Button
+        className='col-span-full w-full px-3'
+        variant='filled'
+        onClick={() => {
+          if (themeCreation === 'AI') themeModalHandler.open();
+          else {
+            if (!colors.preset) return;
+            setName(theme);
+            setInputColors(colors.preset);
+            addTheme({ name: theme, colors: colors.preset });
+          }
+        }}
+      >
+        create theme
+      </Button>
+      <Tooltip label={themeCreation === 'AI' ? 'Generate with AI' : 'Load from preset'}>
+        <Button active className='px-2.5' variant='filled' onClick={() => toggleThemeCreation()}>
+          {themeCreation === 'AI' ? <RiSparklingFill /> : <RiPaintBrushFill />}
+        </Button>
+      </Tooltip>
+    </div>
   );
 
   useDidUpdate(() => {
@@ -145,7 +158,7 @@ export default function CustomTheme({ className, ...props }: HTMLMotionProps<'di
         <>
           <div className='relative'>
             <div className='absolute inset-0 flex flex-col gap-4'>
-              <CreateThemeButton className='w-full' />
+              <CreateThemeButton />
               <div className='h-full flex flex-col gap-2 overflow-y-auto pt-0.5'>
                 <AnimatePresence>
                   {customThemes.map(({ id, name, colors }) => (
@@ -203,7 +216,11 @@ export default function CustomTheme({ className, ...props }: HTMLMotionProps<'di
                     isValid &&
                     colord(color).contrast(inputColors.bg) < 2 && (
                       <Tooltip label='Poor contrast ratio' offset={14}>
-                        <Button className='p-0 text-main' tabIndex={-1} onClick={modalHandler.open}>
+                        <Button
+                          className='p-0 text-main'
+                          tabIndex={-1}
+                          onClick={readabilityModalHandler.open}
+                        >
                           <RiAlertLine />
                         </Button>
                       </Tooltip>
@@ -258,10 +275,15 @@ export default function CustomTheme({ className, ...props }: HTMLMotionProps<'di
           <Text className='text-center' dimmed>
             Looks like you don&apos;t have any custom theme yet.
           </Text>
-          <CreateThemeButton className='px-3' />
+          <CreateThemeButton />
         </>
       )}
-      <ReadabilityModal open={modalOpen} onClose={modalHandler.close} />
+      <AIThemeGenerationModal
+        open={themeModalOpen}
+        onClose={themeModalHandler.close}
+        addTheme={addTheme}
+      />
+      <ReadabilityModal open={readabilityModalOpen} onClose={readabilityModalHandler.close} />
     </Transition>
   );
 }
