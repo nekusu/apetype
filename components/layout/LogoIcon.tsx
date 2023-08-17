@@ -4,7 +4,7 @@ import { AnimationControls, SVGMotionProps, motion } from 'framer-motion';
 import { ComponentPropsWithoutRef, useMemo } from 'react';
 import { twMerge } from 'tailwind-merge';
 
-export interface LocoIconProps extends ComponentPropsWithoutRef<'svg'> {
+export interface LogoIconProps extends ComponentPropsWithoutRef<'svg'> {
   controls: AnimationControls;
   pathProps?: SVGMotionProps<SVGPathElement>;
   rectProps?: SVGMotionProps<SVGRectElement>;
@@ -16,7 +16,7 @@ export default function LogoIcon({
   pathProps,
   rectProps,
   ...props
-}: LocoIconProps) {
+}: LogoIconProps) {
   const _pathProps: typeof pathProps = useMemo(
     () => ({
       variants: {
