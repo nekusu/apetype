@@ -2,10 +2,21 @@
 
 import { Transition } from 'components/core';
 import { LogoIcon } from 'components/layout';
-import { useAnimation } from 'framer-motion';
+import { LogoIconProps } from 'components/layout/LogoIcon';
+import { HTMLMotionProps, useAnimation } from 'framer-motion';
 import { useEffect } from 'react';
+import { twMerge } from 'tailwind-merge';
 
-export default function Loading() {
+export interface LoadingProps extends HTMLMotionProps<'div'> {
+  logoIconProps?: Partial<LogoIconProps>;
+}
+
+export default function Loading({
+  className,
+  logoIconProps: _logoIconProps,
+  ...props
+}: LoadingProps) {
+  const { className: logoIconClassName, ...logoIconProps } = _logoIconProps ?? {};
   const animationControls = useAnimation();
 
   useEffect(() => {
@@ -16,8 +27,17 @@ export default function Loading() {
   }, [animationControls]);
 
   return (
-    <Transition className='flex items-center justify-center' transition={{ duration: 0.5 }}>
-      <LogoIcon className='animate-pulse-alt stroke-sub' width='70' controls={animationControls} />
+    <Transition
+      className={twMerge(['flex items-center justify-center', className])}
+      transition={{ duration: 0.5 }}
+      {...props}
+    >
+      <LogoIcon
+        className={twMerge(['animate-pulse-alt stroke-sub', logoIconClassName])}
+        width='70'
+        controls={animationControls}
+        {...logoIconProps}
+      />
     </Transition>
   );
 }
