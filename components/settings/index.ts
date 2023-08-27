@@ -1,4 +1,5 @@
 export { default as CustomTheme } from './CustomTheme';
+export { default as DeleteAccount } from './DeleteAccount';
 export { default as FontFamily } from './FontFamily';
 export { default as ImportExportSettings } from './ImportExportSettings';
 export { default as PersistentCache } from './PersistentCache';

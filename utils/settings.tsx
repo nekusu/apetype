@@ -82,7 +82,7 @@ function create<T extends keyof Settings = 'mode'>({
     id: toCamelCase(params.command) as keyof Settings,
     options:
       (options?.map((option) =>
-        typeof option !== 'object' ? { value: option } : option
+        typeof option !== 'object' ? { value: option } : option,
       ) as SettingParams<T>['options']) ?? [],
     ...params,
   } as const;
@@ -471,6 +471,17 @@ export const settingsList = {
     ),
     options: OFF_ON_OPTIONS,
   }),
+  deleteAccount: create({
+    command: 'delete account',
+    category: 'danger zone',
+    description: (
+      <>
+        Deletes your account and all your data.
+        <br />
+        <span className='text-error'>You can&apos;t undo this action!</span>
+      </>
+    ),
+  }),
 };
 
 export const defaultSettings: Settings = {
@@ -523,7 +534,7 @@ export const defaultSettings: Settings = {
 
 export function validateSettings(
   settings: Partial<Settings>,
-  customProperties?: Partial<Record<keyof Settings, z.ZodType>>
+  customProperties?: Partial<Record<keyof Settings, z.ZodType>>,
 ) {
   const customThemeIds = settings.customThemes?.map(({ id }) => id) ?? [];
   const schemaProperties: Record<keyof Settings, z.ZodType> = {
@@ -638,6 +649,6 @@ export function validateSettings(
 
   return [newSettings, { missing, invalid, unknown }] as [
     Settings,
-    { missing: typeof missing; invalid: typeof invalid; unknown: typeof unknown }
+    { missing: typeof missing; invalid: typeof invalid; unknown: typeof unknown },
   ];
 }

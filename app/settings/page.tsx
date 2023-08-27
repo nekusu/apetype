@@ -11,41 +11,52 @@ import {
   Theme,
 } from 'components/settings';
 import { useGlobal } from 'context/globalContext';
+import { useUser } from 'context/userContext';
 import { motion } from 'framer-motion';
+import dynamic from 'next/dynamic';
 import { ReactNode, useEffect, useMemo, useRef, useState } from 'react';
 import { twJoin } from 'tailwind-merge';
 import { replaceSpaces } from 'utils/misc';
 import { categories, settingsList } from 'utils/settings';
 
+const DeleteAccount = dynamic(() => import('components/settings/DeleteAccount'));
+
 type SettingsList = typeof settingsList;
 type Category = (typeof categories)[number];
 
-const customComponents: Partial<Record<keyof SettingsList, ReactNode>> = {
-  soundOnClick: <SoundOnClick key='soundOnClick' />,
-  fontFamily: <FontFamily key='fontFamily' />,
-  theme: <Theme key='theme' />,
-  importExportSettings: <ImportExportSettings key='importExportSettings' />,
-  resetSettings: <ResetSettings key='resetSettings' />,
-  persistentCache: <PersistentCache key='persistentCache' />,
-};
-
 export default function Page() {
   const { settingsList } = useGlobal();
+  const { user } = useUser();
   const settingsListEntries = useMemo(
     () =>
       Object.entries(settingsList).filter(([, { hidden }]) => !hidden) as [
         keyof SettingsList,
-        SettingsList[keyof SettingsList]
+        SettingsList[keyof SettingsList],
       ][],
-    [settingsList]
+    [settingsList],
+  );
+  const customComponents: Partial<Record<keyof SettingsList, ReactNode>> = useMemo(
+    () => ({
+      soundOnClick: <SoundOnClick key='soundOnClick' />,
+      fontFamily: <FontFamily key='fontFamily' />,
+      theme: <Theme key='theme' />,
+      importExportSettings: <ImportExportSettings key='importExportSettings' />,
+      resetSettings: <ResetSettings key='resetSettings' />,
+      persistentCache: <PersistentCache key='persistentCache' />,
+      deleteAccount: user ? <DeleteAccount key='deleteAccount' /> : null,
+    }),
+    [user],
   );
   const settingsComponents = useMemo(() => {
-    const components = settingsListEntries.reduce((components, [id]) => {
-      if (!customComponents[id]) components[id] = <Setting key={id} id={id} />;
-      return components;
-    }, {} as Record<keyof SettingsList, ReactNode>);
+    const components = settingsListEntries.reduce(
+      (components, [id]) => {
+        if (!customComponents[id]) components[id] = <Setting key={id} id={id} />;
+        return components;
+      },
+      {} as Record<keyof SettingsList, ReactNode>,
+    );
     return { ...components, ...customComponents };
-  }, [settingsListEntries]);
+  }, [customComponents, settingsListEntries]);
   const [currentCategory, setCurrentCategory] = useState<Category>(categories[0]);
   const listRef = useRef<HTMLDivElement>(null);
 
@@ -59,7 +70,7 @@ export default function Page() {
           }
         }
       },
-      { root: listRef.current, rootMargin: '-10% 0px -90%' }
+      { root: listRef.current, rootMargin: '-10% 0px -90%' },
     );
     if (listRef.current)
       Array.from(listRef.current.children).forEach((child) => observer.observe(child));
