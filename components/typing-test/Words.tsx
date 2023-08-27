@@ -9,7 +9,7 @@ import { useCaretPosition } from 'hooks/useCaretPosition';
 import { useDidMount } from 'hooks/useDidMount';
 import { useLineScroll } from 'hooks/useLineScroll';
 import { useWords } from 'hooks/useWords';
-import { useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { RiCursorFill } from 'react-icons/ri';
 import { twJoin } from 'tailwind-merge';
 import { Caret, Word } from '.';
@@ -39,16 +39,16 @@ export default function Words() {
   const { start: startBlur, clear: clearBlur } = useTimeout(() => setIsBlurred(true), 1000);
   const { start: startIdle, clear: clearIdle } = useTimeout(
     () => setGlobalValues((draft) => void (draft.isUserTyping = false)),
-    1000
+    1000,
   );
   const inputRef = useRef<HTMLInputElement>(null);
   const highestWordIndex = useRef(0);
-  const focusWords = () => {
+  const focusWords = useCallback(() => {
     clearBlur();
     setIsFocused(true);
     setIsBlurred(false);
     inputRef.current?.focus();
-  };
+  }, [clearBlur]);
   const blurWords = () => {
     clearBlur();
     startBlur();
@@ -70,8 +70,10 @@ export default function Words() {
 
   useDidMount(() => {
     wordsCollection.add(mode === 'words' && wordAmount ? wordAmount : 100);
-    if (!modalOpen) focusWords();
   });
+  useEffect(() => {
+    if (!modalOpen) focusWords();
+  }, [focusWords, modalOpen]);
   useDidUpdate(() => {
     if (wordIndex > highestWordIndex.current) {
       if (mode === 'time' || words.length < (wordAmount || Infinity)) wordsCollection.add(1);
