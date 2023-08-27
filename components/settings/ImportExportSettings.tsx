@@ -85,7 +85,7 @@ function ImportSettingsModal({ className, ...props }: ModalProps) {
   }, [open]);
 
   return (
-    <Modal className={twMerge(['w-full max-w-sm cursor-default', className])} centered {...props}>
+    <Modal className={twMerge(['w-full max-w-sm', className])} centered {...props}>
       <form
         ref={formRef}
         className='flex flex-col gap-3.5'

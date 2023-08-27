@@ -17,12 +17,7 @@ export default function ResetSettings() {
           reset settings
         </Button>
       </Setting>
-      <Modal
-        className='max-w-sm w-full cursor-default'
-        open={modalOpen}
-        onClose={modalHandler.close}
-        centered
-      >
+      <Modal className='max-w-sm w-full' open={modalOpen} onClose={modalHandler.close} centered>
         <div className='flex flex-col gap-3.5'>
           <Text asChild className='text-2xl'>
             <h3>Reset settings</h3>

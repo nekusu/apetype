@@ -29,12 +29,7 @@ export default function FontFamily() {
           custom {isCustomFont && `(${fontFamily})`}
         </Button>
       </Setting>
-      <Modal
-        className='max-w-sm w-full cursor-default'
-        open={modalOpen}
-        onClose={modalHandler.close}
-        centered
-      >
+      <Modal className='max-w-sm w-full' open={modalOpen} onClose={modalHandler.close} centered>
         <form
           className='flex flex-col gap-3.5'
           onSubmit={(event) => {

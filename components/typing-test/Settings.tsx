@@ -28,7 +28,7 @@ function getDurationPreview(time: number) {
 }
 
 export default function Settings() {
-  const { settingsList, setGlobalValues } = useGlobal();
+  const { settingsList } = useGlobal();
   const settings = useSettings();
   const { mode, setSettings } = settings;
   const [modalOpen, modalHandler] = useDisclosure(false);
@@ -41,9 +41,6 @@ export default function Settings() {
   useEffect(() => {
     setCustomAmount(settings[mode]);
   }, [mode, settings]);
-  useDidUpdate(() => {
-    setGlobalValues((draft) => void (draft.modalOpen = modalOpen));
-  }, [modalOpen]);
   useDidUpdate(() => {
     if (modalOpen) setCustomAmount(settings[mode]);
   }, [modalOpen, mode, settings]);
@@ -82,12 +79,7 @@ export default function Settings() {
           {customActive && (customAmount || 'Infinite')}
         </Button>
       )}
-      <Modal
-        className='max-w-sm w-full cursor-default'
-        open={modalOpen}
-        onClose={modalHandler.close}
-        centered
-      >
+      <Modal className='max-w-sm w-full' open={modalOpen} onClose={modalHandler.close} centered>
         <form
           className='flex flex-col gap-3.5'
           onSubmit={(event) => {

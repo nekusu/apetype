@@ -2,6 +2,7 @@
 
 import { FloatingPortal } from '@floating-ui/react';
 import { useFocusTrap, useHotkeys, useScrollLock } from '@mantine/hooks';
+import { useGlobal } from 'context/globalContext';
 import { AnimatePresence, HTMLMotionProps } from 'framer-motion';
 import { MouseEvent, useEffect } from 'react';
 import { twMerge } from 'tailwind-merge';
@@ -36,16 +37,20 @@ export default function Modal({
   trapFocus = true,
   ...props
 }: ModalProps) {
+  const { setGlobalValues } = useGlobal();
   const [, setScrollLocked] = useScrollLock();
   const focusTrapRef = useFocusTrap(trapFocus && open);
 
   const handleEscapePress = () => {
-    if (closeOnEscape) onClose?.();
+    if (closeOnEscape && open) onClose?.();
   };
   const handleOutsideClick = (event: MouseEvent) => {
     if (closeOnClickOutside && event.target === event.currentTarget) onClose?.();
   };
 
+  useEffect(() => {
+    setGlobalValues((draft) => void (draft.modalOpen = open));
+  }, [open, setGlobalValues]);
   useEffect(() => {
     setScrollLocked(lockScroll && open);
   }, [lockScroll, open, setScrollLocked]);
@@ -68,7 +73,7 @@ export default function Modal({
             <Transition
               ref={focusTrapRef}
               className={twMerge([
-                'relative rounded-lg bg-bg p-6 shadow-2xl transition-colors',
+                'relative rounded-lg bg-bg p-6 shadow-2xl transition-colors cursor-default',
                 overflow === 'inside' && 'max-h-full overflow-y-auto',
                 className,
               ])}

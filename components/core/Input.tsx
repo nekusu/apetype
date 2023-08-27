@@ -1,14 +1,7 @@
 'use client';
 
-import { useId, useMergedRef } from '@mantine/hooks';
-import {
-  ComponentPropsWithoutRef,
-  ElementRef,
-  ReactNode,
-  forwardRef,
-  useRef,
-  useState,
-} from 'react';
+import { useFocusWithin, useId, useMergedRef } from '@mantine/hooks';
+import { ComponentPropsWithoutRef, ElementRef, ReactNode, forwardRef } from 'react';
 import { RiErrorWarningLine } from 'react-icons/ri';
 import { twMerge } from 'tailwind-merge';
 import Tooltip from './Tooltip';
@@ -31,20 +24,17 @@ const Input = forwardRef<ElementRef<'input'>, InputProps>(function Input(
     inputClassName,
     label,
     leftNode,
-    onFocus,
-    onBlur,
     rightNode,
     type = 'text',
     wrapperClassName,
     ...props
   },
-  ref
+  ref,
 ) {
   const uuid = useId(id);
-  const [isFocused, setIsFocused] = useState(false);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const { ref: inputRef, focused } = useFocusWithin<HTMLInputElement>();
   const mergedRef = useMergedRef(ref, inputRef);
-  const isErrorVisible = !isFocused && error;
+  const isErrorVisible = !focused && error;
 
   return (
     <div
@@ -62,10 +52,11 @@ const Input = forwardRef<ElementRef<'input'>, InputProps>(function Input(
           {label}
         </label>
       )}
-      <Tooltip className='bg-error text-bg' label={error} disabled={!isErrorVisible}>
+      <Tooltip className='bg-error text-bg' label={error} disabled={!error}>
         <div
           className={twMerge([
             'flex w-full cursor-text items-center rounded-lg bg-sub-alt px-3 py-2 text-sub caret-main focus-within:outline-solid transition focus-within:text-text outline-2 outline-main -outline-offset-2 active:translate-y-0.5',
+            error && 'outline-error',
             className,
           ])}
           onClick={() => inputRef.current?.focus()}
@@ -83,18 +74,12 @@ const Input = forwardRef<ElementRef<'input'>, InputProps>(function Input(
             disabled={disabled}
             id={uuid}
             type={type}
-            onFocus={(e) => {
-              setIsFocused(true);
-              onFocus?.(e);
-            }}
-            onBlur={(e) => {
-              setIsFocused(false);
-              onBlur?.(e);
-            }}
             {...props}
           />
+          {isErrorVisible && (
+            <RiErrorWarningLine className='min-w-max text-error not-last-mr-1.5' />
+          )}
           {rightNode}
-          {isErrorVisible && <RiErrorWarningLine className='ml-2 min-w-max text-error' />}
         </div>
       </Tooltip>
     </div>

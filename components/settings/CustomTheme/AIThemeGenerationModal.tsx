@@ -67,7 +67,7 @@ export default function AIThemeGenerationModal({ open, onClose, addTheme }: Moda
   }, [open]);
 
   return (
-    <Modal className='cursor-default' centered open={open} onClose={onClose}>
+    <Modal centered open={open} onClose={onClose}>
       <div className='max-w-sm flex flex-col gap-3.5 text-sm'>
         <Text asChild className='text-2xl'>
           <h3>AI Theme Generation</h3>

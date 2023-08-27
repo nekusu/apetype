@@ -37,11 +37,7 @@ ChartJS.register(
   Tooltip,
 );
 
-function getFontFamily() {
-  return getComputedStyle(document.body).getPropertyValue('--font');
-}
-
-export interface ChartTooltipProps {
+interface ChartTooltipProps {
   position: { top: number; left: number };
   data?: TooltipModel<keyof ChartTypeRegistry>;
   disabled: boolean;
@@ -91,7 +87,6 @@ export default function Chart() {
     () =>
       Object.entries(theme.colors[themeType] ?? {}).reduce((colors, [key, color]) => {
         colors[key] = validateColor(color).color;
-        console.log(colors[key]);
         return colors;
       }, {} as ThemeColors),
     [theme.colors, themeType],
@@ -99,7 +94,10 @@ export default function Chart() {
 
   const labels = Array.from({ length: stats.raw.length }, (_, i) => i + 1);
   if (stats.raw.length > elapsedTime) labels[stats.raw.length - 1] = elapsedTime;
-  const style = { font: { family: getFontFamily() }, color: colors?.sub };
+  const style = {
+    font: { family: getComputedStyle(document.body).getPropertyValue('--font') },
+    color: colors?.sub,
+  };
   const ticks = {
     precision: 0,
     autoSkip: true,
