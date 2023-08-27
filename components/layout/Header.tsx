@@ -2,17 +2,24 @@
 
 import { Button, Text, Tooltip, Transition } from 'components/core';
 import { useGlobal } from 'context/globalContext';
+import { useUser } from 'context/userContext';
+import { signOut } from 'firebase/auth';
 import { AnimatePresence, useAnimation } from 'framer-motion';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { Fragment, useCallback, useEffect } from 'react';
+import { toast } from 'react-hot-toast';
 import {
   RiInformationFill,
   RiKeyboardBoxFill,
+  RiLoginCircleFill,
+  RiLogoutCircleRFill,
   RiSettingsFill,
+  RiUser4Fill,
   RiVipCrownFill,
 } from 'react-icons/ri';
 import { twJoin } from 'tailwind-merge';
+import { auth } from 'utils/firebase';
 import LogoIcon from './LogoIcon';
 
 const BUTTONS = [
@@ -21,12 +28,23 @@ const BUTTONS = [
   { label: 'About', href: '/about', icon: <RiInformationFill /> },
   { label: 'Settings', href: '/settings', icon: <RiSettingsFill /> },
 ];
+const VARIANTS = {
+  initial: { opacity: 0 },
+  animate: { opacity: 1, transition: { delay: 0.25, duration: 0.5 } },
+  exit: { opacity: 0 },
+};
 
 export default function Header() {
   const { testId, isUserTyping, restartTest } = useGlobal();
+  const { user } = useUser();
   const router = useRouter();
   const pathname = usePathname();
   const animationControls = useAnimation();
+
+  const logout = useCallback(async () => {
+    await signOut(auth);
+    toast.success('Signed out! See you next time!');
+  }, []);
 
   useEffect(() => {
     if (!isUserTyping)
@@ -83,22 +101,38 @@ export default function Header() {
       </div>
       <AnimatePresence>
         {!isUserTyping && (
-          <Transition
-            className='flex items-center gap-1.5'
-            variants={{
-              initial: { opacity: 0 },
-              animate: { opacity: 1, transition: { delay: 0.25, duration: 0.5 } },
-              exit: { opacity: 0 },
-            }}
-          >
-            {BUTTONS.map(({ label, href, icon }) => (
-              <Tooltip key={label} label={label}>
-                <Button asChild className='text-xl'>
-                  <Link href={href}>{icon}</Link>
+          <Fragment key='routes'>
+            <Transition className='flex items-center gap-1.5' variants={VARIANTS}>
+              {BUTTONS.map(({ label, href, icon }) => (
+                <Tooltip key={label} label={label}>
+                  <Button asChild className='text-xl'>
+                    <Link href={href}>{icon}</Link>
+                  </Button>
+                </Tooltip>
+              ))}
+            </Transition>
+            <Transition className='flex items-center gap-1.5' variants={VARIANTS}>
+              {user && (
+                <Button className='text-sm'>
+                  <RiUser4Fill />
+                  {user.name}
                 </Button>
+              )}
+              <Tooltip label={`Sign ${user ? 'out' : 'in'}`}>
+                {user ? (
+                  <Button className='text-xl' onClick={() => void logout()}>
+                    <RiLogoutCircleRFill />
+                  </Button>
+                ) : (
+                  <Button asChild className='text-xl'>
+                    <Link href='login'>
+                      <RiLoginCircleFill />
+                    </Link>
+                  </Button>
+                )}
               </Tooltip>
-            ))}
-          </Transition>
+            </Transition>
+          </Fragment>
         )}
       </AnimatePresence>
     </div>
