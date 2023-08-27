@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "genversion": "genversion --es6 --semi utils/version.ts",
+    "analyze": "ANALYZE=true next build",
     "dev": "next dev",
     "dev:turbo": "next dev --turbo",
     "build": "next build",
@@ -41,6 +42,7 @@
   "devDependencies": {
     "@commitlint/cli": "^17.7.1",
     "@commitlint/config-conventional": "^17.7.0",
+    "@next/bundle-analyzer": "^13.4.19",
     "@release-it/conventional-changelog": "^7.0.0",
     "@total-typescript/ts-reset": "^0.4.2",
     "@types/node": "^20.4.9",
