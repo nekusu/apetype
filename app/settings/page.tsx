@@ -19,6 +19,7 @@ import { twJoin } from 'tailwind-merge';
 import { replaceSpaces } from 'utils/misc';
 import { categories, settingsList } from 'utils/settings';
 
+const AuthenticationMethods = dynamic(() => import('components/settings/AuthenticationMethods'));
 const DeleteAccount = dynamic(() => import('components/settings/DeleteAccount'));
 
 type SettingsList = typeof settingsList;
@@ -43,6 +44,7 @@ export default function Page() {
       importExportSettings: <ImportExportSettings key='importExportSettings' />,
       resetSettings: <ResetSettings key='resetSettings' />,
       persistentCache: <PersistentCache key='persistentCache' />,
+      authenticationMethods: user ? <AuthenticationMethods key='authenticationMethods' /> : null,
       deleteAccount: user ? <DeleteAccount key='deleteAccount' /> : null,
     }),
     [user],

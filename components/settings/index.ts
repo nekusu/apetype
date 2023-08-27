@@ -1,3 +1,4 @@
+export { default as AuthenticationMethods } from './AuthenticationMethods';
 export { default as CustomTheme } from './CustomTheme';
 export { default as DeleteAccount } from './DeleteAccount';
 export { default as FontFamily } from './FontFamily';

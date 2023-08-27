@@ -471,6 +471,11 @@ export const settingsList = {
     ),
     options: OFF_ON_OPTIONS,
   }),
+  authenticationMethods: create({
+    command: 'authentication methods',
+    category: 'danger zone',
+    description: <>Link or unlink authentication methods.</>,
+  }),
   deleteAccount: create({
     command: 'delete account',
     category: 'danger zone',
