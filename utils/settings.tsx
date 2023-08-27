@@ -476,6 +476,10 @@ export const settingsList = {
     category: 'danger zone',
     description: <>Link or unlink authentication methods.</>,
   }),
+  passwordAuthentication: create({
+    command: 'password authentication',
+    category: 'danger zone',
+  }),
   deleteAccount: create({
     command: 'delete account',
     category: 'danger zone',

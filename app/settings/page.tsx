@@ -20,6 +20,7 @@ import { replaceSpaces } from 'utils/misc';
 import { categories, settingsList } from 'utils/settings';
 
 const AuthenticationMethods = dynamic(() => import('components/settings/AuthenticationMethods'));
+const PasswordAuthentication = dynamic(() => import('components/settings/PasswordAuthentication'));
 const DeleteAccount = dynamic(() => import('components/settings/DeleteAccount'));
 
 type SettingsList = typeof settingsList;
@@ -45,6 +46,7 @@ export default function Page() {
       resetSettings: <ResetSettings key='resetSettings' />,
       persistentCache: <PersistentCache key='persistentCache' />,
       authenticationMethods: user ? <AuthenticationMethods key='authenticationMethods' /> : null,
+      passwordAuthentication: user ? <PasswordAuthentication key='passwordAuthentication' /> : null,
       deleteAccount: user ? <DeleteAccount key='deleteAccount' /> : null,
     }),
     [user],
