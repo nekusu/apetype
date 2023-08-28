@@ -6,7 +6,7 @@ import { Transition } from 'components/core';
 import { useGlobal } from 'context/globalContext';
 import { useSettings } from 'context/settingsContext';
 import { useTypingTest } from 'context/typingTestContext';
-import { motion } from 'framer-motion';
+import { m } from 'framer-motion';
 import { useStats } from 'hooks/useStats';
 import { twJoin } from 'tailwind-merge';
 import { accuracy as acc } from 'utils/typingTest';
@@ -47,7 +47,7 @@ export default function Stats() {
     <div className='select-none' style={{ height: `${fontSize}rem` }}>
       {isTestRunning && (
         <Transition>
-          <motion.div
+          <m.div
             className='flex leading-none transition-colors'
             style={{
               gap: `${fontSize * 1.25}rem`,
@@ -70,12 +70,12 @@ export default function Stats() {
             )}
             {liveWpm && <div>{Math.floor(wpm)}</div>}
             {liveAccuracy && <div>{Math.floor(accuracy)}%</div>}
-          </motion.div>
+          </m.div>
         </Transition>
       )}
       <FloatingPortal>
         {isTestRunning && (
-          <motion.div
+          <m.div
             className={twJoin([
               'fixed inset-x-0 top-0 h-2 transition-colors',
               (!timerProgress || !['bar', 'both'].includes(timerProgressStyle) || time === 0) &&

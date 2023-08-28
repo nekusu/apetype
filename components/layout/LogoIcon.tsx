@@ -1,6 +1,6 @@
 'use client';
 
-import { AnimationControls, SVGMotionProps, motion } from 'framer-motion';
+import { AnimationControls, SVGMotionProps, m } from 'framer-motion';
 import { ComponentPropsWithoutRef, useMemo } from 'react';
 import { twMerge } from 'tailwind-merge';
 
@@ -44,20 +44,20 @@ export default function LogoIcon({
       className={twMerge(['transition-colors', className])}
       {...props}
     >
-      <motion.path d='M123.961 49.6772H126.685' {..._pathProps} />
-      <motion.path d='M162.102 49.6772L202.968 49.6772' {..._pathProps} />
-      <motion.path d='M47.6772 125.961H50.4017' {..._pathProps} />
-      <motion.path d='M200.925 125.961H202.287' {..._pathProps} />
-      <motion.path d='M57.2126 78.2835H79.0079' {..._pathProps} />
-      <motion.path d='M85.8188 125.961H126.685' {..._pathProps} />
-      <motion.path d='M163.465 96.6732L163.465 125.961' {..._pathProps} />
-      <motion.path d='M125.323 87.8189L201.606 87.8189' {..._pathProps} />
-      <motion.path
+      <m.path d='M123.961 49.6772H126.685' {..._pathProps} />
+      <m.path d='M162.102 49.6772L202.968 49.6772' {..._pathProps} />
+      <m.path d='M47.6772 125.961H50.4017' {..._pathProps} />
+      <m.path d='M200.925 125.961H202.287' {..._pathProps} />
+      <m.path d='M57.2126 78.2835H79.0079' {..._pathProps} />
+      <m.path d='M85.8188 125.961H126.685' {..._pathProps} />
+      <m.path d='M163.465 96.6732L163.465 125.961' {..._pathProps} />
+      <m.path d='M125.323 87.8189L201.606 87.8189' {..._pathProps} />
+      <m.path
         d='M49.0393 88.5V67.3858C49.0393 61.2559 49.5842 48.315 68.1102
         48.315C86.6362 48.315 87.181 59.8937 87.181 67.3858V88.5'
         {..._pathProps}
       />
-      <motion.rect
+      <m.rect
         x='10.2166'
         y='10.8543'
         width='230.213'

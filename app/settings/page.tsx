@@ -12,7 +12,7 @@ import {
 } from 'components/settings';
 import { useGlobal } from 'context/globalContext';
 import { useUser } from 'context/userContext';
-import { motion } from 'framer-motion';
+import { m } from 'framer-motion';
 import dynamic from 'next/dynamic';
 import { ReactNode, useEffect, useMemo, useRef, useState } from 'react';
 import { twJoin } from 'tailwind-merge';
@@ -101,7 +101,7 @@ export default function Page() {
               }
             >
               {currentCategory === category && (
-                <motion.div
+                <m.div
                   className={twJoin([
                     'absolute -z-10 box-content h-full w-full px-2.5 transition-colors group-hover:bg-text group-focus-visible:bg-text',
                     currentCategory === 'danger zone' ? 'bg-error' : 'bg-main',

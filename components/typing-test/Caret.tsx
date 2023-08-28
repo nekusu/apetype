@@ -2,7 +2,7 @@
 
 import { useGlobal } from 'context/globalContext';
 import { useSettings } from 'context/settingsContext';
-import { motion } from 'framer-motion';
+import { m } from 'framer-motion';
 import { CSSProperties } from 'react';
 import { twJoin } from 'tailwind-merge';
 
@@ -17,7 +17,7 @@ export default function Caret({ width = '.5em', x, y }: CaretProps) {
   const { smoothCaret, caretStyle, fontSize } = useSettings();
 
   return (
-    <motion.div
+    <m.div
       initial={{ left: fontSize * 4, top: fontSize * 4 }}
       animate={{
         opacity: smoothCaret ? [1, isUserTyping ? 1 : 0, 1] : undefined,

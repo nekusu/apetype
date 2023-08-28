@@ -2,7 +2,7 @@
 
 import { Key, Tooltip } from 'components/core';
 import { useSettings } from 'context/settingsContext';
-import { HTMLMotionProps, motion } from 'framer-motion';
+import { HTMLMotionProps, m } from 'framer-motion';
 import { ReactNode } from 'react';
 import { RiCheckLine, RiQuestionLine } from 'react-icons/ri';
 import { twJoin, twMerge } from 'tailwind-merge';
@@ -27,7 +27,7 @@ export default function Item({
   const { keyTips } = useSettings();
 
   return (
-    <motion.div
+    <m.div
       className={twMerge([
         'flex h-9 cursor-pointer items-center gap-2 px-4 text-sm',
         active ? 'bg-main text-bg' : selected ? 'text-text' : 'bg-transparent text-sub',
@@ -58,6 +58,6 @@ export default function Item({
           </div>
         </Tooltip>
       )}
-    </motion.div>
+    </m.div>
   );
 }

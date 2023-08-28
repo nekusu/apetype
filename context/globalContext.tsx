@@ -1,5 +1,6 @@
 'use client';
 
+import { LazyMotion } from 'framer-motion';
 import { useThrottle } from 'hooks/useThrottle';
 import { ReactNode, createContext, useContext, useMemo } from 'react';
 import { Updater, useImmer } from 'use-immer';
@@ -75,7 +76,7 @@ export function GlobalProvider({ children, languages, layouts, themes }: GlobalP
           draft.commandLine.initialSetting = undefined;
         }),
     }),
-    [setGlobalValues]
+    [setGlobalValues],
   );
   const restartTest = useThrottle(() => {
     setGlobalValues((draft) => {
@@ -94,17 +95,15 @@ export function GlobalProvider({ children, languages, layouts, themes }: GlobalP
         commandLine: { ...globalValues.commandLine, handler },
       }}
     >
-      {children}
+      <LazyMotion features={async () => (await import('framer-motion')).domMax} strict>
+        {children}
+      </LazyMotion>
     </GlobalContext.Provider>
   );
 }
 
 export function useGlobal() {
   const context = useContext(GlobalContext);
-
-  if (!context) {
-    throw new Error('useGlobal must be used within a GlobalProvider');
-  }
-
+  if (!context) throw new Error('useGlobal must be used within a GlobalProvider');
   return context;
 }

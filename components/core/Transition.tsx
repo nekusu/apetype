@@ -1,6 +1,6 @@
 'use client';
 
-import { HTMLMotionProps, motion, Variants } from 'framer-motion';
+import { HTMLMotionProps, m, Variants } from 'framer-motion';
 import { ElementRef, forwardRef } from 'react';
 
 const DEFAULT_VARIANTS: Variants = {
@@ -10,10 +10,10 @@ const DEFAULT_VARIANTS: Variants = {
 
 const Transition = forwardRef<ElementRef<'div'>, HTMLMotionProps<'div'>>(function Transition(
   { variants = DEFAULT_VARIANTS, ...props },
-  ref
+  ref,
 ) {
   return (
-    <motion.div
+    <m.div
       ref={ref}
       variants={variants}
       initial={variants.hidden ? 'hidden' : 'initial'}

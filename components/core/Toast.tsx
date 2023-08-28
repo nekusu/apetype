@@ -1,7 +1,7 @@
 'use client';
 
 import { Text, Transition } from 'components/core';
-import { AnimatePresence, HTMLMotionProps, motion, useAnimation } from 'framer-motion';
+import { AnimatePresence, HTMLMotionProps, m, useAnimation } from 'framer-motion';
 import { useEffect, useRef } from 'react';
 import { Toast, resolveValue, toast, useToasterStore } from 'react-hot-toast';
 import { twJoin, twMerge } from 'tailwind-merge';
@@ -74,7 +74,7 @@ export default function Toast({
             </div>
           )}
           {!!t.duration && t.duration !== Infinity && (
-            <motion.div
+            <m.div
               className={twJoin([
                 'absolute bottom-0 left-0 h-1 rounded transition-colors',
                 t.type === 'error' ? 'bg-error-extra' : 'bg-sub',

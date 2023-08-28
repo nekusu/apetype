@@ -7,7 +7,7 @@ import { ThemeBubbles } from 'components/settings';
 import { useGlobal } from 'context/globalContext';
 import { useSettings } from 'context/settingsContext';
 import { useTheme } from 'context/themeContext';
-import { motion } from 'framer-motion';
+import { m } from 'framer-motion';
 import { useFocusLock } from 'hooks/useFocusLock';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { RiArrowDownLine, RiArrowUpLine, RiLoaderLine, RiTerminalLine } from 'react-icons/ri';
@@ -22,9 +22,9 @@ export default function CommandLine() {
   const settingsListValues = useMemo(
     () =>
       Object.values(settingsList).filter(
-        ({ category, hidden }) => category !== 'danger zone' && !hidden
+        ({ category, hidden }) => category !== 'danger zone' && !hidden,
       ),
-    [settingsList]
+    [settingsList],
   );
   const settings = useSettings();
   const { quickRestart, themeType, customThemes, keyTips, setSettings } = settings;
@@ -178,7 +178,7 @@ export default function CommandLine() {
             </Transition>
           </Button>
         )}
-        <motion.input
+        <m.input
           ref={focusLockRef}
           className='flex-1 bg-transparent py-3.5 text-text caret-caret outline-0 transition-colors placeholder:text-sub'
           min={0}
@@ -192,7 +192,7 @@ export default function CommandLine() {
         />
         {items.settings.length || items.options.length || setting?.custom ? (
           keyTips && (
-            <motion.div
+            <m.div
               className='flex cursor-default items-center gap-1 text-xs text-sub'
               layout
               transition={{ duration: 0.15 }}
@@ -206,13 +206,13 @@ export default function CommandLine() {
               </Key>
               <Key>home</Key>
               <Key>end</Key>
-            </motion.div>
+            </m.div>
           )
         ) : (
           <div className='cursor-default text-sm text-sub'>nothing found</div>
         )}
       </form>
-      <motion.div
+      <m.div
         ref={viewportRef}
         className='overflow-x-hidden overflow-y-scroll'
         animate={{ height: itemCount * 36 }}
@@ -287,7 +287,7 @@ export default function CommandLine() {
             onMouseMove={() => hoverItem(items.options.length)}
           />
         )}
-      </motion.div>
+      </m.div>
     </Modal>
   );
 }

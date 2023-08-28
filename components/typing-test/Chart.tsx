@@ -19,7 +19,7 @@ import { Text } from 'components/core';
 import { useSettings } from 'context/settingsContext';
 import { useTheme } from 'context/themeContext';
 import { useTypingTest } from 'context/typingTestContext';
-import { motion } from 'framer-motion';
+import { m } from 'framer-motion';
 import { useMemo } from 'react';
 import { Chart as MultitypeChart } from 'react-chartjs-2';
 import { twJoin } from 'tailwind-merge';
@@ -45,7 +45,7 @@ interface ChartTooltipProps {
 
 function ChartTooltip({ position: { top, left }, data, disabled }: ChartTooltipProps) {
   return (
-    <motion.div
+    <m.div
       className={twJoin([
         'pointer-events-none absolute rounded-lg bg-sub-alt py-2.5 px-3 shadow-md transition',
         disabled ? 'opacity-0' : 'opacity-100',
@@ -70,7 +70,7 @@ function ChartTooltip({ position: { top, left }, data, disabled }: ChartTooltipP
           </div>
         </>
       )}
-    </motion.div>
+    </m.div>
   );
 }
 
