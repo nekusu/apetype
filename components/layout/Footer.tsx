@@ -4,8 +4,9 @@ import { Button, Key, Tooltip, Transition } from 'components/core';
 import { useGlobal } from 'context/globalContext';
 import { useSettings } from 'context/settingsContext';
 import { useTheme } from 'context/themeContext';
-import { RiGitBranchLine, RiGithubLine, RiLoaderLine, RiPaletteFill } from 'react-icons/ri';
-import { version } from 'utils/version';
+import { useMemo } from 'react';
+import { RiGithubFill, RiLoaderLine, RiPaletteFill } from 'react-icons/ri';
+import Version from './Version';
 
 export default function Footer() {
   const { commandLine } = useGlobal();
@@ -18,7 +19,10 @@ export default function Footer() {
     setSettings,
   } = useSettings();
   const { isLoading } = useTheme();
-  const customTheme = customThemes.find(({ id }) => id === customThemeId);
+  const customTheme = useMemo(
+    () => customThemes.find(({ id }) => id === customThemeId),
+    [customThemeId, customThemes],
+  );
 
   return (
     <Transition className='w-full'>
@@ -26,7 +30,7 @@ export default function Footer() {
         <div className='gap-6'>
           <Button asChild className='p-0 text-sm'>
             <a href='https://github.com/nekusu' target='_blank' rel='noopener noreferrer'>
-              <RiGithubLine />
+              <RiGithubFill />
               nekusu
             </a>
           </Button>
@@ -47,7 +51,8 @@ export default function Footer() {
               onClick={(e) => {
                 if (e.shiftKey)
                   setSettings(
-                    (draft) => void (draft.themeType = themeType === 'preset' ? 'custom' : 'preset')
+                    (draft) =>
+                      void (draft.themeType = themeType === 'preset' ? 'custom' : 'preset'),
                   );
                 else commandLine.handler?.open(themeType === 'preset' ? 'theme' : 'customTheme');
               }}
@@ -56,17 +61,7 @@ export default function Footer() {
               {themeType === 'custom' && customTheme ? `custom (${customTheme.name})` : theme}
             </Button>
           </Tooltip>
-          <Tooltip label='See changelog' offset={8} placement='left'>
-            <Button asChild className='p-0 text-sm'>
-              <a
-                href={`https://github.com/nekusu/apetype/releases/tag/v${version}`}
-                target='_blank'
-                rel='noopener noreferrer'
-              >
-                <RiGitBranchLine />v{version}
-              </a>
-            </Button>
-          </Tooltip>
+          <Version />
         </div>
       </div>
     </Transition>
