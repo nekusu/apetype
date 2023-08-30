@@ -548,8 +548,8 @@ export function validateSettings(
   const customThemeIds = settings.customThemes?.map(({ id }) => id) ?? [];
   const schemaProperties: Record<keyof Settings, z.ZodType> = {
     mode: z.enum(['time', 'words']),
-    time: z.number().positive(),
-    words: z.number().positive(),
+    time: z.number().nonnegative(),
+    words: z.number().nonnegative(),
     quickRestart: z.union([z.literal(false), z.enum(['tab', 'esc'])]),
     blindMode: z.boolean(),
     language: z.string(),
