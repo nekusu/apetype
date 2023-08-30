@@ -1,5 +1,28 @@
 # Changelog
 
+## [0.7.0](https://github.com/nekusu/apetype/compare/v0.6.0...v0.7.0) (2023-08-30)
+
+
+### New Features
+
+* add loading UI ([3af1643](https://github.com/nekusu/apetype/commit/3af16434674b44113e52b36e0d67fb092ed93bd0))
+* add toast notifications ([#39](https://github.com/nekusu/apetype/issues/39)) ([dcc32c0](https://github.com/nekusu/apetype/commit/dcc32c00b455c85386473fdb9aa1e5fbf2225669))
+* add user authentication ([#40](https://github.com/nekusu/apetype/issues/40)) ([d336676](https://github.com/nekusu/apetype/commit/d3366765fb898d664559f908cc42932c03c136dc))
+* **settings:** add authentication methods setting ([38bb649](https://github.com/nekusu/apetype/commit/38bb6494193c99ac2572c43475e63f13f81613ee))
+* **settings:** add delete account setting ([4f376f3](https://github.com/nekusu/apetype/commit/4f376f39dc6f858bdcc15d53dacc56115ed263cb))
+* **settings:** add password authentication setting ([b418bc1](https://github.com/nekusu/apetype/commit/b418bc142fd93aa44e560eb9f1b481e6d9555b2d))
+* **theme:** add AI theme generation ([9325d85](https://github.com/nekusu/apetype/commit/9325d85ff78b8d7e0f807de80aacadfa6839e94c))
+* **theme:** add css color variable validation ([5024090](https://github.com/nekusu/apetype/commit/502409023533d4d86fd69df68d541c6c09c68603))
+* **theme:** add eyedropper color selection ([5c8a5b3](https://github.com/nekusu/apetype/commit/5c8a5b3f9d8267ad18e2598c1d833716791ca51d))
+* **theme:** show restore theme toast after deletion ([32d0db6](https://github.com/nekusu/apetype/commit/32d0db6ee3166dfcfeada07180fa0912c45eedbb))
+
+
+### Bug Fixes
+
+* **core:** tooltip not visible when modal is open ([dddf90c](https://github.com/nekusu/apetype/commit/dddf90c9b19f6bb86f05df240f4759b9c3b7d520))
+* **test:** css color variables not showing in chart ([2306f50](https://github.com/nekusu/apetype/commit/2306f50c174d88d077dc545107ee145b6007d66f))
+* **test:** test words not getting focus after closing modal ([24abd8f](https://github.com/nekusu/apetype/commit/24abd8f4c05c603f85830648c38500372c0f9d3f))
+
 ## [0.6.0](https://github.com/nekusu/apetype/compare/v0.5.0...v0.6.0) (2023-08-11)
 
 
