@@ -227,14 +227,16 @@ export default function CommandLine() {
             initialIndex={selectedIndex}
           >
             {({ alt, value }, i) => {
+              const key = typeof value === 'string' ? value : alt ?? value.toString();
               const active = index === i;
               const selected = selectedIndex === i;
               return (
                 <Item
-                  key={alt ?? value.toString()}
+                  key={key}
                   active={active}
                   label={(setting.id === 'caretStyle' ? value || alt : alt ?? value)?.toString()}
                   selected={selected && (!isLoading || !active)}
+                  layoutId={key}
                   style={{
                     fontFamily:
                       setting.id === 'fontFamily' ? `var(${value.toString()})` : undefined,
