@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.7.1](https://github.com/nekusu/apetype/compare/v0.7.0...v0.7.1) (2023-08-30)
+
+
+### Bug Fixes
+
+* new version toast not showing ([19e786f](https://github.com/nekusu/apetype/commit/19e786f5a8cb2ed3941b579ce765d924f20b91c5))
+* **cli:** custom themes with the same name not displaying correctly ([fb7f947](https://github.com/nekusu/apetype/commit/fb7f947605dcc9e76aab3fe0a8acfc70c61cd7f4))
+* **settings:** wrong validation of settings when test is set to infinite ([2a3a388](https://github.com/nekusu/apetype/commit/2a3a38844e8535bf3b6b74b7f842491c9d2b7d77))
+* **test:** inability to stop infinite test ([980a026](https://github.com/nekusu/apetype/commit/980a02634192d5f7625bf8b41488cb1aa14c9e0f))
+* **test:** words stuck after setting test to infinite ([076a418](https://github.com/nekusu/apetype/commit/076a418eba83e275fbedf1c5e9cbdbf28c4f9077))
+
 ## [0.7.0](https://github.com/nekusu/apetype/compare/v0.6.0...v0.7.0) (2023-08-30)
 
 
