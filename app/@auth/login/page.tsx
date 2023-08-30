@@ -5,12 +5,6 @@ import { useDisclosure, useFocusTrap } from '@mantine/hooks';
 import { PasswordInput, SignInMethods } from 'components/auth';
 import { Button, Checkbox, Divider, Input, Text, Transition } from 'components/core';
 import { FirebaseError } from 'firebase/app';
-import {
-  browserLocalPersistence,
-  browserSessionPersistence,
-  setPersistence,
-  signInWithEmailAndPassword,
-} from 'firebase/auth';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
@@ -18,7 +12,7 @@ import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import { RiLoaderLine, RiMailFill } from 'react-icons/ri';
 import { twJoin } from 'tailwind-merge';
-import { auth } from 'utils/firebase';
+import { getFirebaseAuth } from 'utils/firebase';
 import { z } from 'zod';
 
 const formSchema = z.object({
@@ -49,6 +43,13 @@ export default function Login() {
   const [isLoading, setIsLoading] = useState(false);
 
   const onSubmit: SubmitHandler<FormValues> = async ({ email, password, remember }) => {
+    const {
+      auth,
+      browserLocalPersistence,
+      browserSessionPersistence,
+      setPersistence,
+      signInWithEmailAndPassword,
+    } = await getFirebaseAuth();
     try {
       setIsLoading(true);
       await setPersistence(auth, remember ? browserLocalPersistence : browserSessionPersistence);

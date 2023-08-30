@@ -2,16 +2,12 @@
 
 import { Button } from 'components/core';
 import { FirebaseError } from 'firebase/app';
-import {
-  AuthProvider,
-  UserCredential,
-  getAdditionalUserInfo,
-  signInWithPopup,
-} from 'firebase/auth';
-import { serverTimestamp } from 'firebase/firestore';
-import { useCallback } from 'react';
+import { AuthProvider, UserCredential } from 'firebase/auth';
+import { useDidMount } from 'hooks/useDidMount';
+import { useCallback, useState } from 'react';
 import { toast } from 'react-hot-toast';
-import { addDocument, auth, authenticationMethods } from 'utils/firebase';
+import { getFirebaseAuth, getFirebaseFirestore } from 'utils/firebase';
+import { AuthenticationMethod } from 'utils/firebase/auth';
 
 export interface SignInMethodsProps {
   onFinish?: () => void;
@@ -26,8 +22,12 @@ export default function SignInMethods({
   onSignIn,
   onStart,
 }: SignInMethodsProps) {
+  const [authMethods, setAuthMethods] = useState<AuthenticationMethod[]>();
+
   const signIn = useCallback(
     async (provider: AuthProvider) => {
+      const [{ auth, getAdditionalUserInfo, signInWithPopup }, { addDocument, serverTimestamp }] =
+        await Promise.all([getFirebaseAuth(), getFirebaseFirestore()]);
       try {
         onStart?.();
         const result = await signInWithPopup(auth, provider);
@@ -54,9 +54,16 @@ export default function SignInMethods({
     [onError, onFinish, onSignIn, onStart],
   );
 
+  useDidMount(() => {
+    void (async () => {
+      const { authenticationMethods } = await getFirebaseAuth();
+      setAuthMethods(authenticationMethods);
+    })();
+  });
+
   return (
     <div className='flex gap-2'>
-      {authenticationMethods.map(({ name, provider, Icon }) => (
+      {authMethods?.map(({ name, provider, Icon }) => (
         <Button
           key={name}
           className='w-full'

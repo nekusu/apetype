@@ -5,14 +5,13 @@ import { useFocusTrap } from '@mantine/hooks';
 import { EmailToast } from 'components/auth';
 import { Button, Input, Text, Transition } from 'components/core';
 import { FirebaseError } from 'firebase/app';
-import { sendPasswordResetEmail } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import { RiLoaderLine, RiMailFill } from 'react-icons/ri';
 import { twJoin } from 'tailwind-merge';
-import { auth } from 'utils/firebase';
+import { getFirebaseAuth } from 'utils/firebase';
 import { z } from 'zod';
 
 const formSchema = z.object({
@@ -35,6 +34,7 @@ export default function Login() {
   const [isLoading, setIsLoading] = useState(false);
 
   const onSubmit: SubmitHandler<FormValues> = async ({ email }) => {
+    const { auth, sendPasswordResetEmail } = await getFirebaseAuth();
     try {
       setIsLoading(true);
       await sendPasswordResetEmail(auth, email);

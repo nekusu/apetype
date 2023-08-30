@@ -1,9 +1,9 @@
 'use client';
 
 import { useDoc } from '@tatsuokaniwa/swr-firestore';
-import { onAuthStateChanged } from 'firebase/auth';
+import { Unsubscribe } from 'firebase/auth';
 import { ReactNode, createContext, useCallback, useContext, useEffect, useState } from 'react';
-import { auth, updateDocument } from 'utils/firebase';
+import { getFirebaseAuth, getFirebaseFirestore } from 'utils/firebase';
 
 export interface User {
   id: string;
@@ -26,19 +26,24 @@ export function UserProvider({ children }: { children: ReactNode }) {
 
   const updateUser: UserContext['updateUser'] = useCallback(
     async (user) => {
+      const [{ auth, updateProfile }, { updateDocument }] = await Promise.all([
+        getFirebaseAuth(),
+        getFirebaseFirestore(),
+      ]);
       if (!auth.currentUser || !userId) return;
-      if (user.name) {
-        const { updateProfile } = await import('firebase/auth');
-        await updateProfile(auth.currentUser, { displayName: user.name });
-      }
+      if (user.name) await updateProfile(auth.currentUser, { displayName: user.name });
       return await updateDocument('users', userId, user);
     },
     [userId],
   );
 
   useEffect(() => {
-    const unsuscribe = onAuthStateChanged(auth, (user) => setUserId(user?.uid));
-    return () => unsuscribe();
+    let unsuscribe: Unsubscribe | null = null;
+    void (async () => {
+      const { auth, onAuthStateChanged } = await getFirebaseAuth();
+      unsuscribe = onAuthStateChanged(auth, (user) => setUserId(user?.uid));
+    })();
+    return () => unsuscribe?.();
   }, []);
 
   return <UserContext.Provider value={{ user, updateUser }}>{children}</UserContext.Provider>;

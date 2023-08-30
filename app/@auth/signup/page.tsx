@@ -6,12 +6,6 @@ import { ZxcvbnResult } from '@zxcvbn-ts/core';
 import { EmailToast, PasswordInput, PasswordStrength, SignInMethods } from 'components/auth';
 import { Button, Divider, Input, Text, Transition } from 'components/core';
 import { FirebaseError } from 'firebase/app';
-import {
-  createUserWithEmailAndPassword,
-  sendEmailVerification,
-  updateProfile,
-} from 'firebase/auth';
-import { serverTimestamp, where } from 'firebase/firestore';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useCallback, useDeferredValue, useMemo, useState } from 'react';
@@ -19,7 +13,7 @@ import { SubmitHandler, useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
 import { RiLoaderLine, RiMailFill, RiUser4Fill } from 'react-icons/ri';
 import { twJoin } from 'tailwind-merge';
-import { addDocument, auth, getDocuments } from 'utils/firebase';
+import { getFirebaseAuth, getFirebaseFirestore } from 'utils/firebase';
 import { z } from 'zod';
 
 const formSchema = z
@@ -79,6 +73,10 @@ export default function Signup() {
   const handleResult = useCallback((result: ZxcvbnResult) => setPasswordStrength(result), []);
 
   const onSubmit: SubmitHandler<FormValues> = async ({ username, email, password }) => {
+    const [
+      { auth, createUserWithEmailAndPassword, sendEmailVerification, updateProfile },
+      { addDocument, getDocuments, serverTimestamp, where },
+    ] = await Promise.all([getFirebaseAuth(), getFirebaseFirestore()]);
     try {
       setIsLoading(true);
       const usersWithSameName = await getDocuments('users', where('name', '==', username));

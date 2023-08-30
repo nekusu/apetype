@@ -3,7 +3,6 @@
 import { Button, Text, Tooltip, Transition } from 'components/core';
 import { useGlobal } from 'context/globalContext';
 import { useUser } from 'context/userContext';
-import { signOut } from 'firebase/auth';
 import { AnimatePresence, useAnimation } from 'framer-motion';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
@@ -19,7 +18,7 @@ import {
   RiVipCrownFill,
 } from 'react-icons/ri';
 import { twJoin } from 'tailwind-merge';
-import { auth } from 'utils/firebase';
+import { getFirebaseAuth } from 'utils/firebase';
 import LogoIcon from './LogoIcon';
 
 const BUTTONS = [
@@ -42,6 +41,7 @@ export default function Header() {
   const animationControls = useAnimation();
 
   const logout = useCallback(async () => {
+    const { auth, signOut } = await getFirebaseAuth();
     await signOut(auth);
     toast.success('Signed out! See you next time!');
   }, []);

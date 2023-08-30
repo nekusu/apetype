@@ -5,19 +5,15 @@ import { useDisclosure } from '@mantine/hooks';
 import { Button, Divider, Modal, Text } from 'components/core';
 import { ModalProps } from 'components/core/Modal';
 import { FirebaseError } from 'firebase/app';
-import {
-  AuthCredential,
-  AuthProvider,
-  EmailAuthProvider,
-  reauthenticateWithCredential,
-  signInWithPopup,
-} from 'firebase/auth';
+import { AuthCredential, AuthProvider, UserInfo } from 'firebase/auth';
+import { useDidMount } from 'hooks/useDidMount';
 import { useCallback, useState } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
 import { RiLoaderLine } from 'react-icons/ri';
 import { twJoin } from 'tailwind-merge';
-import { AuthenticationMethod, auth, authenticationMethods } from 'utils/firebase';
+import { getFirebaseAuth } from 'utils/firebase';
+import { AuthenticationMethod } from 'utils/firebase/auth';
 import { z } from 'zod';
 import { PasswordInput } from '.';
 
@@ -49,10 +45,12 @@ export default function ReauthenticationModal({
   });
   const [popupOpen, popupHandler] = useDisclosure(false);
   const [isLoading, setIsLoading] = useState(false);
-  const userProviders = auth.currentUser?.providerData;
+  const [userProviders, setUserProviders] = useState<UserInfo[]>();
+  const [authMethods, setAuthMethods] = useState<AuthenticationMethod[]>();
 
   const reauthenticate = useCallback(
     async (credential: AuthCredential | null) => {
+      const { auth, reauthenticateWithCredential } = await getFirebaseAuth();
       if (!auth.currentUser || !credential) return;
       await reauthenticateWithCredential(auth.currentUser, credential);
       onReauthenticate?.(credential);
@@ -65,6 +63,7 @@ export default function ReauthenticationModal({
       provider: AuthProvider,
       credentialFromResult: AuthenticationMethod['credentialFromResult'],
     ) => {
+      const { auth, signInWithPopup } = await getFirebaseAuth();
       try {
         popupHandler.open();
         const result = await signInWithPopup(auth, provider);
@@ -79,6 +78,7 @@ export default function ReauthenticationModal({
     [popupHandler, reauthenticate],
   );
   const onSubmit: SubmitHandler<FormValues> = async ({ password }) => {
+    const { auth, EmailAuthProvider } = await getFirebaseAuth();
     if (!auth.currentUser?.email) return;
     try {
       setIsLoading(true);
@@ -93,6 +93,14 @@ export default function ReauthenticationModal({
       setIsLoading(false);
     }
   };
+
+  useDidMount(() => {
+    void (async () => {
+      const { auth, authenticationMethods } = await getFirebaseAuth();
+      setUserProviders(auth.currentUser?.providerData);
+      setAuthMethods(authenticationMethods);
+    })();
+  });
 
   return (
     <Modal onClose={onClose} centered {...props}>
@@ -109,7 +117,7 @@ export default function ReauthenticationModal({
           Select method to reauthenticate:
         </Text>
         <div className='flex gap-2'>
-          {authenticationMethods.map(({ name, provider, Icon, credentialFromResult }) => (
+          {authMethods?.map(({ name, provider, Icon, credentialFromResult }) => (
             <Button
               key={name}
               className='w-full'

@@ -1,25 +1,27 @@
 'use client';
 
-import { useForceUpdate } from '@mantine/hooks';
 import { Button } from 'components/core';
 import { FirebaseError } from 'firebase/app';
-import { AuthProvider, linkWithPopup, unlink } from 'firebase/auth';
+import { AuthProvider, UserInfo } from 'firebase/auth';
+import { useDidMount } from 'hooks/useDidMount';
 import { useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { RiLoaderLine } from 'react-icons/ri';
-import { auth, authenticationMethods } from 'utils/firebase';
+import { getFirebaseAuth } from 'utils/firebase';
+import { AuthenticationMethod } from 'utils/firebase/auth';
 import Setting from './Setting';
 
 export default function AuthenticationMethods() {
-  const forceUpdate = useForceUpdate();
   const [providerLoading, setProviderLoading] = useState('');
-  const userProviders = auth.currentUser?.providerData;
+  const [userProviders, setUserProviders] = useState<UserInfo[]>();
+  const [authMethods, setAuthMethods] = useState<AuthenticationMethod[]>();
 
   const handleMethod = async (
     providerName: string,
     provider: AuthProvider,
     type: 'link' | 'unlink',
   ) => {
+    const { auth, linkWithPopup, unlink } = await getFirebaseAuth();
     if (!auth.currentUser) return;
     try {
       setProviderLoading(providerName);
@@ -28,7 +30,7 @@ export default function AuthenticationMethods() {
       toast.success(
         `Account ${type === 'link' ? 'linked to' : 'unlinked from'} ${providerName} successfully!`,
       );
-      forceUpdate();
+      setUserProviders(auth.currentUser.providerData);
     } catch (e) {
       toast.error(`Something went wrong! ${(e as FirebaseError).message}`);
     } finally {
@@ -36,9 +38,17 @@ export default function AuthenticationMethods() {
     }
   };
 
+  useDidMount(() => {
+    void (async () => {
+      const { auth, authenticationMethods } = await getFirebaseAuth();
+      setUserProviders(auth.currentUser?.providerData);
+      setAuthMethods(authenticationMethods);
+    })();
+  });
+
   return (
     <Setting id='authenticationMethods'>
-      {authenticationMethods.map(({ name, provider }) => {
+      {authMethods?.map(({ name, provider }) => {
         const isProviderLinked = userProviders?.some(
           ({ providerId }) => providerId === provider.providerId,
         );

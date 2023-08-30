@@ -4,11 +4,10 @@ import { useDisclosure } from '@mantine/hooks';
 import { ReauthenticationModal } from 'components/auth';
 import { Button, Modal, Text } from 'components/core';
 import { FirebaseError } from 'firebase/app';
-import { deleteUser } from 'firebase/auth';
 import { useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { RiLoaderLine } from 'react-icons/ri';
-import { auth, deleteDocument } from 'utils/firebase';
+import { getFirebaseAuth, getFirebaseFirestore } from 'utils/firebase';
 import Setting from './Setting';
 
 export default function DeleteAccount() {
@@ -17,6 +16,10 @@ export default function DeleteAccount() {
   const [isLoading, setIsLoading] = useState(false);
 
   const deleteAccount = async () => {
+    const [{ auth, deleteUser }, { deleteDocument }] = await Promise.all([
+      getFirebaseAuth(),
+      getFirebaseFirestore(),
+    ]);
     if (!auth.currentUser) return;
     try {
       setIsLoading(true);
