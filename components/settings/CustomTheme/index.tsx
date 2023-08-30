@@ -1,6 +1,7 @@
 'use client';
 
-import { useDidUpdate, useDisclosure, useInputState, useToggle } from '@mantine/hooks';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useDidUpdate, useDisclosure, useToggle } from '@mantine/hooks';
 import { colord, extend } from 'colord';
 import a11yPlugin from 'colord/plugins/a11y';
 import { Button, Input, Text, Tooltip, Transition } from 'components/core';
@@ -10,31 +11,63 @@ import { useSettings } from 'context/settingsContext';
 import { useTheme } from 'context/themeContext';
 import { AnimatePresence, HTMLMotionProps } from 'framer-motion';
 import { useEffect, useRef } from 'react';
+import { SubmitHandler, useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
 import { RiAlertLine, RiDeleteBin7Line, RiPaintBrushFill, RiSparklingFill } from 'react-icons/ri';
 import { twMerge } from 'tailwind-merge';
-import { useImmer } from 'use-immer';
-import { CustomTheme, ThemeColors, themeColorVariables, validateColor } from 'utils/theme';
+import { CustomTheme, validateColor } from 'utils/theme';
+import { z } from 'zod';
 import AIThemeGenerationModal from './AIThemeGenerationModal';
 import ColorInput from './ColorInput';
 import ReadabilityModal from './ReadabilityModal';
 
-type Color = keyof ThemeColors;
-
 extend([a11yPlugin]);
 
 const COMMON_BUTTON_PROPS: Omit<ButtonProps, 'ref'> = { className: 'w-full', variant: 'filled' };
-const initialColors = Object.keys(themeColorVariables).reduce((colors, key) => {
-  colors[key as Color] = '';
-  return colors;
-}, {} as ThemeColors);
+const zColor = (color: string) =>
+  z
+    .string()
+    .trim()
+    .min(1, `${color} color is required`)
+    .refine((color) => validateColor(color).isValid, 'Invalid color');
+const formSchema = z.object({
+  name: z
+    .string()
+    .trim()
+    .min(1, 'Name is required')
+    .max(30, 'Name must have at most 30 characters'),
+  colors: z.object({
+    bg: zColor('Background'),
+    main: zColor('Main'),
+    caret: zColor('Caret'),
+    sub: zColor('Sub'),
+    subAlt: zColor('Sub alt'),
+    text: zColor('Text'),
+    error: zColor('Error'),
+    errorExtra: zColor('Error extra'),
+    colorfulError: zColor('Colorful error'),
+    colorfulErrorExtra: zColor('Colorful error extra'),
+  }),
+});
+type FormValues = z.infer<typeof formSchema>;
 
 export default function CustomTheme({ className, ...props }: HTMLMotionProps<'div'>) {
   const { theme, customThemes, customTheme: customThemeId, setSettings } = useSettings();
-  const { colors } = useTheme();
+  const { colors: themeColors } = useTheme();
   const [themeCreation, toggleThemeCreation] = useToggle(['AI', 'preset']);
-  const [name, setName] = useInputState('');
-  const [inputColors, setInputColors] = useImmer(initialColors);
+  const {
+    clearErrors,
+    formState: { errors },
+    handleSubmit,
+    register,
+    setValue,
+    watch,
+  } = useForm<FormValues>({
+    defaultValues: { name: '', colors: {} },
+    mode: 'onChange',
+    resolver: zodResolver(formSchema),
+  });
+  const colors = watch('colors');
   const [themeModalOpen, themeModalHandler] = useDisclosure(false);
   const [readabilityModalOpen, readabilityModalHandler] = useDisclosure(false);
   const themeButtonRef = useRef<HTMLButtonElement>(null);
@@ -79,26 +112,25 @@ export default function CustomTheme({ className, ...props }: HTMLMotionProps<'di
   };
   const duplicateTheme = () => {
     if (!customTheme) return;
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { id, ...theme } = customTheme;
-    addTheme(theme);
+    const { name, colors } = customTheme;
+    addTheme({ name, colors });
   };
   const shareTheme = () => {
     const encodedTheme = Buffer.from(JSON.stringify(customTheme)).toString('base64');
     void navigator.clipboard
       .writeText(`${window.location.origin}?customTheme=${encodedTheme}`)
-      .then(() => toast.success('URL copied to clipboard!'))
-      .catch(() => toast.error('Failed to copy URL to clipboard. Please try again.'));
+      .then(() => toast.success('URL copied to clipboard!'));
   };
-  const saveTheme = () => {
+  const onSubmit: SubmitHandler<FormValues> = ({ name, colors }) => {
     setSettings((draft) => {
       const index = draft.customThemes.findIndex(({ id }) => id === draft.customTheme);
       if (index >= 0) {
         draft.customThemes[index].name = name;
-        draft.customThemes[index].colors = inputColors;
+        draft.customThemes[index].colors = colors;
         draft.customThemes.sort((a, b) => a.name.localeCompare(b.name));
       }
     });
+    toast.success('Theme saved successfully!');
   };
 
   const CreateThemeButton = () => (
@@ -108,12 +140,7 @@ export default function CustomTheme({ className, ...props }: HTMLMotionProps<'di
         variant='filled'
         onClick={() => {
           if (themeCreation === 'AI') themeModalHandler.open();
-          else {
-            if (!colors.preset) return;
-            setName(theme);
-            setInputColors(colors.preset);
-            addTheme({ name: theme, colors: colors.preset });
-          }
+          else if (themeColors.preset) addTheme({ name: theme, colors: themeColors.preset });
         }}
       >
         create theme
@@ -131,11 +158,11 @@ export default function CustomTheme({ className, ...props }: HTMLMotionProps<'di
   }, [customTheme]);
   useEffect(() => {
     if (customTheme) {
-      setName(customTheme.name);
-      setInputColors(customTheme.colors);
+      setValue('name', customTheme.name);
+      setValue('colors', customTheme.colors);
+      clearErrors();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [customTheme]);
+  }, [clearErrors, customTheme, setValue]);
 
   return (
     <Transition
@@ -180,35 +207,31 @@ export default function CustomTheme({ className, ...props }: HTMLMotionProps<'di
           </div>
           <form
             className='grid grid-cols-4 gap-x-2 gap-y-3'
-            onSubmit={(e) => {
-              e.preventDefault();
-              saveTheme();
-            }}
+            onSubmit={(e) => void handleSubmit(onSubmit)(e)}
           >
             <Input
-              error={!name && 'Name is required'}
+              error={errors.name?.message}
               wrapperClassName='col-span-2'
               label='name'
-              value={name}
-              onChange={setName}
+              {...register('name')}
             />
-            {Object.entries(inputColors).map(([key, value]) => {
-              const { color, isValid } = validateColor(value, inputColors);
+            {Object.entries(colors).map(([k, value]) => {
+              const key = k as keyof typeof colors;
+              const { color, isValid } = validateColor(value, colors);
               return (
                 <ColorInput
                   key={key}
                   colorKey={key}
-                  value={value}
                   computedValue={color}
-                  error={!isValid && 'Invalid color'}
-                  setValue={(value) => setInputColors((draft) => void (draft[key] = value))}
+                  error={errors.colors?.[key]?.message}
+                  setValue={(value) => setValue(`colors.${key}`, value)}
                   rightNode={
                     ['main', 'sub', 'text'].includes(key) &&
                     isValid &&
-                    colord(color).contrast(inputColors.bg) < 2 && (
+                    colord(color).contrast(colors.bg) < 2 && (
                       <Tooltip label='Poor contrast ratio' offset={14}>
                         <Button
-                          className='p-0 text-main'
+                          className='ml-1.5 p-0 text-main'
                           tabIndex={-1}
                           onClick={readabilityModalHandler.open}
                         >
@@ -217,6 +240,7 @@ export default function CustomTheme({ className, ...props }: HTMLMotionProps<'di
                       </Tooltip>
                     )
                   }
+                  {...register(`colors.${key}`)}
                 />
               );
             })}
@@ -246,16 +270,7 @@ export default function CustomTheme({ className, ...props }: HTMLMotionProps<'di
               <Button onClick={shareTheme} {...COMMON_BUTTON_PROPS}>
                 share
               </Button>
-              <Button
-                type='submit'
-                disabled={
-                  !name ||
-                  Object.values(inputColors).some(
-                    (color) => !validateColor(color, inputColors).isValid,
-                  )
-                }
-                {...COMMON_BUTTON_PROPS}
-              >
+              <Button type='submit' {...COMMON_BUTTON_PROPS}>
                 save
               </Button>
             </div>

@@ -1,8 +1,8 @@
 import { useEyeDropper, useFocusWithin, useMergedRef } from '@mantine/hooks';
 import { Button, ColorPicker, Input, Key, Text, Tooltip } from 'components/core';
 import { InputProps } from 'components/core/Input';
-import { useRef } from 'react';
-import toast from 'react-hot-toast';
+import { ElementRef, forwardRef, useRef } from 'react';
+import { toast } from 'react-hot-toast';
 import { RiForbidFill, RiSipLine } from 'react-icons/ri';
 import { ThemeColors } from 'utils/theme';
 
@@ -23,23 +23,19 @@ type Color = keyof ThemeColors;
 
 export interface ColorInputProps extends InputProps {
   colorKey: Color;
-  value: string;
+  value?: string;
   computedValue?: string;
-  setValue: (value: string) => void;
+  setValue?: (value: string) => void;
 }
 
-export default function ColorInput({
-  colorKey,
-  value,
-  computedValue,
-  rightNode,
-  setValue,
-  ...props
-}: ColorInputProps) {
+const ColorInput = forwardRef<ElementRef<'input'>, ColorInputProps>(function ColorInput(
+  { colorKey, computedValue, rightNode, setValue, value, ...props },
+  ref,
+) {
   const { supported, open } = useEyeDropper();
-  const { ref, focused } = useFocusWithin();
+  const { ref: focusRef, focused } = useFocusWithin();
   const inputRef = useRef<HTMLInputElement>(null);
-  const mergedRef = useMergedRef(ref, inputRef);
+  const mergedRef = useMergedRef(ref, focusRef, inputRef);
 
   const pickColor = async () => {
     const toastId = toast(
@@ -55,9 +51,9 @@ export default function ColorInput({
     );
     try {
       const { sRGBHex } = await open();
-      setValue(sRGBHex);
+      setValue?.(sRGBHex);
     } catch (e) {
-      console.error(e);
+      toast.error(`Something went wrong! ${(e as Error).message}`);
     } finally {
       inputRef.current?.focus();
       toast.dismiss(toastId);
@@ -67,13 +63,12 @@ export default function ColorInput({
   return (
     <Input
       ref={mergedRef}
-      tabIndex={0}
       label={LABELS[colorKey]}
       leftNode={
-        <ColorPicker color={computedValue ?? value} onChange={(color) => setValue(color)} />
+        <ColorPicker color={computedValue ?? value ?? ''} onChange={(color) => setValue?.(color)} />
       }
       rightNode={
-        <div className='flex gap-1.5'>
+        <>
           {supported && focused && (
             <Tooltip label='Pick color'>
               <Button className='p-0' tabIndex={-1} onMouseDown={() => void pickColor()}>
@@ -82,11 +77,12 @@ export default function ColorInput({
             </Tooltip>
           )}
           {rightNode}
-        </div>
+        </>
       }
       value={value}
-      onChange={({ target: { value } }) => setValue(value)}
       {...props}
     />
   );
-}
+});
+
+export default ColorInput;
