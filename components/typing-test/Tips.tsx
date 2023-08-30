@@ -4,11 +4,11 @@ import { Key, Text } from 'components/core';
 import { useSettings } from 'context/settingsContext';
 
 export default function Tips() {
-  const { time, quickRestart } = useSettings();
+  const { mode, time, words, quickRestart } = useSettings();
 
   return (
     <div className='flex flex-col select-none items-center gap-1.5'>
-      {!time && (
+      {((mode === 'time' && !time) || (mode === 'words' && !words)) && (
         <Text className='text-xs' dimmed>
           <Key>shift</Key> + <Key>enter</Key> - stop test
         </Text>

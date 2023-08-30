@@ -104,7 +104,14 @@ export default function Words() {
           e.target.value = value;
           focusWords();
         }}
-        onKeyDown={getHotkeyHandler([[!time && isTestRunning ? 'shift+Enter' : '', finishTest]])}
+        onKeyDown={getHotkeyHandler([
+          [
+            ((mode === 'time' && !time) || (mode === 'words' && !wordAmount)) && isTestRunning
+              ? 'shift+Enter'
+              : '',
+            finishTest,
+          ],
+        ])}
         ref={inputRef}
         value={inputValue}
       />
