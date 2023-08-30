@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useCallback, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 
 interface ThrottleOptions {
   leading?: boolean;
@@ -7,38 +7,34 @@ interface ThrottleOptions {
 }
 
 export function useThrottle<T extends (...args: any[]) => any>(
-  fn: T,
-  wait: number,
-  options: ThrottleOptions = { leading: true, trailing: true }
-): (...args: Parameters<T>) => void {
+  cb: T,
+  delay: number,
+  options?: ThrottleOptions,
+) {
+  const { leading = true, trailing = true } = options ?? {};
+  const cbRef = useRef(cb);
   const timerId = useRef<NodeJS.Timeout | null>(null);
   const lastArgs = useRef<Parameters<T> | null>(null);
 
-  const throttle = useCallback(
+  useEffect(() => {
+    cbRef.current = cb;
+  }, [cb]);
+
+  return useCallback(
     function (this: any, ...args: Parameters<T>) {
-      const { trailing, leading } = options;
       const waitFunc = () => {
         if (trailing && lastArgs.current) {
-          fn.apply(this, lastArgs.current);
+          cbRef.current.apply(this, lastArgs.current);
           lastArgs.current = null;
-          timerId.current = setTimeout(waitFunc, wait);
-        } else {
-          timerId.current = null;
-        }
+          timerId.current = setTimeout(waitFunc, delay);
+        } else timerId.current = null;
       };
 
-      if (!timerId.current && leading) {
-        fn.apply(this, args);
-      } else {
-        lastArgs.current = args;
-      }
+      if (!timerId.current && leading) cbRef.current.apply(this, args);
+      else lastArgs.current = args;
 
-      if (!timerId.current) {
-        timerId.current = setTimeout(waitFunc, wait);
-      }
+      if (!timerId.current) timerId.current = setTimeout(waitFunc, delay);
     },
-    [fn, wait, options]
+    [delay, leading, trailing],
   );
-
-  return throttle;
 }

@@ -79,12 +79,13 @@ export function GlobalProvider({ children, languages, layouts, themes }: GlobalP
     [setGlobalValues],
   );
   const restartTest = useThrottle(() => {
+    const newTestId = crypto.randomUUID();
     setGlobalValues((draft) => {
-      draft.testId = crypto.randomUUID();
+      draft.testId = newTestId;
       draft.isUserTyping = false;
       draft.isTestFinished = false;
     });
-  }, 250);
+  }, 500);
 
   return (
     <GlobalContext.Provider
