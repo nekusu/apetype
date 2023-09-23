@@ -2,6 +2,7 @@
 
 import { useDoc } from '@tatsuokaniwa/swr-firestore';
 import { Unsubscribe } from 'firebase/auth';
+import { UpdateData } from 'firebase/firestore';
 import { ReactNode, createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { getFirebaseAuth, getFirebaseFirestore } from 'utils/firebase';
 
@@ -13,10 +14,11 @@ export interface User {
 
 export interface UserContext {
   user?: User;
-  updateUser: (user: Partial<Omit<User, 'id' | 'joinedAt'>>) => Promise<void>;
+  updateUser: (user: UpdateData<Omit<User, 'id' | 'joinedAt'>>) => Promise<void>;
 }
 
 export const UserContext = createContext<UserContext | null>(null);
+export const defaultUserDetails: Partial<User> = {};
 
 export function UserProvider({ children }: { children: ReactNode }) {
   const [userId, setUserId] = useState<string>();
@@ -31,7 +33,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
         getFirebaseFirestore(),
       ]);
       if (!auth.currentUser || !userId) return;
-      if (user.name) await updateProfile(auth.currentUser, { displayName: user.name });
+      if (user.name) await updateProfile(auth.currentUser, { displayName: user.name as string });
       return await updateDocument('users', userId, user);
     },
     [userId],

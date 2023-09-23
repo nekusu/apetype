@@ -1,6 +1,7 @@
 'use client';
 
 import { Button } from 'components/core';
+import { User, defaultUserDetails } from 'context/userContext';
 import { FirebaseError } from 'firebase/app';
 import { AuthProvider, UserCredential } from 'firebase/auth';
 import { useDidMount } from 'hooks/useDidMount';
@@ -26,7 +27,7 @@ export default function SignInMethods({
 
   const signIn = useCallback(
     async (provider: AuthProvider) => {
-      const [{ auth, getAdditionalUserInfo, signInWithPopup }, { addDocument, serverTimestamp }] =
+      const [{ auth, getAdditionalUserInfo, signInWithPopup }, { setDocument, serverTimestamp }] =
         await Promise.all([getFirebaseAuth(), getFirebaseFirestore()]);
       try {
         onStart?.();
@@ -36,17 +37,18 @@ export default function SignInMethods({
         let toastMessage = `Welcome back, ${user.displayName}! You're now logged in.`;
         if (userInfo?.isNewUser) {
           toastMessage = `Account created successfully! Welcome aboard, ${user.displayName}!`;
-          await addDocument(
-            'users',
-            { name: user.displayName, joinedAt: serverTimestamp() },
-            user.uid,
-          );
+          await setDocument<User>('users', user.uid, {
+            name: user.displayName as string,
+            joinedAt: serverTimestamp(),
+            ...defaultUserDetails,
+          });
         }
         toast.success(toastMessage);
         onSignIn?.(result);
       } catch (e) {
-        toast.error(`Something went wrong! ${(e as FirebaseError).message}`);
-        onError?.(e as FirebaseError);
+        const error = e as FirebaseError;
+        toast.error(`Something went wrong! ${error.message}`);
+        onError?.(error);
       } finally {
         onFinish?.();
       }

@@ -1,6 +1,12 @@
 import {
+  CollectionReference,
   DocumentData,
+  DocumentReference,
+  PartialWithFieldValue,
   QueryConstraint,
+  SetOptions,
+  UpdateData,
+  addDoc,
   and,
   arrayRemove,
   arrayUnion,
@@ -24,25 +30,38 @@ import { app } from './app';
 
 export const db = getFirestore(app);
 
-export const getDocument = async (path: string, id: string) => {
-  return await getDoc(doc(db, path, id));
+export const getDocument = async <T>(path: string, id: string) => {
+  const documentRef = doc(db, path, id) as DocumentReference<T>;
+  return await getDoc(documentRef);
 };
-export const getDocuments = async (path: string, ...queryConstraints: QueryConstraint[]) => {
-  const q = query(collection(db, path), ...queryConstraints);
+export const getDocuments = async <T>(path: string, ...queryConstraints: QueryConstraint[]) => {
+  const collectionRef = collection(db, path) as CollectionReference<T>;
+  const q = query(collectionRef, ...queryConstraints);
   return await getDocs(q);
 };
-export const addDocument = async <T>(path: string, data: T, id?: string) => {
-  const docRef = id ? doc(db, path, id) : doc(db, path);
-  return await setDoc(docRef, data as DocumentData);
+export const addDocument = async <T>(path: string, data: T) => {
+  const collectionRef = collection(db, path) as CollectionReference<T>;
+  return await addDoc(collectionRef, data);
 };
-export const updateDocument = async <T>(path: string, id: string, data: T) => {
-  return await updateDoc(doc(db, path, id), data as DocumentData);
+export const setDocument = async <T>(
+  path: string,
+  id: string,
+  data: PartialWithFieldValue<T>,
+  options: SetOptions = {},
+) => {
+  const documentRef = doc(db, path, id) as DocumentReference<T>;
+  return await setDoc(documentRef, data, options);
+};
+export const updateDocument = async <T>(path: string, id: string, data: UpdateData<T>) => {
+  const documentRef = doc(db, path, id) as DocumentReference<T>;
+  return await updateDoc(documentRef, data as UpdateData<DocumentData>);
 };
 export const deleteDocument = async (path: string, id: string) => {
   return await deleteDoc(doc(db, path, id));
 };
 
 export {
+  addDoc,
   and,
   arrayRemove,
   arrayUnion,

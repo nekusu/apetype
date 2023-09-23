@@ -5,6 +5,7 @@ import { useDidUpdate, useDisclosure, useFocusTrap } from '@mantine/hooks';
 import { ZxcvbnResult } from '@zxcvbn-ts/core';
 import { EmailToast, PasswordInput, PasswordStrength, SignInMethods } from 'components/auth';
 import { Button, Divider, Input, Text, Transition } from 'components/core';
+import { User, defaultUserDetails } from 'context/userContext';
 import { FirebaseError } from 'firebase/app';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -75,17 +76,21 @@ export default function Signup() {
   const onSubmit: SubmitHandler<FormValues> = async ({ username, email, password }) => {
     const [
       { auth, createUserWithEmailAndPassword, sendEmailVerification, updateProfile },
-      { addDocument, getDocuments, serverTimestamp, where },
+      { getDocuments, serverTimestamp, setDocument, where },
     ] = await Promise.all([getFirebaseAuth(), getFirebaseFirestore()]);
     try {
       setIsLoading(true);
-      const usersWithSameName = await getDocuments('users', where('name', '==', username));
+      const usersWithSameName = await getDocuments<User>('users', where('name', '==', username));
       if (usersWithSameName.size > 0) {
         setError('username', { message: 'Username is already taken' }, { shouldFocus: true });
         return;
       }
       const { user } = await createUserWithEmailAndPassword(auth, email, password);
-      await addDocument('users', { name: username, joinedAt: serverTimestamp() }, user.uid);
+      await setDocument<User>('users', user.uid, {
+        name: username,
+        joinedAt: serverTimestamp(),
+        ...defaultUserDetails,
+      });
       if (auth.currentUser) {
         await updateProfile(auth.currentUser, { displayName: username });
         await sendEmailVerification(auth.currentUser);
