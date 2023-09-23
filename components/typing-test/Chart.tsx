@@ -1,40 +1,54 @@
 'use client';
 
-import {
-  CategoryScale,
-  ChartData,
-  Chart as ChartJS,
-  ChartOptions,
-  ChartTypeRegistry,
-  Filler,
-  LineController,
-  LineElement,
-  LinearScale,
-  PointElement,
-  ScatterController,
-  Tooltip,
-  TooltipModel,
-} from 'chart.js';
+import Loading from 'app/loading';
+import { ChartData, ChartOptions, ChartTypeRegistry, TooltipModel } from 'chart.js';
 import { Text } from 'components/core';
 import { useSettings } from 'context/settingsContext';
 import { useTheme } from 'context/themeContext';
 import { useTypingTest } from 'context/typingTestContext';
 import { m } from 'framer-motion';
+import dynamic from 'next/dynamic';
 import { useMemo } from 'react';
-import { Chart as MultitypeChart } from 'react-chartjs-2';
 import { twJoin } from 'tailwind-merge';
 import { useImmer } from 'use-immer';
 import { ThemeColors, validateColor } from 'utils/theme';
 
-ChartJS.register(
-  CategoryScale,
-  Filler,
-  LinearScale,
-  LineController,
-  LineElement,
-  PointElement,
-  ScatterController,
-  Tooltip,
+const ReactChart = dynamic(
+  async () => {
+    const {
+      Chart: ChartJS,
+      CategoryScale,
+      Filler,
+      LinearScale,
+      LineController,
+      LineElement,
+      PointElement,
+      ScatterController,
+      Tooltip,
+    } = await import('chart.js');
+    ChartJS.register(
+      CategoryScale,
+      Filler,
+      LinearScale,
+      LineController,
+      LineElement,
+      PointElement,
+      ScatterController,
+      Tooltip,
+    );
+    const { Chart } = await import('react-chartjs-2');
+    return Chart;
+  },
+  {
+    loading: () => (
+      <Loading
+        transition={{ duration: 0.15 }}
+        style={{ height: 200 }}
+        logoIconProps={{ width: '60' }}
+      />
+    ),
+    ssr: false,
+  },
 );
 
 interface ChartTooltipProps {
@@ -199,7 +213,7 @@ export default function Chart() {
 
   return (
     <div className='relative h-[200px] w-full'>
-      <MultitypeChart className='!w-full' type='line' options={options} data={data} />
+      <ReactChart className='!w-full' type='line' options={options} data={data} />
       {!!tooltip.position.top && <ChartTooltip {...tooltip} />}
     </div>
   );
