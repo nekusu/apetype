@@ -1,9 +1,8 @@
 import { getApp, getApps, initializeApp } from 'firebase/app';
 import config from './config';
 
-const setupFirebase = () => {
-  if (getApps.length) return getApp();
-  return initializeApp(config);
-};
+export function setupFirebase() {
+  return getApps().length ? getApp() : initializeApp(config);
+}
 
 export const app = setupFirebase();
