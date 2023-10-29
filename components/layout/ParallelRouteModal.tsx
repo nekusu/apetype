@@ -32,7 +32,7 @@ export default function ParallelRouteModal({
       onClose={() => router.push(lastPathname.current)}
       layout
       transition={{ type: 'spring', bounce: 0.6, layout: { type: 'spring', duration: 0.25 } }}
-      style={{ borderRadius: 8 }}
+      style={{ borderRadius: 12 }}
       {...props}
     >
       {children}

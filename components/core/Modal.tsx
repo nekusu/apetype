@@ -73,7 +73,7 @@ export default function Modal({
             <Transition
               ref={focusTrapRef}
               className={twMerge([
-                'relative rounded-lg bg-bg p-6 shadow-2xl transition-colors cursor-default',
+                'relative rounded-xl bg-bg p-6 shadow-2xl transition-colors cursor-default',
                 overflow === 'inside' && 'max-h-full overflow-y-auto',
                 className,
               ])}
