@@ -1,4 +1,5 @@
 import { MainLayout } from 'components/layout';
+import { AuthProvider } from 'context/authContext';
 import { GlobalProvider } from 'context/globalContext';
 import { SettingsProvider } from 'context/settingsContext';
 import { ThemeProvider } from 'context/themeContext';
@@ -104,20 +105,22 @@ export default async function RootLayout(props: { children: ReactNode; auth: Rea
 
   return (
     <html lang='en' className={twJoin(fonts.map((font) => font.variable))}>
-      <body className='flex justify-center overflow-y-hidden bg-bg font-default transition-colors'>
+      <body className='flex justify-center bg-bg font-default transition-colors'>
         <GlobalProvider languages={languages} layouts={layouts} themes={themes}>
           <SettingsProvider>
             <ThemeProvider previewDelay={250} themes={themes}>
-              <UserProvider>
-                <MainLayout>{props.children}</MainLayout>
-                <CommandLine />
-                <ParallelRouteModal
-                  routes={['login', 'reset-password', 'signup']}
-                  trapFocus={false}
-                >
-                  {props.auth}
-                </ParallelRouteModal>
-              </UserProvider>
+              <AuthProvider>
+                <UserProvider>
+                  <MainLayout>{props.children}</MainLayout>
+                  <CommandLine />
+                  <ParallelRouteModal
+                    routes={['login', 'reset-password', 'signup']}
+                    trapFocus={false}
+                  >
+                    {props.auth}
+                  </ParallelRouteModal>
+                </UserProvider>
+              </AuthProvider>
             </ThemeProvider>
           </SettingsProvider>
         </GlobalProvider>
