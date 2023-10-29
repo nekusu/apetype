@@ -73,7 +73,6 @@ export function ThemeProvider({ children, previewDelay, themes }: ThemeProviderP
   const { data: presetColors, isLoading } = useSWRImmutable<ThemeColors, Error>(
     `${STATIC_URL}/themes/${presetName}.css`,
     (url: string) => fetch(url).then(async (res) => extractThemeColors(await res.text())),
-    { keepPreviousData: true },
   );
   const customTheme = useMemo(
     () => customThemes.find(({ id }) => id === (previewThemeId ?? customThemeId)),

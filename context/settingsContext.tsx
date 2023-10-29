@@ -35,7 +35,7 @@ export function SettingsProvider({ children }: SettingsProviderProps) {
       if (typeof updater === 'function') _setSettings(produce(updater));
       else _setSettings(freeze(updater));
     },
-    [_setSettings]
+    [_setSettings],
   );
   const validate: typeof validateSettings = useCallback(
     (settings, customProperties) => {
@@ -50,7 +50,7 @@ export function SettingsProvider({ children }: SettingsProviderProps) {
         ...customProperties,
       });
     },
-    [settingsList]
+    [settingsList],
   );
 
   useDidMount(() => {
@@ -60,15 +60,15 @@ export function SettingsProvider({ children }: SettingsProviderProps) {
     setGlobalValues(
       (draft) =>
         void (draft.settingsList.customTheme.options = settings.customThemes.map(
-          ({ id, name }) => ({ alt: name, value: id })
-        ))
+          ({ id, name }) => ({ alt: name, value: id }),
+        )),
     );
   }, [setGlobalValues, settings.customThemes]);
   useIsomorphicEffect(() => {
     const fontFamily = settings.fontFamily;
     document.documentElement.style.setProperty(
       '--font',
-      fontFamily.startsWith('--') ? `var(${fontFamily})` : fontFamily
+      fontFamily.startsWith('--') ? `var(${fontFamily})` : fontFamily,
     );
   }, [settings.fontFamily]);
 
@@ -77,6 +77,8 @@ export function SettingsProvider({ children }: SettingsProviderProps) {
       <SWRConfig
         value={{
           fetcher: ((input, init) => fetch(input, init).then((res) => res.json())) as typeof fetch,
+          keepPreviousData: true,
+          revalidateOnFocus: false,
           provider,
         }}
       >
