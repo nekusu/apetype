@@ -2,7 +2,6 @@ export { default as Button } from './Button';
 export { default as Checkbox } from './Checkbox';
 export { default as ColorPicker } from './ColorPicker';
 export { default as Divider } from './Divider';
-export { default as Group } from './Group';
 export { default as Input } from './Input';
 export { default as Key } from './Key';
 export { default as Modal } from './Modal';
