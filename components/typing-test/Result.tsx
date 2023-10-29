@@ -55,7 +55,7 @@ export default function Result() {
           valueSize='lg'
         />
       </div>
-      <Chart />
+      <Chart stats={stats} elapsedTime={elapsedTime} />
       <div className='col-span-full flex justify-between gap-5'>
         <Group
           title='test type'

@@ -5,13 +5,12 @@ import { ChartData, ChartOptions, ChartTypeRegistry, TooltipModel } from 'chart.
 import { Text } from 'components/core';
 import { useSettings } from 'context/settingsContext';
 import { useTheme } from 'context/themeContext';
-import { useTypingTest } from 'context/typingTestContext';
-import { m } from 'framer-motion';
 import dynamic from 'next/dynamic';
 import { useMemo } from 'react';
 import { twJoin } from 'tailwind-merge';
 import { useImmer } from 'use-immer';
 import { ThemeColors, validateColor } from 'utils/theme';
+import { TypingTestValues } from 'utils/typingTest';
 
 const ReactChart = dynamic(
   async () => {
@@ -51,6 +50,8 @@ const ReactChart = dynamic(
   },
 );
 
+export type ChartProps = Pick<TypingTestValues, 'stats' | 'elapsedTime'>;
+
 interface ChartTooltipProps {
   position: { top: number; left: number };
   data?: TooltipModel<keyof ChartTypeRegistry>;
@@ -59,13 +60,12 @@ interface ChartTooltipProps {
 
 function ChartTooltip({ position: { top, left }, data, disabled }: ChartTooltipProps) {
   return (
-    <m.div
+    <div
       className={twJoin([
-        'pointer-events-none absolute rounded-lg bg-sub-alt py-2.5 px-3 shadow-md transition',
+        'pointer-events-none absolute rounded-lg bg-sub-alt py-2.5 px-3 shadow-md transition-all',
         disabled ? 'opacity-0' : 'opacity-100',
       ])}
-      animate={{ top, left }}
-      transition={{ ease: 'easeOut', duration: 0.2 }}
+      style={{ top, left }}
     >
       {data && (
         <>
@@ -84,14 +84,13 @@ function ChartTooltip({ position: { top, left }, data, disabled }: ChartTooltipP
           </div>
         </>
       )}
-    </m.div>
+    </div>
   );
 }
 
-export default function Chart() {
+export default function Chart({ stats, elapsedTime }: ChartProps) {
   const { showDecimalPlaces, themeType } = useSettings();
   const theme = useTheme();
-  const { stats, elapsedTime } = useTypingTest();
   const { raw, wpm, errors } = stats;
   const [tooltip, setTooltip] = useImmer<ChartTooltipProps>({
     position: { top: 0, left: 0 },
