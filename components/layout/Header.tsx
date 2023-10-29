@@ -1,6 +1,7 @@
 'use client';
 
 import { Button, Text, Tooltip, Transition } from 'components/core';
+import { ProfilePicture } from 'components/profile';
 import { useGlobal } from 'context/globalContext';
 import { useUser } from 'context/userContext';
 import { AnimatePresence, useAnimation } from 'framer-motion';
@@ -14,7 +15,6 @@ import {
   RiLoginCircleFill,
   RiLogoutCircleRFill,
   RiSettingsFill,
-  RiUser4Fill,
   RiVipCrownFill,
 } from 'react-icons/ri';
 import { twJoin } from 'tailwind-merge';
@@ -112,10 +112,16 @@ export default function Header() {
               ))}
             </Transition>
             <Transition className='flex items-center gap-1.5' variants={VARIANTS}>
-              {user && (
-                <Button className='text-sm'>
-                  <RiUser4Fill />
-                  {user.name}
+              {user && pathname !== '/account' && (
+                <Button asChild className='text-sm'>
+                  <Link href='/account'>
+                    <ProfilePicture
+                      className='w-5 border-0 bg-sub-alt'
+                      expandable={false}
+                      imageProps={{ src: user.profilePicture?.url }}
+                    />
+                    {user.name}
+                  </Link>
                 </Button>
               )}
               <Tooltip label={`Sign ${user ? 'out' : 'in'}`}>
@@ -125,7 +131,7 @@ export default function Header() {
                   </Button>
                 ) : (
                   <Button asChild className='text-xl'>
-                    <Link href='login'>
+                    <Link href='/login'>
                       <RiLoginCircleFill />
                     </Link>
                   </Button>
