@@ -6,7 +6,6 @@ import { PasswordInput, SignInMethods } from 'components/auth';
 import { Button, Checkbox, Divider, Input, Text, Transition } from 'components/core';
 import { FirebaseError } from 'firebase/app';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
@@ -26,7 +25,6 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 export default function Login() {
-  const router = useRouter();
   const {
     control,
     formState: { errors },
@@ -55,7 +53,6 @@ export default function Login() {
       await setPersistence(auth, remember ? browserLocalPersistence : browserSessionPersistence);
       const { user } = await signInWithEmailAndPassword(auth, email, password);
       toast.success(`Welcome back, ${user.displayName}! You're now logged in.`);
-      router.push('/');
     } catch (e) {
       const error = e as FirebaseError;
       if (error.code === 'auth/user-not-found')
@@ -82,11 +79,7 @@ export default function Login() {
       <Text className='text-sm' dimmed>
         Select method to log in:
       </Text>
-      <SignInMethods
-        onStart={popupHandler.open}
-        onSignIn={() => router.push('/')}
-        onFinish={popupHandler.close}
-      />
+      <SignInMethods onStart={popupHandler.open} onFinish={popupHandler.close} />
       <Divider label='or continue with email' />
       <form className='flex flex-col gap-3.5' onSubmit={(e) => void handleSubmit(onSubmit)(e)}>
         <div className='flex flex-col gap-2'>

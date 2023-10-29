@@ -8,7 +8,6 @@ import { Button, Divider, Input, Text, Transition } from 'components/core';
 import { User, defaultUserDetails } from 'context/userContext';
 import { FirebaseError } from 'firebase/app';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { useCallback, useDeferredValue, useMemo, useState } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
@@ -39,7 +38,6 @@ const formSchema = z
 type FormValues = z.infer<typeof formSchema>;
 
 export default function Signup() {
-  const router = useRouter();
   const [passwordStrength, setPasswordStrength] = useState<ZxcvbnResult | null>(null);
   const {
     formState: { isSubmitted, errors },
@@ -106,7 +104,6 @@ export default function Signup() {
         { duration: Infinity },
       );
       toast.success(`Account created successfully! Welcome aboard, ${user.displayName}!`);
-      router.push('/');
     } catch (e) {
       const error = e as FirebaseError;
       if (error.code === 'auth/email-already-in-use')
@@ -135,11 +132,7 @@ export default function Signup() {
       <Text className='text-sm' dimmed>
         Select method to sign up:
       </Text>
-      <SignInMethods
-        onStart={popupHandler.open}
-        onSignIn={() => router.push('/')}
-        onFinish={popupHandler.close}
-      />
+      <SignInMethods onStart={popupHandler.open} onFinish={popupHandler.close} />
       <Divider label='or continue with email' />
       <form className='flex flex-col gap-3.5' onSubmit={(e) => void handleSubmit(onSubmit)(e)}>
         <div className='flex flex-col gap-2'>
