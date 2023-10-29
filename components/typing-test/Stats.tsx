@@ -3,9 +3,11 @@
 import { FloatingPortal } from '@floating-ui/react';
 import { useDidUpdate } from '@mantine/hooks';
 import { Transition } from 'components/core';
+import { useAuth } from 'context/authContext';
 import { useGlobal } from 'context/globalContext';
 import { useSettings } from 'context/settingsContext';
 import { useTypingTest } from 'context/typingTestContext';
+import { useUser } from 'context/userContext';
 import { m } from 'framer-motion';
 import { useStats } from 'hooks/useStats';
 import { twJoin } from 'tailwind-merge';
@@ -25,13 +27,27 @@ export default function Stats() {
     liveAccuracy,
     timerProgress,
   } = useSettings();
+  const { signedIn } = useAuth();
+  const { setPendingData, removePendingData } = useUser();
   const { wordIndex, currentStats, timer, isTestRunning, setValues } = useTypingTest();
   const { wpm, characters, errors } = currentStats;
   const stats = useStats();
   const accuracy = acc(characters, errors);
 
   useDidUpdate(() => {
-    if (isTestRunning) stats.start();
+    let startTime = 0;
+    if (isTestRunning) {
+      stats.start();
+      startTime = performance.now();
+      if (!signedIn) removePendingData();
+      setPendingData((draft) => void (draft.typingStats.startedTests += 1));
+    }
+    return () => {
+      if (startTime)
+        setPendingData(
+          (draft) => void (draft.typingStats.timeTyping += (performance.now() - startTime) / 1000),
+        );
+    };
   }, [isTestRunning]);
   useDidUpdate(() => {
     const timeFinished = mode === 'time' && time > 0 && timer <= 0;
