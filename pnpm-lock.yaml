@@ -22,7 +22,7 @@ dependencies:
     version: 1.0.2(@types/react@18.2.21)(react@18.2.0)
   '@tatsuokaniwa/swr-firestore':
     specifier: ^2.0.6
-    version: 2.0.6(firebase-admin@11.10.1)(firebase@10.3.0)(swr@2.2.2)
+    version: 2.0.6(firebase-admin@11.11.0)(firebase@10.3.0)(swr@2.2.2)
   '@zxcvbn-ts/core':
     specifier: ^3.0.3
     version: 3.0.3
@@ -74,6 +74,9 @@ dependencies:
   react-dom:
     specifier: ^18.2.0
     version: 18.2.0(react@18.2.0)
+  react-easy-crop:
+    specifier: ^5.0.2
+    version: 5.0.2(react-dom@18.2.0)(react@18.2.0)
   react-hook-form:
     specifier: ^7.45.4
     version: 7.45.4(react@18.2.0)
@@ -1811,7 +1814,7 @@ packages:
       defer-to-connect: 2.0.1
     dev: true
 
-  /@tatsuokaniwa/swr-firestore@2.0.6(firebase-admin@11.10.1)(firebase@10.3.0)(swr@2.2.2):
+  /@tatsuokaniwa/swr-firestore@2.0.6(firebase-admin@11.11.0)(firebase@10.3.0)(swr@2.2.2):
     resolution: {integrity: sha512-QAX8yN+If6iB9y5q4QEluv+Lize4A8RUtgWAQmOkQ31h1YxIcWUlsG+MvvoLijRsUf/mooqqDeURFp1RdDU6pA==}
     peerDependencies:
       firebase: '>=9.11.0'
@@ -1819,7 +1822,7 @@ packages:
       swr: ^2.1.0 <3.0.0
     dependencies:
       firebase: 10.3.0
-      firebase-admin: 11.10.1
+      firebase-admin: 11.11.0
       lodash: 4.17.21
       lodash-es: 4.17.21
       swr: 2.2.2(react@18.2.0)
@@ -4109,8 +4112,8 @@ packages:
       path-exists: 4.0.0
     dev: true
 
-  /firebase-admin@11.10.1:
-    resolution: {integrity: sha512-atv1E6GbuvcvWaD3eHwrjeP5dAVs+EaHEJhu9CThMzPY6In8QYDiUR6tq5SwGl4SdA/GcAU0nhwWc/FSJsAzfQ==}
+  /firebase-admin@11.11.0:
+    resolution: {integrity: sha512-lp784gXFAJgUEtjSdYNZGTWZqltqjBkoaPSQhDKnmWXJP/MCbWdiDY1hsdkl/6O4O4KFovTjUDLu26sojwdQvw==}
     engines: {node: '>=14'}
     dependencies:
       '@fastify/busboy': 1.2.1
@@ -5973,6 +5976,10 @@ packages:
     engines: {node: '>=14.16'}
     dev: true
 
+  /normalize-wheel@1.0.1:
+    resolution: {integrity: sha512-1OnlAPZ3zgrk8B91HyRj+eVv+kS5u+Z0SCsak6Xil/kmgEia50ga7zfkumayonZrImffAxPU/5WcyGhzetHNPA==}
+    dev: false
+
   /npm-run-path@4.0.1:
     resolution: {integrity: sha512-S48WzZW777zhNIrn7gxOlISNAqi9ZC/uQFnRdbeIHhZhCA6UqpkOT8T1G7BvfdgP4Er8gF4sUbaS0i7QvIfCWw==}
     engines: {node: '>=8'}
@@ -6611,6 +6618,18 @@ packages:
       loose-envify: 1.4.0
       react: 18.2.0
       scheduler: 0.23.0
+    dev: false
+
+  /react-easy-crop@5.0.2(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-j4A/0s0v/Gx5YGXvw3SOFIMmRk5YCdob2ABL5cD00Q9HQPKIz6tkCYLdj0RMO0REPtCAOsZ2ZZLI6fUofiDP6w==}
+    peerDependencies:
+      react: '>=16.4.0'
+      react-dom: '>=16.4.0'
+    dependencies:
+      normalize-wheel: 1.0.1
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
+      tslib: 2.0.1
     dev: false
 
   /react-hook-form@7.45.4(react@18.2.0):
@@ -7496,6 +7515,10 @@ packages:
       minimist: 1.2.8
       strip-bom: 3.0.0
     dev: true
+
+  /tslib@2.0.1:
+    resolution: {integrity: sha512-SgIkNheinmEBgx1IUNirK0TUD4X9yjjBRTqqjggWCU3pUEqIk3/Uwl3yRixYKT6WjQuGiwDv4NomL3wqRCj+CQ==}
+    dev: false
 
   /tslib@2.5.0:
     resolution: {integrity: sha512-336iVw3rtn2BUK7ORdIAHTyxHGRIHVReokCR3XjbckJMK7ms8FysBfhLR8IXnAgy7T0PTPNBWKiH514FOW/WSg==}
