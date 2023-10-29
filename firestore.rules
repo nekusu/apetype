@@ -5,7 +5,7 @@ service cloud.firestore {
     function isSignedIn() {
       return request.auth != null;
     }
-    match /users/{userId} {
+    match /users/{userId}/{document=**} {
       allow read: if true;
       allow write: if isSignedIn() && request.auth.uid == userId;
     }
