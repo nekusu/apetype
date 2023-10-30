@@ -1,4 +1,5 @@
-import { UpdateData } from 'firebase/firestore';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { Timestamp, UpdateData } from 'firebase/firestore';
 
 export function getRandomNumber(max = 1, min = 0) {
   if (arguments.length === 1) min = 0;
@@ -50,6 +51,23 @@ export function flattenObject<T extends object>(obj: T, prefix = ''): UpdateData
     }
   }
   return result;
+}
+
+export function parseTimestamps<T extends Record<string, any>>(obj?: T) {
+  const replacedObj: Partial<T> = {};
+
+  for (const key in obj) {
+    const value = obj[key];
+
+    if (value && typeof value.toDate === 'function') {
+      const { nanoseconds, seconds } = value as Timestamp;
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      replacedObj[key] = { nanoseconds, seconds } as any;
+    } else if (typeof value === 'object') replacedObj[key] = parseTimestamps(value);
+    else replacedObj[key] = value;
+  }
+
+  return replacedObj as T;
 }
 
 export function getLocalStorageSize(...keys: string[]) {
