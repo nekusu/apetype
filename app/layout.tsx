@@ -1,3 +1,4 @@
+import '@unocss/reset/tailwind-compat.css';
 import { MainLayout } from 'components/layout';
 import { AuthProvider } from 'context/authContext';
 import { GlobalProvider } from 'context/globalContext';

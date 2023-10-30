@@ -142,7 +142,7 @@ export default function ProfileEditModal({ open, onClose }: ModalProps) {
           <Input
             disabled={
               !!user?.lastUsernameChange &&
-              dayjs().diff(dayjs.unix(user.lastUsernameChange.seconds), 'days', true) < 30
+              dayjs().diff(dayjs(user.lastUsernameChange), 'days', true) < 30
             }
             error={errors.username?.message}
             label='username'
@@ -154,7 +154,7 @@ export default function ProfileEditModal({ open, onClose }: ModalProps) {
             </Text>
             {user?.lastUsernameChange && (
               <Text className='text-xs text-error'>
-                Last changed {dayjs.unix(user.lastUsernameChange.seconds).fromNow()}.
+                Last changed {dayjs(user.lastUsernameChange).fromNow()}.
               </Text>
             )}
           </div>

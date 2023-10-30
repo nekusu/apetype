@@ -47,7 +47,7 @@ export interface User {
   id: string;
   name: string;
   joinedAt: Date;
-  lastUsernameChange?: Timestamp | null;
+  lastUsernameChange?: Date | null;
   profilePicture?: {
     url: string;
     shape: 'rect' | 'round';
@@ -100,9 +100,10 @@ export const defaultUserDetails: Partial<User> = {
 
 export function UserProvider({ children }: { children: ReactNode }) {
   const { currentUser } = useAuth();
-  console.log(currentUser);
   const { data: user } = useDoc<User>(
-    currentUser ? { path: `users/${currentUser.uid}`, parseDates: ['joinedAt'] } : null,
+    currentUser
+      ? { path: `users/${currentUser.uid}`, parseDates: ['joinedAt', 'lastUsernameChange'] }
+      : null,
     { keepPreviousData: false },
   );
   const [pendingData, _setPendingData, removePendingData] = useLocalStorage<PendingData>({
@@ -118,7 +119,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
       ]);
       if (!currentUser) return;
       if (user.name) await updateProfile(currentUser, { displayName: user.name as string });
-      return await updateDocument('users', currentUser.uid, user);
+      return await updateDocument<User>('users', currentUser.uid, user);
     },
     [currentUser],
   );

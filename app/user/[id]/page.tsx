@@ -5,6 +5,7 @@ import { User } from 'context/userContext';
 import Link from 'next/link';
 import { RiKeyboardBoxFill } from 'react-icons/ri';
 import { setupFirebaseAdmin } from 'utils/firebase/admin/app';
+import { parseTimestamps } from 'utils/misc';
 
 setupFirebaseAdmin();
 
@@ -12,18 +13,18 @@ export default async function User({ params }: { params: { id: string } }) {
   const { data: usersWithSameName } = await getCollection<User>({
     path: 'users',
     where: [['name', '==', params.id]],
-    parseDates: ['joinedAt'],
+    parseDates: ['joinedAt', 'lastUsernameChange'],
   });
   const userByName = usersWithSameName[0];
   let userById: DocumentData<User> | undefined;
   if (!userByName)
     userById = (await getDoc<User>({ path: `users/${params.id}`, parseDates: ['joinedAt'] })).data;
-  const { ref, ...user } = userByName ?? userById ?? {};
+  const { ref, personalBests, ...user } = userByName ?? userById ?? {};
 
   return ref ? (
     <Transition className='w-full flex flex-col self-center gap-6'>
       <UserDetails user={user} />
-      <PersonalBests data={user.personalBests} />
+      <PersonalBests data={parseTimestamps(personalBests)} />
     </Transition>
   ) : (
     <Transition className='flex flex-col cursor-default items-center self-center gap-6'>

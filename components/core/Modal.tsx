@@ -1,10 +1,11 @@
 'use client';
 
 import { FloatingPortal } from '@floating-ui/react';
-import { useFocusTrap, useHotkeys, useScrollLock } from '@mantine/hooks';
+import { useFocusTrap, useHotkeys } from '@mantine/hooks';
 import { useGlobal } from 'context/globalContext';
 import { AnimatePresence, HTMLMotionProps } from 'framer-motion';
 import { MouseEvent, useEffect } from 'react';
+import { RemoveScroll } from 'react-remove-scroll';
 import { twMerge } from 'tailwind-merge';
 import Transition from './Transition';
 
@@ -38,7 +39,6 @@ export default function Modal({
   ...props
 }: ModalProps) {
   const { setGlobalValues } = useGlobal();
-  const [, setScrollLocked] = useScrollLock();
   const focusTrapRef = useFocusTrap(trapFocus && open);
 
   const handleEscapePress = () => {
@@ -51,37 +51,38 @@ export default function Modal({
   useEffect(() => {
     setGlobalValues((draft) => void (draft.modalOpen = open));
   }, [open, setGlobalValues]);
-  useEffect(() => {
-    setScrollLocked(lockScroll && open);
-  }, [lockScroll, open, setScrollLocked]);
   useHotkeys([['Escape', handleEscapePress]], ['input']);
 
   return (
     <FloatingPortal id={id} root={target}>
       <AnimatePresence>
         {open && (
-          <Transition
-            className={twMerge([
-              'inset-0 z-50 flex h-full w-full justify-center bg-black/50 py-16 px-8 backdrop-blur-[2.5px]',
-              centered ? 'items-center' : 'items-start',
-              overflow === 'outside' && 'overflow-y-auto',
-              target ? 'absolute' : 'fixed',
-              backdropClassName,
-            ])}
-            onClick={handleOutsideClick}
-          >
+          <RemoveScroll enabled={lockScroll && open} forwardProps>
             <Transition
-              ref={focusTrapRef}
               className={twMerge([
-                'relative rounded-xl bg-bg p-6 shadow-2xl transition-colors cursor-default',
-                overflow === 'inside' && 'max-h-full overflow-y-auto',
-                className,
+                'inset-0 z-50 flex h-full w-full justify-center bg-black/50 py-16 px-8 backdrop-blur-[2.5px]',
+                centered ? 'items-center' : 'items-start',
+                overflow === 'outside' && 'overflow-y-auto',
+                target ? 'absolute' : 'fixed',
+                backdropClassName,
               ])}
-              variants={{ hidden: { scale: 0.95 }, visible: { scale: 1 } }}
-              transition={{ type: 'spring', bounce: 0.6 }}
-              {...props}
-            />
-          </Transition>
+              onClick={handleOutsideClick}
+            >
+              <Transition
+                ref={focusTrapRef}
+                className={twMerge([
+                  'relative rounded-xl bg-bg p-6 shadow-2xl transition-colors cursor-default',
+                  overflow === 'inside' && 'max-h-full overflow-y-auto',
+                  className,
+                ])}
+                variants={{
+                  hidden: { scale: 0.95, transition: { duration: 0.15 } },
+                  visible: { scale: 1, transition: { type: 'spring', bounce: 0.6 } },
+                }}
+                {...props}
+              />
+            </Transition>
+          </RemoveScroll>
         )}
       </AnimatePresence>
     </FloatingPortal>
