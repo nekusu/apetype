@@ -11,7 +11,7 @@ export interface ButtonProps extends ComponentPropsWithoutRef<'button'> {
 function getVariantStyles(variant: NonNullable<ButtonProps['variant']>) {
   const className = ['danger', 'filled'].includes(variant)
     ? 'bg-sub-alt text-text -outline-offset-2 active:scale-[.925]'
-    : 'text-sub hover:text-text';
+    : 'text-sub hover:text-text bg-transparent';
   switch (variant) {
     case 'danger':
       return twMerge([
@@ -35,7 +35,7 @@ function getVariantStyles(variant: NonNullable<ButtonProps['variant']>) {
 
 const Button = forwardRef<ElementRef<'button'>, ButtonProps>(function Button(
   { asChild, active = false, className, disabled, type = 'button', variant = 'text', ...props },
-  ref
+  ref,
 ) {
   const Component = asChild ? Slot : 'button';
   return (
