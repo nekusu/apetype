@@ -5,7 +5,8 @@ import { toCamelCase } from './misc';
 import { CustomTheme } from './theme';
 
 export type Sound = 'beep' | 'click' | 'hitmarker' | 'nk-creams' | 'osu' | 'pop' | 'typewriter';
-
+export type Time = 15 | 30 | 60 | 120;
+export type Words = 10 | 25 | 50 | 100;
 export interface Settings {
   mode: 'time' | 'words';
   time: number;

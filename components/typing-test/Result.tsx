@@ -1,13 +1,27 @@
 'use client';
 
 import { Text, Tooltip } from 'components/core';
+import { useAuth } from 'context/authContext';
 import { useSettings } from 'context/settingsContext';
 import { useTypingTest } from 'context/typingTestContext';
+import { PersonalBest, User, useUser } from 'context/userContext';
 import { useLanguage } from 'hooks/useLanguage';
-import { Fragment, JSXElementConstructor, ReactElement, ReactNode, useMemo } from 'react';
+import {
+  Fragment,
+  JSXElementConstructor,
+  ReactElement,
+  ReactNode,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
+import { RiVipCrown2Fill } from 'react-icons/ri';
+import { twJoin, twMerge } from 'tailwind-merge';
+import { getFirebaseFirestore } from 'utils/firebase';
+import { settingsList } from 'utils/settings';
 import { Letter as LetterType, accuracy as acc, consistency as con } from 'utils/typingTest';
 import { Chart, Letter } from '.';
-import { twMerge, twJoin } from 'tailwind-merge';
 
 interface GroupProps {
   title: string | number | ReactElement<HTMLElement, string | JSXElementConstructor<HTMLElement>>;
@@ -49,14 +63,16 @@ function Group({ title, titleClassName, value, valueClassName }: GroupProps) {
 export default function Result() {
   const {
     mode,
-    time,
-    words: wordAmount,
     blindMode,
     language: languageName,
     stopOnError,
     lazyMode,
     showDecimalPlaces,
+    ...settings
   } = useSettings();
+  const { time, words: wordAmount } = settings;
+  const { signedIn } = useAuth();
+  const { user, updateUser, setPendingData, removePendingData } = useUser();
   const { words, currentStats, stats, elapsedTime } = useTypingTest();
   const { raw, wpm, characters, errors } = currentStats;
   const { language } = useLanguage(languageName);
@@ -73,16 +89,94 @@ export default function Result() {
         });
         return characters;
       },
-      { correct: 0, incorrect: 0, extra: 0, missed: 0 }
+      { correct: 0, incorrect: 0, extra: 0, missed: 0 },
     );
   }, [words]);
+  const [bestWpmDiff, setBestWpmDiff] = useState(0);
+  const userDataSaved = useRef(false);
+
+  useEffect(() => {
+    if (user && !userDataSaved.current) {
+      const mode2 = settings[mode];
+      const personalBest = user.personalBests?.[mode]?.[
+        mode2 as keyof Required<User>['personalBests'][typeof mode]
+      ] as unknown as PersonalBest | undefined;
+      const isPb =
+        settingsList[mode].options.map(({ value }) => value).includes(mode2) &&
+        (!personalBest || wpm > personalBest.wpm);
+
+      setPendingData((draft) => {
+        const { typingStats, tests } = draft;
+        const { highest, average } = user.typingStats;
+        const currentStats = { wpm, raw, accuracy, consistency };
+        typingStats.completedTests += 1;
+
+        Object.entries(currentStats).forEach(([_key, value]) => {
+          const key = _key as keyof typeof currentStats;
+          if (!highest[key] || value > highest[key]) typingStats.highest[key] = value;
+          typingStats.average[key] = (average[key] + value) / (average[key] ? 2 : 1);
+        });
+
+        tests.push({
+          language: languageName,
+          date: new Date(),
+          mode,
+          mode2,
+          words,
+          stats,
+          result: { ...currentStats, characterStats },
+          duration: elapsedTime,
+          blindMode,
+          lazyMode,
+          isPb,
+        });
+      });
+
+      if (isPb) {
+        setBestWpmDiff(Math.abs((personalBest?.wpm ?? 0) - wpm));
+        void (async () => {
+          const { serverTimestamp } = await getFirebaseFirestore();
+          await updateUser({
+            [`personalBests.${mode}`]: {
+              ...user.personalBests?.[mode],
+              [mode2]: {
+                wpm,
+                raw,
+                accuracy,
+                consistency,
+                date: serverTimestamp(),
+              },
+            },
+          });
+        })();
+      }
+
+      userDataSaved.current = true;
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
+  useEffect(() => {
+    return () => void (!signedIn && removePendingData());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div className='flex flex-col cursor-default gap-5'>
       <div className='grid grid-cols-[min-content_1fr] items-center gap-5'>
         <div className='flex flex-wrap gap-2'>
           <Group
-            title='wpm'
+            title={
+              <div className='flex items-center gap-3 text-[2rem]'>
+                wpm
+                {signedIn && bestWpmDiff > 0 && (
+                  <Tooltip label={`+${bestWpmDiff.toFixed(2)}`} placement='top'>
+                    <div className='rounded-xl bg-main p-2 text-base text-sub-alt'>
+                      <RiVipCrown2Fill />
+                    </div>
+                  </Tooltip>
+                )}
+              </div>
+            }
             value={showDecimalPlaces ? wpm.toFixed(2) : Math.floor(wpm)}
             valueClassName='text-[4rem]'
           />
