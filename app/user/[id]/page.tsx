@@ -18,12 +18,7 @@ export default async function User({ params }: { params: { id: string } }) {
   let userById: DocumentData<User> | undefined;
   if (!userByName)
     userById = (await getDoc<User>({ path: `users/${params.id}`, parseDates: ['joinedAt'] })).data;
-  // Silences the warning "Only plain objects can be passed to Client Components from Server
-  // Components" caused by the 'date' property in User.personalBests, JSON stringify/parse can be
-  // removed once this issue is resolved
-  const { ref, ...user } = JSON.parse(
-    JSON.stringify(userByName ?? userById ?? {}),
-  ) as DocumentData<User>;
+  const { ref, ...user } = userByName ?? userById ?? {};
 
   return ref ? (
     <Transition className='w-full flex flex-col self-center gap-6'>
