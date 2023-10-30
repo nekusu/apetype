@@ -2,6 +2,7 @@
 
 import { useDidUpdate, useWindowEvent } from '@mantine/hooks';
 import { Button, Text, Tooltip, Transition } from 'components/core';
+import { useAuth } from 'context/authContext';
 import { useGlobal } from 'context/globalContext';
 import { useSettings } from 'context/settingsContext';
 import { useTheme } from 'context/themeContext';
@@ -10,6 +11,7 @@ import dayjs from 'dayjs';
 import { AnimatePresence } from 'framer-motion';
 import { useLanguage } from 'hooks/useLanguage';
 import { toPng } from 'html-to-image';
+import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import {
@@ -47,6 +49,7 @@ export default function Test() {
     themeType,
     capsLockWarning,
   } = useSettings();
+  const { signedIn } = useAuth();
   const { colors } = useTheme();
   const { language } = useLanguage(languageName);
   const [showResultDate, setShowResultDate] = useState(false);
@@ -116,6 +119,11 @@ export default function Test() {
                   </div>
                 )}
               </div>
+              {!signedIn && (
+                <Button asChild className='self-center p-0'>
+                  <Link href='/login'>sign in to save this test</Link>
+                </Button>
+              )}
               <div className='w-full flex justify-center gap-4'>
                 <Tooltip label='Next test' offset={8}>
                   <Button className='px-8 py-4 text-xl' variant='subtle' onClick={restartTest}>
