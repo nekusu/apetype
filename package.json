@@ -28,6 +28,7 @@
     "dayjs": "^1.11.9",
     "earwurm": "^0.4.0",
     "firebase": "^10.3.0",
+    "firebase-admin": "^11.11.0",
     "framer-motion": "^10.16.1",
     "html-to-image": "^1.11.11",
     "immer": "^10.0.2",
