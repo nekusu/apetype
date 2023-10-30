@@ -11,7 +11,7 @@ export interface LazyImageProps extends Optional<ComponentPropsWithoutRef<typeof
 }
 
 export default function LazyImage({ loadingProps: _loadingProps, ...props }: LazyImageProps) {
-  const { src, onLoadingComplete } = props;
+  const { src, onLoad } = props;
   const { className: loadingClassName, ...loadingProps } = _loadingProps ?? {};
   const [isLoading, setIsLoading] = useState(false);
 
@@ -25,9 +25,9 @@ export default function LazyImage({ loadingProps: _loadingProps, ...props }: Laz
         // eslint-disable-next-line jsx-a11y/alt-text
         <Image
           src={src}
-          onLoadingComplete={(img) => {
+          onLoad={(img) => {
             setIsLoading(false);
-            onLoadingComplete?.(img);
+            onLoad?.(img);
           }}
           {...props}
         />
