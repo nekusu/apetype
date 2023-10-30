@@ -76,7 +76,8 @@ export function SettingsProvider({ children }: SettingsProviderProps) {
     <SettingsContext.Provider value={{ setSettings, validate, ...settings }}>
       <SWRConfig
         value={{
-          fetcher: ((input, init) => fetch(input, init).then((res) => res.json())) as typeof fetch,
+          fetcher: (input: RequestInfo, init: RequestInit) =>
+            fetch(input, init).then((res) => res.json()),
           keepPreviousData: true,
           revalidateOnFocus: false,
           provider,
