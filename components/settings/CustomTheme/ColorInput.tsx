@@ -50,7 +50,7 @@ const ColorInput = forwardRef<ElementRef<'input'>, ColorInputProps>(function Col
       { duration: Infinity, icon: <RiForbidFill /> },
     );
     try {
-      const { sRGBHex } = await open();
+      const { sRGBHex } = (await open())!;
       setValue?.(sRGBHex);
     } catch (e) {
       toast.error(`Something went wrong! ${(e as Error).message}`);
