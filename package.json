@@ -11,7 +11,7 @@
     "start": "next start",
     "lint": "next lint",
     "release": "release-it",
-    "prepare": "husky install && pnpm genversion"
+    "prepare": "husky install && bun genversion"
   },
   "dependencies": {
     "@floating-ui/react": "^0.26.3",
