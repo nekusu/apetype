@@ -50,6 +50,7 @@
     "zod": "^3.22.4"
   },
   "devDependencies": {
+    "@biomejs/biome": "^1.4.1",
     "@commitlint/cli": "^18.4.3",
     "@commitlint/config-conventional": "^18.4.3",
     "@next/bundle-analyzer": "^14.0.3",
@@ -65,10 +66,8 @@
     "@unocss/reset": "^0.58.0",
     "eslint": "^8.55.0",
     "eslint-config-next": "^14.0.3",
-    "eslint-config-prettier": "^9.1.0",
     "genversion": "^3.1.1",
     "husky": "^8.0.3",
-    "prettier": "^3.1.0",
     "release-it": "^17.0.0",
     "typescript": "^5.3.3",
     "unocss": "^0.58.0"
