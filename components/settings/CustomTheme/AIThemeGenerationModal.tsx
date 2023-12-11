@@ -118,7 +118,7 @@ export default function AIThemeGenerationModal({ open, onClose, addTheme }: Moda
         <div className='flex flex-col gap-3'>
           <Input error={errors.name?.message} label='name' data-autofocus {...register('name')} />
           <div className='grid grid-cols-3 gap-2'>
-            <div className='col-span-full flex gap-1 text-sm leading-none text-sub -mb-1'>
+            <div className='col-span-full flex gap-1 text-sm text-sub leading-none -mb-1'>
               model
             </div>
             {(Object.keys(MODELS) as Model[]).map((m) => (
@@ -135,7 +135,7 @@ export default function AIThemeGenerationModal({ open, onClose, addTheme }: Moda
             ))}
           </div>
           <div className='grid grid-cols-3 gap-2'>
-            <div className='col-span-full flex gap-1 text-sm leading-none text-sub -mb-1'>
+            <div className='col-span-full flex gap-1 text-sm text-sub leading-none -mb-1'>
               creativity
               <Tooltip
                 className='max-w-xs text-xs'

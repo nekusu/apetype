@@ -95,6 +95,7 @@ export default function Words() {
     >
       <input
         className='absolute opacity-0 -z-10'
+        autoCapitalize='off'
         onBlur={blurWords}
         onChange={handleInput}
         onFocus={(e) => {

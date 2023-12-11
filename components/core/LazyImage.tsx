@@ -1,21 +1,26 @@
 'use client';
 
+import { useDidUpdate } from '@mantine/hooks';
 import Loading, { LoadingProps } from 'app/loading';
 import { AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
-import { ComponentPropsWithoutRef, useEffect, useState } from 'react';
+import { ComponentPropsWithoutRef, useState } from 'react';
 import { twMerge } from 'tailwind-merge';
 
 export interface LazyImageProps extends Optional<ComponentPropsWithoutRef<typeof Image>, 'src'> {
   loadingProps?: LoadingProps;
 }
 
-export default function LazyImage({ loadingProps: _loadingProps, ...props }: LazyImageProps) {
-  const { src, onLoad } = props;
+export default function LazyImage({
+  loadingProps: _loadingProps,
+  onLoad,
+  src,
+  ...props
+}: LazyImageProps) {
   const { className: loadingClassName, ...loadingProps } = _loadingProps ?? {};
   const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
+  useDidUpdate(() => {
     setIsLoading(!!src);
   }, [src]);
 

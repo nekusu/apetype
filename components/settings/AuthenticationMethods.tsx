@@ -1,8 +1,9 @@
 'use client';
 
 import { Button } from 'components/core';
+import { useAuth } from 'context/authContext';
 import { FirebaseError } from 'firebase/app';
-import { AuthProvider, UserInfo } from 'firebase/auth';
+import { AuthProvider } from 'firebase/auth';
 import { useDidMount } from 'hooks/useDidMount';
 import { useState } from 'react';
 import { toast } from 'react-hot-toast';
@@ -12,8 +13,8 @@ import { AuthenticationMethod } from 'utils/firebase/auth';
 import Setting from './Setting';
 
 export default function AuthenticationMethods() {
+  const { currentUser } = useAuth();
   const [providerLoading, setProviderLoading] = useState('');
-  const [userProviders, setUserProviders] = useState<UserInfo[]>();
   const [authMethods, setAuthMethods] = useState<AuthenticationMethod[]>();
 
   const handleMethod = async (
@@ -21,16 +22,15 @@ export default function AuthenticationMethods() {
     provider: AuthProvider,
     type: 'link' | 'unlink',
   ) => {
-    const { auth, linkWithPopup, unlink } = await getFirebaseAuth();
-    if (!auth.currentUser) return;
+    const { linkWithPopup, unlink } = await getFirebaseAuth();
+    if (!currentUser) return;
     try {
       setProviderLoading(providerName);
-      if (type === 'link') await linkWithPopup(auth.currentUser, provider);
-      else await unlink(auth.currentUser, provider.providerId);
+      if (type === 'link') await linkWithPopup(currentUser, provider);
+      else await unlink(currentUser, provider.providerId);
       toast.success(
         `Account ${type === 'link' ? 'linked to' : 'unlinked from'} ${providerName} successfully!`,
       );
-      setUserProviders(auth.currentUser.providerData);
     } catch (e) {
       toast.error(`Something went wrong! ${(e as FirebaseError).message}`);
     } finally {
@@ -40,8 +40,7 @@ export default function AuthenticationMethods() {
 
   useDidMount(() => {
     void (async () => {
-      const { auth, authenticationMethods } = await getFirebaseAuth();
-      setUserProviders(auth.currentUser?.providerData);
+      const { authenticationMethods } = await getFirebaseAuth();
       setAuthMethods(authenticationMethods);
     })();
   });
@@ -49,7 +48,7 @@ export default function AuthenticationMethods() {
   return (
     <Setting id='authenticationMethods'>
       {authMethods?.map(({ name, provider }) => {
-        const isProviderLinked = userProviders?.some(
+        const isProviderLinked = currentUser?.providerData.some(
           ({ providerId }) => providerId === provider.providerId,
         );
         return (

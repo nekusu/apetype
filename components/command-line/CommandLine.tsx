@@ -110,11 +110,10 @@ export default function CommandLine() {
   };
 
   useIsomorphicEffect(() => {
-    if (open && initialSetting) setSetting(settingsList[initialSetting]);
+    if (open) setSetting(initialSetting ? settingsList[initialSetting] : null);
     else {
       clearPreview();
       setInput('');
-      setSetting(null);
     }
   }, [open]);
   useIsomorphicEffect(() => {

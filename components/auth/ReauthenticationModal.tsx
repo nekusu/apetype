@@ -4,8 +4,9 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useDisclosure } from '@mantine/hooks';
 import { Button, Divider, Modal, Text } from 'components/core';
 import { ModalProps } from 'components/core/Modal';
+import { useAuth } from 'context/authContext';
 import { FirebaseError } from 'firebase/app';
-import { AuthCredential, AuthProvider, UserInfo } from 'firebase/auth';
+import { AuthCredential, AuthProvider } from 'firebase/auth';
 import { useDidMount } from 'hooks/useDidMount';
 import { useCallback, useState } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
@@ -34,6 +35,7 @@ export default function ReauthenticationModal({
   onReauthenticate,
   ...props
 }: ReauthenticationModalProps) {
+  const { currentUser } = useAuth();
   const {
     formState: { errors },
     handleSubmit,
@@ -45,7 +47,6 @@ export default function ReauthenticationModal({
   });
   const [popupOpen, popupHandler] = useDisclosure(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [userProviders, setUserProviders] = useState<UserInfo[]>();
   const [authMethods, setAuthMethods] = useState<AuthenticationMethod[]>();
 
   const reauthenticate = useCallback(
@@ -96,8 +97,7 @@ export default function ReauthenticationModal({
 
   useDidMount(() => {
     void (async () => {
-      const { auth, authenticationMethods } = await getFirebaseAuth();
-      setUserProviders(auth.currentUser?.providerData);
+      const { authenticationMethods } = await getFirebaseAuth();
       setAuthMethods(authenticationMethods);
     })();
   });
@@ -122,7 +122,9 @@ export default function ReauthenticationModal({
               key={name}
               className='w-full'
               disabled={
-                !userProviders?.some(({ providerId }) => providerId === provider.providerId)
+                !currentUser?.providerData.some(
+                  ({ providerId }) => providerId === provider.providerId,
+                )
               }
               variant='filled'
               onClick={() => void reauthenticateWithProvider(provider, credentialFromResult)}
@@ -132,7 +134,7 @@ export default function ReauthenticationModal({
             </Button>
           ))}
         </div>
-        {userProviders?.some(({ providerId }) => providerId === 'password') && (
+        {currentUser?.providerData.some(({ providerId }) => providerId === 'password') && (
           <>
             <Divider label='or enter your password' />
             <form

@@ -6,9 +6,9 @@ import { ZxcvbnResult } from '@zxcvbn-ts/core';
 import { PasswordInput, PasswordStrength, ReauthenticationModal } from 'components/auth';
 import { Button, Modal, Text } from 'components/core';
 import { ModalProps } from 'components/core/Modal';
+import { useAuth } from 'context/authContext';
 import { FirebaseError } from 'firebase/app';
-import { useDidMount } from 'hooks/useDidMount';
-import { useCallback, useDeferredValue, useState } from 'react';
+import { useCallback, useDeferredValue, useEffect, useState } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
 import { RiLoaderLine } from 'react-icons/ri';
@@ -18,8 +18,7 @@ import { z } from 'zod';
 import Setting from './Setting';
 
 interface PasswordModalProps extends ModalProps {
-  addPassword: (password: string) => Promise<void>;
-  changePassword: (password: string) => Promise<void>;
+  updatePassword: (password: string) => Promise<void>;
   passwordAuthenticated?: boolean;
 }
 
@@ -37,12 +36,8 @@ const formSchema = z
   });
 type FormValues = z.infer<typeof formSchema>;
 
-function PasswordModal({
-  addPassword,
-  changePassword,
-  passwordAuthenticated,
-  ...props
-}: PasswordModalProps) {
+function PasswordModal({ updatePassword, passwordAuthenticated, ...props }: PasswordModalProps) {
+  const { currentUser } = useAuth();
   const [passwordStrength, setPasswordStrength] = useState<ZxcvbnResult | null>(null);
   const {
     formState: { isSubmitted, errors },
@@ -71,8 +66,7 @@ function PasswordModal({
   const handlePassword = async (password: string) => {
     try {
       setIsLoading(true);
-      if (passwordAuthenticated) await changePassword(password);
-      else await addPassword(password);
+      await updatePassword(password);
     } catch (e) {
       const error = e as FirebaseError;
       if (error.code === 'auth/requires-recent-login') reauthModalHandler.open();
@@ -83,13 +77,9 @@ function PasswordModal({
   };
   const onSubmit: SubmitHandler<FormValues> = async ({ password }) => handlePassword(password);
 
-  useDidMount(() => {
-    void (async () => {
-      const { auth } = await getFirebaseAuth();
-      const user = auth.currentUser;
-      setUserInputs([user?.displayName ?? '', user?.email ?? '']);
-    })();
-  });
+  useEffect(() => {
+    setUserInputs([currentUser?.displayName ?? '', currentUser?.email ?? '']);
+  }, [currentUser?.displayName, currentUser?.email]);
   useDidUpdate(() => {
     if (isSubmitted) void trigger();
   }, [passwordStrength, confirmPassword]);
@@ -144,34 +134,26 @@ function PasswordModal({
 }
 
 export default function PasswordAuthentication() {
+  const { currentUser } = useAuth();
   const [passwordModalOpen, passwordModalHandler] = useDisclosure(false);
   const [passwordAuthenticated, setPasswordAuthenticated] = useState(false);
 
-  const addPassword = async (password: string) => {
-    const { auth, EmailAuthProvider, linkWithCredential } = await getFirebaseAuth();
-    if (!auth.currentUser?.email) return;
-    const credential = EmailAuthProvider.credential(auth.currentUser.email, password);
-    await linkWithCredential(auth.currentUser, credential);
-    toast.success('Your password has been successfully added.');
+  const updatePassword = async (password: string) => {
+    const { auth, updatePassword: _updatePassword } = await getFirebaseAuth();
+    if (!auth.currentUser) return;
+    await _updatePassword(auth.currentUser, password);
+    toast.success(
+      `Your password has been successfully ${passwordAuthenticated ? 'changed' : 'added'}.`,
+    );
     setPasswordAuthenticated(true);
     passwordModalHandler.close();
   };
-  const changePassword = async (password: string) => {
-    const { auth, updatePassword } = await getFirebaseAuth();
-    if (!auth.currentUser) return;
-    await updatePassword(auth.currentUser, password);
-    toast.success('Your password has been successfully changed.');
-    passwordModalHandler.close();
-  };
 
-  useDidMount(() => {
-    void (async () => {
-      const { auth } = await getFirebaseAuth();
-      setPasswordAuthenticated(
-        !!auth.currentUser?.providerData?.some(({ providerId }) => providerId === 'password'),
-      );
-    })();
-  });
+  useEffect(() => {
+    setPasswordAuthenticated(
+      !!currentUser?.providerData.some(({ providerId }) => providerId === 'password'),
+    );
+  }, [currentUser?.providerData]);
 
   return (
     <>
@@ -192,8 +174,7 @@ export default function PasswordAuthentication() {
       <PasswordModal
         open={passwordModalOpen}
         onClose={passwordModalHandler.close}
-        addPassword={addPassword}
-        changePassword={changePassword}
+        updatePassword={updatePassword}
         passwordAuthenticated={passwordAuthenticated}
       />
     </>

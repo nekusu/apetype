@@ -24,7 +24,7 @@ const formSchema = z.object({
 });
 type FormValues = z.infer<typeof formSchema>;
 
-export default function Login() {
+export default function LoginPage() {
   const {
     control,
     formState: { errors },

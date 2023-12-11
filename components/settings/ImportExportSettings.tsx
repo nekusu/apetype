@@ -33,7 +33,7 @@ function Warning({ children, icon: Icon, keys, type }: WarningProps) {
   return keys?.length ? (
     <div className='flex items-center gap-1.5 text-main'>
       <Icon className='flex-shrink-0' />
-      <Text className='text-sm leading-tight text-main'>
+      <Text className='text-sm text-main leading-tight'>
         <Tooltip
           className='z-50 max-w-xs text-xs'
           label={<div className='line-clamp-3'>{keys.join(', ')}</div>}
