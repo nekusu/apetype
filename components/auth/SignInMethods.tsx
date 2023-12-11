@@ -27,8 +27,10 @@ export default function SignInMethods({
 
   const signIn = useCallback(
     async (provider: AuthProvider) => {
-      const [{ auth, getAdditionalUserInfo, signInWithPopup }, { setDocument, serverTimestamp }] =
-        await Promise.all([getFirebaseAuth(), getFirebaseFirestore()]);
+      const [
+        { auth, getAdditionalUserInfo, signInWithPopup, updateProfile },
+        { getDocuments, serverTimestamp, setDocument, where },
+      ] = await Promise.all([getFirebaseAuth(), getFirebaseFirestore()]);
       try {
         onStart?.();
         const result = await signInWithPopup(auth, provider);
@@ -36,9 +38,15 @@ export default function SignInMethods({
         const { user } = result;
         let toastMessage = `Welcome back, ${user.displayName}! You're now logged in.`;
         if (userInfo?.isNewUser) {
-          toastMessage = `Account created successfully! Welcome aboard, ${user.displayName}!`;
+          const usersWithSameName = await getDocuments<User>(
+            'users',
+            where('name', '==', user.displayName),
+          );
+          const username = `${user.displayName}${usersWithSameName.size || ''}`;
+          toastMessage = `Account created successfully! Welcome aboard, ${username}!`;
+          if (usersWithSameName.size > 0) await updateProfile(user, { displayName: username });
           await setDocument<User>('users', user.uid, {
-            name: user.displayName as string,
+            name: username,
             joinedAt: serverTimestamp(),
             ...defaultUserDetails,
           });
