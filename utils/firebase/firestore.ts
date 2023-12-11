@@ -3,6 +3,7 @@ import {
   DocumentData,
   DocumentReference,
   PartialWithFieldValue,
+  Query,
   QueryConstraint,
   SetOptions,
   UpdateData,
@@ -62,6 +63,36 @@ export const updateDocument = async <T>(path: string, id: string, data: UpdateDa
 export const deleteDocument = async (path: string, id: string) => {
   return await deleteDoc(doc(db, path, id));
 };
+async function deleteQueryBatch(q: Query, batchSize: number, resolve: (value?: unknown) => void) {
+  const querySnapshot = await getDocs(q);
+  if (querySnapshot.empty) {
+    resolve();
+    return;
+  }
+
+  const batch = writeBatch(db);
+  querySnapshot.forEach((doc) => {
+    batch.delete(doc.ref);
+  });
+  await batch.commit();
+
+  if (querySnapshot.size < batchSize) {
+    resolve();
+    return;
+  }
+
+  setTimeout(() => {
+    void deleteQueryBatch(q, batchSize, resolve);
+  }, 0);
+}
+export async function deleteCollection(path: string, batchSize: number) {
+  const collectionRef = collection(db, path);
+  const q = query(collectionRef, limit(batchSize));
+
+  return new Promise((resolve) => {
+    void deleteQueryBatch(q, batchSize, resolve);
+  });
+}
 
 export {
   addDoc,

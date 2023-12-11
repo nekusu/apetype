@@ -3,6 +3,7 @@
 import { useDisclosure } from '@mantine/hooks';
 import { ReauthenticationModal } from 'components/auth';
 import { Button, Modal, Text } from 'components/core';
+import { useUser } from 'context/userContext';
 import { FirebaseError } from 'firebase/app';
 import { useState } from 'react';
 import { toast } from 'react-hot-toast';
@@ -11,22 +12,27 @@ import { getFirebaseAuth, getFirebaseFirestore } from 'utils/firebase';
 import Setting from './Setting';
 
 export default function DeleteAccount() {
+  const { deleteCachedUserData } = useUser();
   const [confirmationModalOpen, confirmationModalHandler] = useDisclosure(false);
   const [reauthModalOpen, reauthModalHandler] = useDisclosure(false);
   const [isLoading, setIsLoading] = useState(false);
 
   const deleteAccount = async () => {
-    const [{ auth, deleteUser }, { deleteDocument }] = await Promise.all([
+    const [{ auth, deleteUser }, { deleteCollection, deleteDocument }] = await Promise.all([
       getFirebaseAuth(),
       getFirebaseFirestore(),
     ]);
     if (!auth.currentUser) return;
     try {
       setIsLoading(true);
-      await deleteDocument('users', auth.currentUser.uid);
+      await Promise.all([
+        deleteDocument('users', auth.currentUser.uid),
+        deleteCollection(`users/${auth.currentUser.uid}/tests}`, 300),
+        deleteCachedUserData(),
+      ]);
+      confirmationModalHandler.close();
       await deleteUser(auth.currentUser);
       toast.success('Your account has been successfully deleted.');
-      confirmationModalHandler.close();
     } catch (e) {
       const error = e as FirebaseError;
       if (error.code === 'auth/requires-recent-login') reauthModalHandler.open();
@@ -65,7 +71,7 @@ export default function DeleteAccount() {
             <Button
               className='w-full'
               disabled={isLoading}
-              onClick={() => void deleteAccount()}
+              onClick={() => reauthModalHandler.open()}
               variant='danger'
             >
               {isLoading ? <RiLoaderLine className='animate-spin' /> : 'delete'}
