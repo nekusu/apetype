@@ -113,7 +113,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
       });
       if (tests.length > 0) {
         tests.forEach((test) => {
-          const isPb = test.isPb || isPersonalBest(user, test);
+          const isPb = test.isPb || isPersonalBest(user, test, tests);
           if (isPb) {
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
             const { characterStats, ...stats } = test.result;
