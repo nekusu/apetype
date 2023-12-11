@@ -37,7 +37,7 @@ const VARIANTS = {
 
 export default function Header() {
   const { testId, isUserTyping, restartTest } = useGlobal();
-  const { user, savePendingData } = useUser();
+  const { user, savePendingData, deleteCachedUserData } = useUser();
   const router = useRouter();
   const pathname = usePathname();
   const animationControls = useAnimation();
@@ -47,7 +47,7 @@ export default function Header() {
     const { auth, signOut } = await getFirebaseAuth();
     try {
       setLoggingOut(true);
-      await savePendingData();
+      await Promise.all([savePendingData(), deleteCachedUserData()]);
       await signOut(auth);
       toast.success('Signed out! See you next time!');
     } catch (e) {
@@ -56,7 +56,7 @@ export default function Header() {
     } finally {
       setLoggingOut(false);
     }
-  }, [savePendingData]);
+  }, [deleteCachedUserData, savePendingData]);
 
   useEffect(() => {
     if (!isUserTyping)

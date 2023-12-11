@@ -33,6 +33,7 @@ export interface UserContext {
   setPendingData: Updater<PendingData>;
   removePendingData: () => void;
   savePendingData: () => Promise<void>;
+  deleteCachedUserData: (path?: string) => Promise<void>;
 }
 
 export const UserContext = createContext<UserContext | null>(null);
@@ -130,24 +131,38 @@ export function UserProvider({ children }: { children: ReactNode }) {
     });
     removePendingData();
   }, [currentUser, pendingData, removePendingData]);
+  const deleteCachedUserData = useCallback(
+    async (path?: string) => {
+      if (!currentUser) return;
+      await mutate((key: string | KeyParams<unknown>) => {
+        const item = typeof key === 'string' ? key : key.path;
+        return item.includes(`users/${currentUser.uid}`) && (path ? item.includes(path) : true);
+      }, undefined);
+    },
+    [currentUser, mutate],
+  );
 
   useEffect(() => {
     if (
       user &&
       (!testsLastUpdatedAt || dayjs(user.testsLastUpdatedAt).isAfter(testsLastUpdatedAt))
     ) {
-      void mutate(
-        (key: string | KeyParams<unknown>) =>
-          typeof key !== 'string' && key.path === `users/${user.id}/tests`,
-        undefined,
-      );
+      void deleteCachedUserData('tests');
       if (user.testsLastUpdatedAt) setTestsLastUpdatedAt(user.testsLastUpdatedAt);
     }
-  }, [mutate, setTestsLastUpdatedAt, testsLastUpdatedAt, user]);
+  }, [deleteCachedUserData, setTestsLastUpdatedAt, testsLastUpdatedAt, user]);
 
   return (
     <UserContext.Provider
-      value={{ user, updateUser, pendingData, setPendingData, removePendingData, savePendingData }}
+      value={{
+        user,
+        updateUser,
+        pendingData,
+        setPendingData,
+        removePendingData,
+        savePendingData,
+        deleteCachedUserData,
+      }}
     >
       {children}
     </UserContext.Provider>
