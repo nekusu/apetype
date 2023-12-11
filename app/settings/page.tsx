@@ -22,6 +22,7 @@ import { categories, settingsList } from 'utils/settings';
 
 const AuthenticationMethods = dynamic(() => import('components/settings/AuthenticationMethods'));
 const PasswordAuthentication = dynamic(() => import('components/settings/PasswordAuthentication'));
+const ResetPersonalBests = dynamic(() => import('components/settings/ResetPersonalBests'));
 const ResetAccount = dynamic(() => import('components/settings/ResetAccount'));
 const DeleteAccount = dynamic(() => import('components/settings/DeleteAccount'));
 
@@ -54,6 +55,7 @@ export default function SettingsPage() {
       passwordAuthentication: (signedIn || user) && (
         <PasswordAuthentication key='passwordAuthentication' />
       ),
+      resetPersonalBests: (signedIn || user) && <ResetPersonalBests key='resetPersonalBests' />,
       resetAccount: (signedIn || user) && <ResetAccount key='resetAccount' />,
       deleteAccount: (signedIn || user) && <DeleteAccount key='deleteAccount' />,
     }),

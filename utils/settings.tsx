@@ -482,6 +482,17 @@ export const settingsList = {
     command: 'password authentication',
     category: 'danger zone',
   }),
+  resetPersonalBests: create({
+    command: 'reset personal bests',
+    category: 'danger zone',
+    description: (
+      <>
+        Resets all your personal bests (but doesn&apos;t delete any tests from your history).
+        <br />
+        {warningMessage}
+      </>
+    ),
+  }),
   resetAccount: create({
     command: 'reset account',
     category: 'danger zone',
