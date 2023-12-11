@@ -10,6 +10,7 @@ import {
   SoundOnClick,
   Theme,
 } from 'components/settings';
+import { useAuth } from 'context/authContext';
 import { useGlobal } from 'context/globalContext';
 import { useUser } from 'context/userContext';
 import { m } from 'framer-motion';
@@ -21,13 +22,15 @@ import { categories, settingsList } from 'utils/settings';
 
 const AuthenticationMethods = dynamic(() => import('components/settings/AuthenticationMethods'));
 const PasswordAuthentication = dynamic(() => import('components/settings/PasswordAuthentication'));
+const ResetAccount = dynamic(() => import('components/settings/ResetAccount'));
 const DeleteAccount = dynamic(() => import('components/settings/DeleteAccount'));
 
 type SettingsList = typeof settingsList;
 type Category = (typeof categories)[number];
 
-export default function Page() {
+export default function SettingsPage() {
   const { settingsList } = useGlobal();
+  const { signedIn } = useAuth();
   const { user } = useUser();
   const settingsListEntries = useMemo(
     () =>
@@ -45,11 +48,16 @@ export default function Page() {
       importExportSettings: <ImportExportSettings key='importExportSettings' />,
       resetSettings: <ResetSettings key='resetSettings' />,
       persistentCache: <PersistentCache key='persistentCache' />,
-      authenticationMethods: user ? <AuthenticationMethods key='authenticationMethods' /> : null,
-      passwordAuthentication: user ? <PasswordAuthentication key='passwordAuthentication' /> : null,
-      deleteAccount: user ? <DeleteAccount key='deleteAccount' /> : null,
+      authenticationMethods: (signedIn || user) && (
+        <AuthenticationMethods key='authenticationMethods' />
+      ),
+      passwordAuthentication: (signedIn || user) && (
+        <PasswordAuthentication key='passwordAuthentication' />
+      ),
+      resetAccount: (signedIn || user) && <ResetAccount key='resetAccount' />,
+      deleteAccount: (signedIn || user) && <DeleteAccount key='deleteAccount' />,
     }),
-    [user],
+    [signedIn, user],
   );
   const settingsComponents = useMemo(() => {
     const components = settingsListEntries.reduce(

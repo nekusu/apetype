@@ -99,6 +99,7 @@ export const categories = [
   'hide elements',
   'danger zone',
 ] as const;
+const warningMessage = <span className='text-error'>You can&apos;t undo this action!</span>;
 
 export const settingsList = {
   mode: create<'mode'>({
@@ -456,7 +457,7 @@ export const settingsList = {
       <>
         Resets settings to their default values.
         <br />
-        <span className='text-error'>You can&apos;t undo this action!</span>
+        {warningMessage}
       </>
     ),
   }),
@@ -481,6 +482,18 @@ export const settingsList = {
     command: 'password authentication',
     category: 'danger zone',
   }),
+  resetAccount: create({
+    command: 'reset account',
+    category: 'danger zone',
+    description: (
+      <>
+        Resets your typing stats, personal bests and tests history. Other profile details will not
+        be affected.
+        <br />
+        {warningMessage}
+      </>
+    ),
+  }),
   deleteAccount: create({
     command: 'delete account',
     category: 'danger zone',
@@ -488,7 +501,7 @@ export const settingsList = {
       <>
         Deletes your account and all your data.
         <br />
-        <span className='text-error'>You can&apos;t undo this action!</span>
+        {warningMessage}
       </>
     ),
   }),
