@@ -4,14 +4,16 @@ import { Button, Text, Tooltip, Transition } from 'components/core';
 import { ProfilePicture } from 'components/profile';
 import { useGlobal } from 'context/globalContext';
 import { useUser } from 'context/userContext';
+import { FirebaseError } from 'firebase-admin';
 import { AnimatePresence, useAnimation } from 'framer-motion';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Fragment, useCallback, useEffect } from 'react';
+import { Fragment, useCallback, useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import {
   RiInformationFill,
   RiKeyboardBoxFill,
+  RiLoaderLine,
   RiLoginCircleFill,
   RiLogoutCircleRFill,
   RiSettingsFill,
@@ -35,16 +37,26 @@ const VARIANTS = {
 
 export default function Header() {
   const { testId, isUserTyping, restartTest } = useGlobal();
-  const { user } = useUser();
+  const { user, savePendingData } = useUser();
   const router = useRouter();
   const pathname = usePathname();
   const animationControls = useAnimation();
+  const [loggingOut, setLoggingOut] = useState(false);
 
   const logout = useCallback(async () => {
     const { auth, signOut } = await getFirebaseAuth();
-    await signOut(auth);
-    toast.success('Signed out! See you next time!');
-  }, []);
+    try {
+      setLoggingOut(true);
+      await savePendingData();
+      await signOut(auth);
+      toast.success('Signed out! See you next time!');
+    } catch (e) {
+      const error = e as FirebaseError;
+      toast.error(`Something went wrong! ${error.message}`);
+    } finally {
+      setLoggingOut(false);
+    }
+  }, [savePendingData]);
 
   useEffect(() => {
     if (!isUserTyping)
@@ -126,9 +138,15 @@ export default function Header() {
               )}
               <Tooltip label={`Sign ${user ? 'out' : 'in'}`}>
                 {user ? (
-                  <Button className='text-xl' onClick={() => void logout()}>
-                    <RiLogoutCircleRFill />
-                  </Button>
+                  loggingOut ? (
+                    <div className='p-2 text-xl'>
+                      <RiLoaderLine className='animate-spin text-main' />
+                    </div>
+                  ) : (
+                    <Button className='text-xl' onClick={() => void logout()}>
+                      <RiLogoutCircleRFill />
+                    </Button>
+                  )
                 ) : (
                   <Button asChild className='text-xl'>
                     <Link href='/login'>
