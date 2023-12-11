@@ -14,6 +14,7 @@ import { twJoin } from 'tailwind-merge';
 import { getFirebaseFirestore } from 'utils/firebase';
 import { capitalize } from 'utils/misc';
 import { Social, socialIcons, socialNames, socialURLs } from 'utils/socials';
+import { User } from 'utils/user';
 import { ZodString, z } from 'zod';
 
 dayjs.extend(relativeTime);
@@ -72,6 +73,7 @@ export default function ProfileEditModal({ open, onClose }: ModalProps) {
     handleSubmit,
     register,
     reset,
+    setError,
     watch,
   } = useForm<FormValues>({
     defaultValues: { username: '', socials: {} },
@@ -87,9 +89,16 @@ export default function ProfileEditModal({ open, onClose }: ModalProps) {
     keyboard,
     socials: { website, ..._socials },
   }) => {
-    const { serverTimestamp } = await getFirebaseFirestore();
+    const { getDocuments, serverTimestamp, where } = await getFirebaseFirestore();
     try {
       setIsLoading(true);
+      if (user?.name !== username) {
+        const usersWithSameName = await getDocuments<User>('users', where('name', '==', username));
+        if (usersWithSameName.size > 0) {
+          setError('username', { message: 'Username is already taken' }, { shouldFocus: true });
+          return;
+        }
+      }
       const socials = socialNames.reduce(
         (socials, name) => {
           socials[`socials.${name}`] = _socials[name];
