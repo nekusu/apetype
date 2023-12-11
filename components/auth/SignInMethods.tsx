@@ -48,6 +48,7 @@ export default function SignInMethods({
           await setDocument<User>('users', user.uid, {
             name: username,
             joinedAt: serverTimestamp(),
+            profilePicture: { url: user.photoURL?.replace('s96-c', 's500-c') ?? '' },
             ...defaultUserDetails,
           });
         }
