@@ -9,6 +9,7 @@ import { useSettings } from 'context/settingsContext';
 import { useTypingTest } from 'context/typingTestContext';
 import { useUser } from 'context/userContext';
 import { m } from 'framer-motion';
+import { useDidMount } from 'hooks/useDidMount';
 import { useStats } from 'hooks/useStats';
 import { twJoin } from 'tailwind-merge';
 import { accuracy as acc } from 'utils/typingTest';
@@ -34,12 +35,14 @@ export default function Stats() {
   const stats = useStats();
   const accuracy = acc(characters, errors);
 
+  useDidMount(() => {
+    if (!signedIn) removePendingData();
+  });
   useDidUpdate(() => {
     let startTime = 0;
     if (isTestRunning) {
       stats.start();
       startTime = performance.now();
-      if (!signedIn) removePendingData();
       setPendingData((draft) => void (draft.typingStats.startedTests += 1));
     }
     return () => {
