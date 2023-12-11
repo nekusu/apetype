@@ -1,13 +1,13 @@
 'use client';
 
 import { Button, Divider, Text, Tooltip } from 'components/core';
-import { User } from 'context/userContext';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import { ReactNode, useState } from 'react';
 import { RiCalendarEventFill, RiGlobalFill } from 'react-icons/ri';
 import { twJoin } from 'tailwind-merge';
 import { socialIcons, socialNames, socialURLs } from 'utils/socials';
+import { User } from 'utils/user';
 import { Banner, ProfilePicture } from '.';
 
 dayjs.extend(relativeTime);

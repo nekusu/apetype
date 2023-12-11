@@ -3,12 +3,12 @@
 import { useDisclosure } from '@mantine/hooks';
 import { Button, LazyImage, Tooltip } from 'components/core';
 import { LazyImageProps } from 'components/core/LazyImage';
-import { User } from 'context/userContext';
 import { ComponentPropsWithoutRef } from 'react';
 import toast from 'react-hot-toast';
 import { RiPencilFill } from 'react-icons/ri';
 import { twMerge } from 'tailwind-merge';
 import { getFirebaseAuth, getFirebaseFirestore, getFirebaseStorage } from 'utils/firebase';
+import { User } from 'utils/user';
 import SetImageModal from './SetImageModal';
 
 export interface BannerProps extends ComponentPropsWithoutRef<'div'> {

@@ -1,24 +1,23 @@
 import { DocumentData, getCollection, getDoc } from '@tatsuokaniwa/swr-firestore/server';
 import { Button, Text, Transition } from 'components/core';
 import { PersonalBests, UserDetails } from 'components/profile';
-import { User } from 'context/userContext';
 import Link from 'next/link';
 import { RiKeyboardBoxFill } from 'react-icons/ri';
 import { setupFirebaseAdmin } from 'utils/firebase/admin/app';
 import { parseTimestamps } from 'utils/misc';
+import { User, parseDates } from 'utils/user';
 
 setupFirebaseAdmin();
 
-export default async function User({ params }: { params: { id: string } }) {
+export default async function UserPage({ params }: { params: { id: string } }) {
   const { data: usersWithSameName } = await getCollection<User>({
     path: 'users',
     where: [['name', '==', params.id]],
-    parseDates: ['joinedAt', 'lastUsernameChange'],
+    parseDates,
   });
   const userByName = usersWithSameName[0];
   let userById: DocumentData<User> | undefined;
-  if (!userByName)
-    userById = (await getDoc<User>({ path: `users/${params.id}`, parseDates: ['joinedAt'] })).data;
+  if (!userByName) userById = (await getDoc<User>({ path: `users/${params.id}`, parseDates })).data;
   const { ref, personalBests, ...user } = userByName ?? userById ?? {};
 
   return ref ? (

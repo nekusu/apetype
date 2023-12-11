@@ -3,13 +3,13 @@
 import { useDisclosure } from '@mantine/hooks';
 import { Button, LazyImage, Modal, Tooltip } from 'components/core';
 import { LazyImageProps } from 'components/core/LazyImage';
-import { User } from 'context/userContext';
 import { UpdateData } from 'firebase/firestore';
 import { ComponentPropsWithoutRef } from 'react';
 import toast from 'react-hot-toast';
 import { RiGhostLine, RiPencilFill } from 'react-icons/ri';
 import { twJoin, twMerge } from 'tailwind-merge';
 import { getFirebaseAuth, getFirebaseFirestore, getFirebaseStorage } from 'utils/firebase';
+import { User } from 'utils/user';
 import SetImageModal from './SetImageModal';
 
 export interface ProfilePictureProps extends ComponentPropsWithoutRef<'div'> {
@@ -110,7 +110,7 @@ export default function ProfilePicture({
       )}
       {expandable && (
         <Modal
-          className='relative aspect-square w-xl select-none overflow-hidden bg-transparent p-0'
+          className='relative aspect-square w-xl select-none overflow-hidden bg-transparent p-0 shadow-none'
           open={imageModalOpen}
           onClose={imageModalHandler.close}
           centered

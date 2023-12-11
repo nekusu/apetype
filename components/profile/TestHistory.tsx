@@ -5,7 +5,7 @@ import { useGetDocs } from '@tatsuokaniwa/swr-firestore';
 import { Button, Modal, Tooltip } from 'components/core';
 import { Chart } from 'components/typing-test';
 import { ChartProps } from 'components/typing-test/Chart';
-import { TypingTest, useUser } from 'context/userContext';
+import { useUser } from 'context/userContext';
 import dayjs from 'dayjs';
 import { OrderByDirection, Timestamp } from 'firebase/firestore';
 import { m } from 'framer-motion';
@@ -31,6 +31,7 @@ import {
   RiZzzFill,
 } from 'react-icons/ri';
 import { twJoin, twMerge } from 'tailwind-merge';
+import { TypingTest } from 'utils/user';
 
 interface InfoIconProps extends ComponentPropsWithoutRef<'div'> {
   label: string;
@@ -123,6 +124,7 @@ export default function TestHistory() {
           limit,
         }
       : null,
+    { revalidateIfStale: false },
   );
   const [chartTest, setChartTest] = useState<ChartProps>();
   const [chartModalOpen, chartModalHandler] = useDisclosure(false);
@@ -181,7 +183,7 @@ export default function TestHistory() {
               return (
                 <m.tr
                   key={id}
-                  className='align-middle text-text transition-colors even:bg-bg odd:bg-sub-alt'
+                  className='align-middle text-text transition-colors odd:bg-sub-alt'
                   layout
                   layoutScroll
                   initial={{ opacity: 0, y: 30 }}
@@ -245,6 +247,7 @@ export default function TestHistory() {
         onClose={chartModalHandler.close}
         centered
         overflow='outside'
+        trapFocus={false}
       >
         {chartTest && <Chart {...chartTest} />}
       </Modal>
