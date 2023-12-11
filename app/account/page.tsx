@@ -12,12 +12,12 @@ import {
 } from 'components/profile';
 import { useAuth } from 'context/authContext';
 import { useUser } from 'context/userContext';
-import { useDidMount } from 'hooks/useDidMount';
 import { redirect } from 'next/navigation';
+import { useEffect } from 'react';
 import toast from 'react-hot-toast';
 import { RiLinksLine } from 'react-icons/ri';
 
-export default function Account() {
+export default function AccountPage() {
   const { signedIn } = useAuth();
   const { user, savePendingData } = useUser();
   const { completedTests = 0 } = user?.typingStats ?? {};
@@ -29,9 +29,9 @@ export default function Account() {
       .then(() => toast.success('URL copied to clipboard!'));
   };
 
-  useDidMount(() => {
-    void savePendingData();
-  });
+  useEffect(() => {
+    if (user) void savePendingData();
+  }, [savePendingData, user]);
 
   if (!signedIn) redirect('/');
 
@@ -55,7 +55,7 @@ export default function Account() {
       />
       <ProfileEditModal open={profileEditModalOpen} onClose={profileEditModalHandler.close} />
       <PersonalBests data={user.personalBests} />
-      {completedTests > 1 && <UserStats userId={user.id} {...user.typingStats} />}
+      {completedTests > 1 && <UserStats user={user} />}
       {completedTests > 0 && <TestHistory />}
     </Transition>
   ) : (

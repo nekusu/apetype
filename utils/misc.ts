@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Timestamp, UpdateData } from 'firebase/firestore';
+import { Timestamp } from 'firebase/firestore';
 
 export function getRandomNumber(max = 1, min = 0) {
   if (arguments.length === 1) min = 0;
@@ -35,22 +35,6 @@ export function formatFileSize(bytes: number, si = false, decimalPlaces = 1) {
   }
 
   return `${bytes.toFixed(decimalPlaces)} ${units[unitIndex]}`;
-}
-
-export function flattenObject<T extends object>(obj: T, prefix = ''): UpdateData<T> {
-  const result: UpdateData<T> = {} as UpdateData<T>;
-  for (const key in obj) {
-    if (Object.prototype.hasOwnProperty.call(obj, key)) {
-      const value = obj[key];
-      const prefixedKey = prefix ? `${prefix}.${key}` : key;
-      if (typeof value === 'object' && value !== null) {
-        Object.assign(result, flattenObject(value, prefixedKey));
-      } else {
-        (result as Record<string, unknown>)[prefixedKey] = value;
-      }
-    }
-  }
-  return result;
 }
 
 export function parseTimestamps<T extends Record<string, any>>(obj?: T) {

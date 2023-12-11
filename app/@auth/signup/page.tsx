@@ -5,7 +5,6 @@ import { useDidUpdate, useDisclosure, useFocusTrap } from '@mantine/hooks';
 import { ZxcvbnResult } from '@zxcvbn-ts/core';
 import { EmailToast, PasswordInput, PasswordStrength, SignInMethods } from 'components/auth';
 import { Button, Divider, Input, Text, Transition } from 'components/core';
-import { User, defaultUserDetails } from 'context/userContext';
 import { FirebaseError } from 'firebase/app';
 import Link from 'next/link';
 import { useCallback, useDeferredValue, useMemo, useState } from 'react';
@@ -14,6 +13,7 @@ import { toast } from 'react-hot-toast';
 import { RiLoaderLine, RiMailFill, RiUser4Fill } from 'react-icons/ri';
 import { twJoin } from 'tailwind-merge';
 import { getFirebaseAuth, getFirebaseFirestore } from 'utils/firebase';
+import { User, defaultUserDetails } from 'utils/user';
 import { z } from 'zod';
 
 const formSchema = z
@@ -37,7 +37,7 @@ const formSchema = z
   });
 type FormValues = z.infer<typeof formSchema>;
 
-export default function Signup() {
+export default function SignupPage() {
   const [passwordStrength, setPasswordStrength] = useState<ZxcvbnResult | null>(null);
   const {
     formState: { isSubmitted, errors },

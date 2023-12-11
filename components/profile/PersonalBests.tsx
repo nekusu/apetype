@@ -1,8 +1,8 @@
 import { Text } from 'components/core';
-import { PersonalBest, User } from 'context/userContext';
 import dayjs from 'dayjs';
 import { twJoin } from 'tailwind-merge';
 import { Settings, Time, Words, settingsList } from 'utils/settings';
+import { PersonalBest, User } from 'utils/user';
 
 interface PersonalBestProps {
   mode: Settings['mode'];

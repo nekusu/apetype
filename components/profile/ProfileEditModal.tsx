@@ -99,7 +99,7 @@ export default function ProfileEditModal({ open, onClose }: ModalProps) {
       );
       await updateUser({
         name: username,
-        lastUsernameChange: user && user.name !== username ? serverTimestamp() : null,
+        nameLastChangedAt: user && user.name !== username ? serverTimestamp() : null,
         bio,
         keyboard,
         'socials.website': website,
@@ -141,8 +141,8 @@ export default function ProfileEditModal({ open, onClose }: ModalProps) {
         <div className='flex flex-col gap-3'>
           <Input
             disabled={
-              !!user?.lastUsernameChange &&
-              dayjs().diff(dayjs(user.lastUsernameChange), 'days', true) < 30
+              !!user?.nameLastChangedAt &&
+              dayjs().diff(dayjs(user.nameLastChangedAt), 'days', true) < 30
             }
             error={errors.username?.message}
             label='username'
@@ -152,9 +152,9 @@ export default function ProfileEditModal({ open, onClose }: ModalProps) {
             <Text className='text-xs text-sub'>
               You can only change your username every 30 days.
             </Text>
-            {user?.lastUsernameChange && (
+            {user?.nameLastChangedAt && (
               <Text className='text-xs text-error'>
-                Last changed {dayjs(user.lastUsernameChange).fromNow()}.
+                Last changed {dayjs(user.nameLastChangedAt).fromNow()}.
               </Text>
             )}
           </div>

@@ -1,7 +1,6 @@
 'use client';
 
 import { Button } from 'components/core';
-import { User, defaultUserDetails } from 'context/userContext';
 import { FirebaseError } from 'firebase/app';
 import { AuthProvider, UserCredential } from 'firebase/auth';
 import { useDidMount } from 'hooks/useDidMount';
@@ -9,6 +8,7 @@ import { useCallback, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { getFirebaseAuth, getFirebaseFirestore } from 'utils/firebase';
 import { AuthenticationMethod } from 'utils/firebase/auth';
+import { User, defaultUserDetails } from 'utils/user';
 
 export interface SignInMethodsProps {
   onFinish?: () => void;
