@@ -1,18 +1,22 @@
 'use client';
 
-import { Button } from 'components/core';
+import { Button, Tooltip } from 'components/core';
 import { useSettings } from 'context/settingsContext';
 import { useDidMount } from 'hooks/useDidMount';
 import { useState } from 'react';
-import { useSWRConfig } from 'swr';
+import { RiQuestionLine } from 'react-icons/ri';
 import { formatFileSize, getLocalStorageSize } from 'utils/misc';
-import { STATIC_URL } from 'utils/monkeytype';
 import Setting from './Setting';
 
 export default function PersistentCache() {
-  const { persistentCache } = useSettings();
-  const { mutate } = useSWRConfig();
+  const { persistentCache, cache } = useSettings();
   const [cacheSize, setCacheSize] = useState(0);
+
+  const deleteCache = () => {
+    localStorage.removeItem('app-cache');
+    cache.load();
+    setCacheSize(getLocalStorageSize('app-cache'));
+  };
 
   useDidMount(() => {
     setCacheSize(getLocalStorageSize('app-cache'));
@@ -26,20 +30,19 @@ export default function PersistentCache() {
         <>
           {description}
           {(persistentCache || cacheSize > 0) && (
-            <div className='text-main'>Cache size: {formatFileSize(cacheSize, true)}</div>
+            <div className='flex items-center gap-1 text-main'>
+              Cache size: {formatFileSize(cacheSize, true)}
+              <Tooltip label='Reload page to see updated size' placement='right'>
+                <div className='cursor-help'>
+                  <RiQuestionLine />
+                </div>
+              </Tooltip>
+            </div>
           )}
         </>
       )}
     >
-      <Button
-        className='col-span-full w-full'
-        onClick={() => {
-          void mutate((key) => typeof key === 'string' && key.includes(STATIC_URL), undefined);
-          localStorage.removeItem('app-cache');
-          setCacheSize(getLocalStorageSize('app-cache'));
-        }}
-        variant='danger'
-      >
+      <Button className='col-span-full w-full' onClick={() => void deleteCache()} variant='danger'>
         clear cache
       </Button>
     </Setting>

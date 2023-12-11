@@ -14,6 +14,7 @@ import { useGlobal } from './globalContext';
 export interface SettingsContext extends Settings {
   setSettings: Updater<Settings>;
   validate: typeof validateSettings;
+  cache: ReturnType<typeof useCacheProvider>;
 }
 
 interface SettingsProviderProps {
@@ -28,7 +29,7 @@ export function SettingsProvider({ children }: SettingsProviderProps) {
     key: 'settings',
     defaultValue: freeze(defaultSettings),
   });
-  const provider = useCacheProvider(settings.persistentCache);
+  const cache = useCacheProvider(settings.persistentCache);
 
   const setSettings: SettingsContext['setSettings'] = useCallback(
     (updater) => {
@@ -73,14 +74,14 @@ export function SettingsProvider({ children }: SettingsProviderProps) {
   }, [settings.fontFamily]);
 
   return (
-    <SettingsContext.Provider value={{ setSettings, validate, ...settings }}>
+    <SettingsContext.Provider value={{ setSettings, validate, cache, ...settings }}>
       <SWRConfig
         value={{
           fetcher: (input: RequestInfo, init: RequestInit) =>
             fetch(input, init).then((res) => res.json()),
           keepPreviousData: true,
           revalidateOnFocus: false,
-          provider,
+          provider: cache.provider,
         }}
       >
         {children}
