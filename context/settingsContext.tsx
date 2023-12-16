@@ -8,7 +8,7 @@ import { ReactNode, createContext, useCallback, useContext, useEffect } from 're
 import { SWRConfig } from 'swr';
 import { Updater } from 'use-immer';
 import { Settings, defaultSettings, validateSettings } from 'utils/settings';
-import { z } from 'zod';
+import { picklist } from 'valibot';
 import { useGlobal } from './globalContext';
 
 export interface SettingsContext extends Settings {
@@ -45,9 +45,9 @@ export function SettingsProvider({ children }: SettingsProviderProps) {
       const layouts = settingsList.keymapLayout.options.map(({ value }) => value) as StringTuple;
       const themes = settingsList.theme.options.map(({ value }) => value) as StringTuple;
       return validateSettings(settings, {
-        language: z.enum(languages),
-        keymapLayout: z.enum(layouts),
-        theme: z.enum(themes),
+        language: picklist(languages),
+        keymapLayout: picklist(layouts),
+        theme: picklist(themes),
         ...customProperties,
       });
     },

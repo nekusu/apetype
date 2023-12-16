@@ -5,7 +5,7 @@ import { Button, Modal, Text, Tooltip } from 'components/core';
 import { ButtonProps } from 'components/core/Button';
 import { ModalProps } from 'components/core/Modal';
 import { useSettings } from 'context/settingsContext';
-import { ChangeEvent, ReactNode, useEffect, useRef, useState } from 'react';
+import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { IconType } from 'react-icons';
 import {
@@ -21,30 +21,52 @@ import { Settings } from 'utils/settings';
 import Setting from './Setting';
 
 interface WarningProps {
-  children?: ReactNode;
   icon: IconType;
-  keys?: string[];
+  properties?: { path: string[]; defaultValue?: unknown }[];
   type: string;
 }
 
 const COMMON_BUTTON_PROPS: Omit<ButtonProps, 'ref'> = { className: 'w-full', variant: 'filled' };
 
-function Warning({ children, icon: Icon, keys, type }: WarningProps) {
-  return keys?.length ? (
-    <div className='flex items-center gap-1.5 text-main'>
-      <Icon className='flex-shrink-0' />
-      <Text className='text-sm text-main leading-tight'>
+function Warning({ icon: Icon, properties, type }: WarningProps) {
+  return properties?.length ? (
+    <div className='flex items-center gap-1.5'>
+      <Icon className='flex-shrink-0 text-error' />
+      <Text className='text-sm text-sub leading-tight'>
         <Tooltip
           className='z-50 max-w-xs text-xs'
-          label={<div className='line-clamp-3'>{keys.join(', ')}</div>}
+          label={
+            <ul className='text-left'>
+              {properties.map(({ path, defaultValue }) => {
+                const pathString = path.join('.');
+                const stringifiedValue = JSON.stringify(defaultValue);
+                return (
+                  <li key={pathString}>
+                    - {pathString}{' '}
+                    <span className='text-sub'>
+                      {stringifiedValue && (
+                        <>
+                          (default: <span className='italic'>{stringifiedValue}</span>)
+                        </>
+                      )}
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
+          }
           offset={6}
-          placement='top'
+          placement='bottom-start'
         >
-          <span className='cursor-pointer border-b border-main border-dashed transition hover:border-text hover:text-text'>
-            {keys.length} {type} setting{keys.length > 1 && 's'}
+          <span className='cursor-pointer border-b border-error border-dashed text-error transition hover:border-text hover:text-text'>
+            {properties.length} {type} propert{properties.length > 1 ? 'ies' : 'y'}
           </span>
         </Tooltip>
-        {children}
+        {['invalid', 'missing'].includes(type) ? (
+          <>, default value{properties.length > 1 && 's'} will be used instead.</>
+        ) : (
+          ' will be ignored.'
+        )}
       </Text>
     </div>
   ) : null;
@@ -54,15 +76,14 @@ function ImportSettingsModal({ className, ...props }: ModalProps) {
   const { open, onClose } = props;
   const { setSettings, validate } = useSettings();
   const [file, setFile] = useState<File | undefined>();
-  const [[settings, { missing, invalid, unknown }], setValidation] = useState<
-    [Settings | undefined, Partial<ReturnType<typeof validate>[1]>]
-  >([undefined, {}]);
+  const [[settings, validation], setValidation] = useState<ReturnType<typeof validate> | []>([]);
+  const { missing, invalid, unknown } = validation ?? {};
   const [error, setError] = useState('');
   const formRef = useRef<HTMLFormElement>(null);
 
   const resetValues = () => {
     setFile(undefined);
-    setValidation([undefined, {}]);
+    setValidation([]);
     setError('');
   };
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -121,16 +142,9 @@ function ImportSettingsModal({ className, ...props }: ModalProps) {
               <Text className='text-sm text-error'>{error}</Text>
             </div>
           )}
-          <Warning icon={RiAlertLine} keys={invalid} type='invalid'>
-            . Default value{(invalid?.length ?? 0) > 1 && 's'} will be used instead.
-          </Warning>
-          <Warning icon={RiSpam2Line} keys={missing} type='missing'>
-            . Default value{(missing?.length ?? 0) > 1 && 's'} will be used instead.
-          </Warning>
-          <Warning icon={RiQuestionLine} keys={unknown} type='unknown'>
-            {' '}
-            will be ignored.
-          </Warning>
+          <Warning icon={RiAlertLine} properties={invalid} type='invalid' />
+          <Warning icon={RiSpam2Line} properties={missing} type='missing' />
+          <Warning icon={RiQuestionLine} properties={unknown} type='unknown' />
         </div>
         <Button
           disabled={!settings || !!error}

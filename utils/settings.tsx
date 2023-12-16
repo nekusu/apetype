@@ -1,6 +1,29 @@
 import { Key } from 'components/core';
 import { ReactNode } from 'react';
-import { ZodIssue, z } from 'zod';
+import { clone, pathOr } from 'remeda';
+import {
+  BaseSchema,
+  array,
+  boolean,
+  custom,
+  forward,
+  integer,
+  literal,
+  merge,
+  minLength,
+  minValue,
+  never,
+  null_,
+  number,
+  object,
+  parse,
+  picklist,
+  safeParse,
+  string,
+  toTrimmed,
+  union,
+  uuid,
+} from 'valibot';
 import { toCamelCase } from './misc';
 import { CustomTheme } from './theme';
 
@@ -45,7 +68,7 @@ export interface Settings {
   themeType: 'preset' | 'custom';
   theme: string;
   customThemes: CustomTheme[];
-  customTheme: string;
+  customTheme: string | null;
   liveWpm: boolean;
   liveAccuracy: boolean;
   timerProgress: boolean;
@@ -556,7 +579,7 @@ export const defaultSettings: Settings = {
   themeType: 'preset',
   theme: 'serika dark',
   customThemes: [],
-  customTheme: '',
+  customTheme: null,
   liveWpm: true,
   liveAccuracy: true,
   timerProgress: true,
@@ -566,123 +589,133 @@ export const defaultSettings: Settings = {
   persistentCache: true,
 };
 
+const positiveInteger = () => number([integer(), minValue(0)]);
+const nonEmptyString = () => string([toTrimmed(), minLength(1)]);
+const settingsSchema = object(
+  {
+    mode: picklist(['time', 'words']),
+    time: positiveInteger(),
+    words: positiveInteger(),
+    quickRestart: union([literal(false), picklist(['tab', 'esc'])]),
+    blindMode: boolean(),
+    language: nonEmptyString(),
+    freedomMode: boolean(),
+    strictSpace: boolean(),
+    stopOnError: union([literal(false), picklist(['letter', 'word'])]),
+    quickEnd: boolean(),
+    indicateTypos: union([literal(false), picklist(['below', 'replace'])]),
+    hideExtraLetters: boolean(),
+    lazyMode: boolean(),
+    soundVolume: union([literal(0.1), literal(0.5), literal(1)]),
+    soundOnClick: union([
+      literal(false),
+      picklist(['beep', 'click', 'hitmarker', 'nk-creams', 'osu', 'pop', 'typewriter']),
+    ]),
+    soundOnError: boolean(),
+    smoothCaret: boolean(),
+    caretStyle: union([literal(false), picklist(['default', 'block', 'outline', 'underline'])]),
+    timerProgressStyle: picklist(['text', 'bar', 'both']),
+    statsColor: picklist(['sub', 'text', 'main']),
+    statsOpacity: union([literal(0.25), literal(0.5), literal(0.75), literal(1)]),
+    smoothLineScroll: boolean(),
+    showDecimalPlaces: boolean(),
+    fontSize: union([literal(1), literal(1.25), literal(1.5), literal(2), literal(3), literal(4)]),
+    fontFamily: nonEmptyString(),
+    pageWidth: picklist(['1000px', '1250px', '1500px', '2000px', '100%']),
+    keymap: union([literal(false), picklist(['static', 'react', 'next'])]),
+    keymapLayout: nonEmptyString(),
+    keymapStyle: picklist(['staggered', 'matrix', 'split', 'split matrix']),
+    keymapLegendStyle: picklist(['dynamic', 'lowercase', 'uppercase', 'blank']),
+    keymapShowTopRow: union([boolean(), literal('layout dependent')]),
+    flipTestColors: boolean(),
+    colorfulMode: boolean(),
+    randomizeTheme: union([boolean(), picklist(['light', 'dark'])]),
+    themeType: picklist(['preset', 'custom']),
+    theme: nonEmptyString(),
+    customThemes: array(
+      object(
+        {
+          id: string([uuid()]),
+          name: string(),
+          colors: object({
+            bg: string(),
+            main: string(),
+            caret: string(),
+            sub: string(),
+            subAlt: string(),
+            text: string(),
+            error: string(),
+            errorExtra: string(),
+            colorfulError: string(),
+            colorfulErrorExtra: string(),
+          }),
+        },
+        never(),
+      ),
+    ),
+    customTheme: union([string([uuid()]), null_()]),
+    liveWpm: boolean(),
+    liveAccuracy: boolean(),
+    timerProgress: boolean(),
+    keyTips: boolean(),
+    outOfFocusWarning: boolean(),
+    capsLockWarning: boolean(),
+    persistentCache: boolean(),
+  },
+  [
+    forward(
+      custom(
+        ({ customThemes, customTheme }) =>
+          !customTheme || customThemes.some(({ id }) => id === customTheme),
+      ),
+      ['customTheme'],
+    ),
+  ],
+);
+parse(settingsSchema, defaultSettings) satisfies Settings;
+
+interface Issue {
+  path: string[];
+  value: unknown;
+  defaultValue?: unknown;
+}
+
 export function validateSettings(
   settings: Partial<Settings>,
-  customProperties?: Partial<Record<keyof Settings, z.ZodType>>,
+  customProperties: Partial<Record<keyof Settings, BaseSchema>> = {},
 ) {
-  const customThemeIds = settings.customThemes?.map(({ id }) => id) ?? [];
-  const schemaProperties: Record<keyof Settings, z.ZodType> = {
-    mode: z.enum(['time', 'words']),
-    time: z.number().nonnegative(),
-    words: z.number().nonnegative(),
-    quickRestart: z.union([z.literal(false), z.enum(['tab', 'esc'])]),
-    blindMode: z.boolean(),
-    language: z.string(),
-    freedomMode: z.boolean(),
-    strictSpace: z.boolean(),
-    stopOnError: z.union([z.literal(false), z.enum(['letter', 'word'])]),
-    quickEnd: z.boolean(),
-    indicateTypos: z.union([z.literal(false), z.enum(['below', 'replace'])]),
-    hideExtraLetters: z.boolean(),
-    lazyMode: z.boolean(),
-    soundVolume: z.union([z.literal(0.1), z.literal(0.5), z.literal(1)]),
-    soundOnClick: z.union([
-      z.literal(false),
-      z.enum(['beep', 'click', 'hitmarker', 'nk-creams', 'osu', 'pop', 'typewriter']),
-    ]),
-    soundOnError: z.boolean(),
-    smoothCaret: z.boolean(),
-    caretStyle: z.union([z.literal(false), z.enum(['default', 'block', 'outline', 'underline'])]),
-    timerProgressStyle: z.enum(['text', 'bar', 'both']),
-    statsColor: z.enum(['sub', 'text', 'main']),
-    statsOpacity: z.union([z.literal(0.25), z.literal(0.5), z.literal(0.75), z.literal(1)]),
-    smoothLineScroll: z.boolean(),
-    showDecimalPlaces: z.boolean(),
-    fontSize: z.union([
-      z.literal(1),
-      z.literal(1.25),
-      z.literal(1.5),
-      z.literal(2),
-      z.literal(3),
-      z.literal(4),
-    ]),
-    fontFamily: z.string(),
-    pageWidth: z.enum(['1000px', '1250px', '1500px', '2000px', '100%']),
-    keymap: z.union([z.literal(false), z.enum(['static', 'react', 'next'])]),
-    keymapLayout: z.string(),
-    keymapStyle: z.enum(['staggered', 'matrix', 'split', 'split matrix']),
-    keymapLegendStyle: z.enum(['dynamic', 'lowercase', 'uppercase', 'blank']),
-    keymapShowTopRow: z.union([z.boolean(), z.literal('layout dependent')]),
-    flipTestColors: z.boolean(),
-    colorfulMode: z.boolean(),
-    randomizeTheme: z.union([z.boolean(), z.enum(['light', 'dark'])]),
-    themeType: z.enum(['preset', 'custom']),
-    theme: z.string(),
-    customThemes: z
-      .object({
-        id: z.string(),
-        name: z.string(),
-        colors: z.object({
-          bg: z.string(),
-          main: z.string(),
-          caret: z.string(),
-          sub: z.string(),
-          subAlt: z.string(),
-          text: z.string(),
-          error: z.string(),
-          errorExtra: z.string(),
-          colorfulError: z.string(),
-          colorfulErrorExtra: z.string(),
-        }),
-      })
-      .strict()
-      .array(),
-    customTheme: z.enum(['', ...customThemeIds]),
-    liveWpm: z.boolean(),
-    liveAccuracy: z.boolean(),
-    timerProgress: z.boolean(),
-    keyTips: z.boolean(),
-    outOfFocusWarning: z.boolean(),
-    capsLockWarning: z.boolean(),
-    persistentCache: z.boolean(),
-    ...customProperties,
-  };
-  const schema = z.object(schemaProperties).strict().required();
-  const result = schema.safeParse(settings);
-  const missing: (keyof Settings)[] = [];
-  const invalid: (keyof Settings)[] = [];
-  const unknown: string[] = [];
-  const newSettings = settings;
+  const mergedSettingsSchema = merge([settingsSchema, object(customProperties)], never());
+  const result = safeParse(mergedSettingsSchema, settings);
+  const missing: Issue[] = [];
+  const invalid: Issue[] = [];
+  const unknown: Issue[] = [];
+  const newSettings = clone(settings);
 
-  if (!result.success) {
-    result.error.issues.forEach((issue) => {
-      if (issue.code === 'unrecognized_keys')
-        issue.keys.forEach((key) => {
-          unknown.push(key);
-          delete newSettings[key as keyof Settings];
-        });
-      else {
-        const isMissing = (issue: ZodIssue) =>
-          (issue.code === 'invalid_type' && issue.received === 'undefined') ||
-          (issue.code === 'invalid_literal' && issue.received === undefined);
-
-        issue.path.forEach((path) => {
-          const key = path as keyof Settings;
-          if (
-            isMissing(issue) ||
-            (issue.code === 'invalid_union' &&
-              issue.unionErrors.some((error) => error.issues.some(isMissing)))
-          )
-            missing.push(key);
-          else invalid.push(key);
-          newSettings[key] = defaultSettings[key] as never;
-        });
+  if (!result.success)
+    result.issues.forEach(({ path, validation }) => {
+      if (!path) return;
+      const pathKeys = path.map(({ key }) => key) as [keyof Settings];
+      const lastKey = pathKeys.at(-1);
+      let current: Partial<Settings> | Settings[keyof Settings] = newSettings;
+      for (const { key: _key, value } of path) {
+        const key = _key as keyof Settings;
+        if (lastKey === key) {
+          const issue: Issue = { path: pathKeys, value };
+          if (validation === 'never') {
+            unknown.push(issue);
+            delete current[key];
+            return;
+          }
+          issue.defaultValue = pathOr(
+            defaultSettings,
+            pathKeys,
+            null as unknown as string,
+          ) as never;
+          if (!value) missing.push(issue);
+          else invalid.push(issue);
+        } else current = current[key] as never;
       }
     });
-  }
 
-  return [newSettings, { missing, invalid, unknown }] as [
-    Settings,
-    { missing: typeof missing; invalid: typeof invalid; unknown: typeof unknown },
-  ];
+  return [newSettings as Settings, { missing, invalid, unknown }] as const;
 }

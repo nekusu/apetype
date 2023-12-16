@@ -1,6 +1,6 @@
 'use client';
 
-import { zodResolver } from '@hookform/resolvers/zod';
+import { valibotResolver } from '@hookform/resolvers/valibot';
 import { Button, Input, Modal, Text, Textarea, Tooltip } from 'components/core';
 import { useUser } from 'context/userContext';
 import dayjs from 'dayjs';
@@ -8,14 +8,25 @@ import relativeTime from 'dayjs/plugin/relativeTime';
 import { FirebaseError } from 'firebase/app';
 import { useEffect, useState } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
-import toast from 'react-hot-toast';
+import { toast } from 'react-hot-toast';
 import { RiExternalLinkLine, RiGlobalFill, RiLoaderLine } from 'react-icons/ri';
 import { twJoin } from 'tailwind-merge';
 import { getFirebaseFirestore } from 'utils/firebase';
 import { capitalize } from 'utils/misc';
 import { Social, socialIcons, socialNames, socialURLs } from 'utils/socials';
 import { User } from 'utils/user';
-import { ZodString, z } from 'zod';
+import {
+  OptionalSchema,
+  StringSchema,
+  Input as ValiInput,
+  maxLength,
+  minLength,
+  object,
+  optional,
+  regex,
+  string,
+  toTrimmed,
+} from 'valibot';
 
 dayjs.extend(relativeTime);
 
@@ -36,35 +47,36 @@ function SocialLink({ url }: { url: string }) {
   );
 }
 
-const formSchema = z.object({
-  username: z
-    .string()
-    .regex(/^[a-zA-Z0-9_]+$/, 'Username can only contain letters, numbers, and underscores')
-    .min(1, 'Username is required')
-    .min(3, 'Username must have at least 3 characters')
-    .max(20, 'Username must have at most 20 characters'),
-  bio: z.string().trim().max(256, 'Bio must have at most 512 characters').optional(),
-  keyboard: z
-    .string()
-    .trim()
-    .max(256, 'Keyboard details must have at most 512 characters')
-    .optional(),
-  socials: z.object({
-    website: z.string().trim().max(128, 'Website URL must have at most 128 characters').optional(),
+const profileSchema = object({
+  username: string([
+    minLength(1, 'Username is required'),
+    minLength(3, 'Username must have at least 3 characters'),
+    maxLength(32, 'Username must have at most 32 characters'),
+    regex(/^[a-zA-Z0-9_]+$/, 'Username can only contain letters, numbers, and underscores'),
+  ]),
+  bio: optional(string([toTrimmed(), maxLength(512, 'Bio must have at most 512 characters')])),
+  keyboard: optional(
+    string([toTrimmed(), maxLength(256, 'Keyboard details must have at most 256 characters')]),
+  ),
+  socials: object({
+    website: optional(
+      string([toTrimmed(), maxLength(128, 'Website URL must have at most 128 characters')]),
+    ),
     ...socialNames.reduce(
       (socials, name) => {
-        socials[name] = z
-          .string()
-          .trim()
-          .max(32, `${capitalize(name)} username must have at most 32 characters`)
-          .optional();
+        socials[name] = optional(
+          string([
+            toTrimmed(),
+            maxLength(64, `${capitalize(name)} username must have at most 64 characters`),
+          ]),
+        );
         return socials;
       },
-      {} as Record<Social, z.ZodOptional<ZodString>>,
+      {} as Record<Social, OptionalSchema<StringSchema<string>>>,
     ),
   }),
 });
-type FormValues = z.infer<typeof formSchema>;
+type ProfileForm = ValiInput<typeof profileSchema>;
 
 export default function ProfileEditModal({ open, onClose }: ModalProps) {
   const { user, updateUser } = useUser();
@@ -75,15 +87,15 @@ export default function ProfileEditModal({ open, onClose }: ModalProps) {
     reset,
     setError,
     watch,
-  } = useForm<FormValues>({
+  } = useForm<ProfileForm>({
     defaultValues: { username: '', socials: {} },
     mode: 'onChange',
-    resolver: zodResolver(formSchema),
+    resolver: valibotResolver(profileSchema),
   });
   const socials = watch('socials');
   const [isLoading, setIsLoading] = useState(false);
 
-  const onSubmit: SubmitHandler<FormValues> = async ({
+  const onSubmit: SubmitHandler<ProfileForm> = async ({
     username,
     bio,
     keyboard,

@@ -45,11 +45,12 @@
     "react-icons": "^4.12.0",
     "react-remove-scroll": "^2.5.7",
     "react-viewport-list": "^7.1.1",
+    "remeda": "^1.30.0",
     "superjson": "^2.2.1",
     "swr": "^2.2.4",
     "tailwind-merge": "^2.1.0",
     "use-immer": "^0.9.0",
-    "zod": "^3.22.4"
+    "valibot": "^0.24.1"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.4.1",

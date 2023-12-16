@@ -1,6 +1,6 @@
 'use client';
 
-import { zodResolver } from '@hookform/resolvers/zod';
+import { valibotResolver } from '@hookform/resolvers/valibot';
 import { useDidUpdate } from '@mantine/hooks';
 import Loading from 'app/loading';
 import { Button, Divider, Input, Modal, Text, Tooltip, Transition } from 'components/core';
@@ -8,7 +8,7 @@ import dynamic from 'next/dynamic';
 import { useState } from 'react';
 import { Area } from 'react-easy-crop';
 import { useForm } from 'react-hook-form';
-import toast from 'react-hot-toast';
+import { toast } from 'react-hot-toast';
 import {
   RiClipboardLine,
   RiCloseLine,
@@ -17,7 +17,7 @@ import {
   RiUpload2Fill,
 } from 'react-icons/ri';
 import { twJoin } from 'tailwind-merge';
-import { z } from 'zod';
+import { Input as ValiInput, object, optional, string, toTrimmed, url } from 'valibot';
 
 const Cropper = dynamic(() => import('react-easy-crop'), {
   loading: () => <Loading transition={{ duration: 0.15 }} style={{ height: 448 }} />,
@@ -118,8 +118,8 @@ async function getCroppedImage(
   });
 }
 
-const formSchema = z.object({ imageURL: z.string().url().trim().optional() });
-type FormValues = z.infer<typeof formSchema>;
+const imageSchema = object({ imageURL: optional(string([toTrimmed(), url()])) });
+type ImageForm = ValiInput<typeof imageSchema>;
 
 export default function SetImageModal({
   open,
@@ -141,10 +141,10 @@ export default function SetImageModal({
     setError,
     setValue,
     watch,
-  } = useForm<FormValues>({
+  } = useForm<ImageForm>({
     defaultValues: { imageURL: '' },
     mode: 'onChange',
-    resolver: zodResolver(formSchema),
+    resolver: valibotResolver(imageSchema),
   });
   const imageURLValue = watch('imageURL');
   const [imageURL, setImageURL] = useState<string | null>(null);

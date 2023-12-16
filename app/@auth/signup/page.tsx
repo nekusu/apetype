@@ -1,7 +1,7 @@
 'use client';
 
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useDidUpdate, useDisclosure, useFocusTrap } from '@mantine/hooks';
+import { valibotResolver } from '@hookform/resolvers/valibot';
+import { useDisclosure, useFocusTrap } from '@mantine/hooks';
 import { ZxcvbnResult } from '@zxcvbn-ts/core';
 import { EmailToast, PasswordInput, PasswordStrength, SignInMethods } from 'components/auth';
 import { Button, Divider, Input, Text, Transition } from 'components/core';
@@ -14,64 +14,78 @@ import { RiLoaderLine, RiMailFill, RiUser4Fill } from 'react-icons/ri';
 import { twJoin } from 'tailwind-merge';
 import { getFirebaseAuth, getFirebaseFirestore } from 'utils/firebase';
 import { User, defaultUserDetails } from 'utils/user';
-import { z } from 'zod';
+import {
+  Input as ValiInput,
+  custom,
+  email,
+  forward,
+  maxLength,
+  minLength,
+  number,
+  object,
+  regex,
+  string,
+  toTrimmed,
+} from 'valibot';
 
-const formSchema = z
-  .object({
-    username: z
-      .string()
-      .regex(/^[a-zA-Z0-9_]+$/, 'Username can only contain letters, numbers, and underscores')
-      .min(1, 'Username is required')
-      .min(3, 'Username must have at least 3 characters')
-      .max(20, 'Username must have at most 20 characters'),
-    email: z.string().trim().email('Invalid email').min(1, 'Email is required'),
-    password: z
-      .string()
-      .min(1, 'Password is required')
-      .min(8, 'Password must have at least 8 characters'),
-    confirmPassword: z.string().min(1, 'Password confirmation is required'),
-  })
-  .refine(({ password, confirmPassword }) => password === confirmPassword, {
-    path: ['confirmPassword'],
-    message: 'Passwords do not match',
-  });
-type FormValues = z.infer<typeof formSchema>;
+const signupSchema = object(
+  {
+    username: string([
+      minLength(1, 'Username is required'),
+      minLength(3, 'Username must have at least 3 characters'),
+      maxLength(32, 'Username must have at most 32 characters'),
+      regex(/^[a-zA-Z0-9_]+$/, 'Username can only contain letters, numbers, and underscores'),
+    ]),
+    email: string([toTrimmed(), minLength(1, 'Email is required'), email('Invalid email')]),
+    password: string([
+      minLength(1, 'Password is required'),
+      minLength(8, 'Password must have at least 8 characters'),
+    ]),
+    confirmPassword: string([minLength(1, 'Password confirmation is required')]),
+    passwordStrength: number(),
+  },
+  [
+    forward(
+      custom(
+        ({ password, confirmPassword }) => password === confirmPassword,
+        'Passwords do not match',
+      ),
+      ['confirmPassword'],
+    ),
+    forward(
+      custom(({ passwordStrength }) => passwordStrength >= 2, 'Password is too weak'),
+      ['password'],
+    ),
+  ],
+);
+type SignupForm = ValiInput<typeof signupSchema>;
 
 export default function SignupPage() {
-  const [passwordStrength, setPasswordStrength] = useState<ZxcvbnResult | null>(null);
   const {
-    formState: { isSubmitted, errors },
+    formState: { errors },
     handleSubmit,
     register,
     setError,
-    trigger,
+    setValue,
     watch,
-  } = useForm<FormValues>({
+  } = useForm<SignupForm>({
     defaultValues: { username: '', email: '', password: '', confirmPassword: '' },
-    resolver: zodResolver(
-      formSchema.refine(() => passwordStrength && passwordStrength.score >= 2, {
-        path: ['password'],
-        message: 'Password is too weak',
-      }),
-    ),
-    reValidateMode: 'onSubmit',
+    resolver: valibotResolver(signupSchema),
   });
   const focusTrapRef = useFocusTrap();
   const [visiblePassword, setVisiblePassword] = useState(false);
-  const [username, email, password, confirmPassword] = watch([
-    'username',
-    'email',
-    'password',
-    'confirmPassword',
-  ]);
+  const [username, email, password] = watch(['username', 'email', 'password']);
   const userInputs = useMemo(() => [username, email], [username, email]);
   const deferredPassword = useDeferredValue(password);
   const deferredUserInputs = useDeferredValue(userInputs);
   const [popupOpen, popupHandler] = useDisclosure(false);
   const [isLoading, setIsLoading] = useState(false);
-  const handleResult = useCallback((result: ZxcvbnResult) => setPasswordStrength(result), []);
+  const handleResult = useCallback(
+    (result: ZxcvbnResult | null) => setValue('passwordStrength', result ? result.score : 0),
+    [setValue],
+  );
 
-  const onSubmit: SubmitHandler<FormValues> = async ({ username, email, password }) => {
+  const onSubmit: SubmitHandler<SignupForm> = async ({ username, email, password }) => {
     const [
       { auth, createUserWithEmailAndPassword, sendEmailVerification, updateProfile },
       { getDocuments, serverTimestamp, setDocument, where },
@@ -113,10 +127,6 @@ export default function SignupPage() {
       setIsLoading(false);
     }
   };
-
-  useDidUpdate(() => {
-    if (isSubmitted) void trigger();
-  }, [passwordStrength, confirmPassword]);
 
   return (
     <Transition

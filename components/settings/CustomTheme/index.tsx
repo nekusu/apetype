@@ -1,6 +1,6 @@
 'use client';
 
-import { zodResolver } from '@hookform/resolvers/zod';
+import { valibotResolver } from '@hookform/resolvers/valibot';
 import { useDidUpdate, useDisclosure, useToggle } from '@mantine/hooks';
 import { colord, extend } from 'colord';
 import a11yPlugin from 'colord/plugins/a11y';
@@ -16,7 +16,15 @@ import { toast } from 'react-hot-toast';
 import { RiAlertLine, RiDeleteBin7Line, RiPaintBrushFill, RiSparklingFill } from 'react-icons/ri';
 import { twMerge } from 'tailwind-merge';
 import { CustomTheme, validateColor } from 'utils/theme';
-import { z } from 'zod';
+import {
+  Input as ValiInput,
+  custom,
+  maxLength,
+  minLength,
+  object,
+  string,
+  toTrimmed,
+} from 'valibot';
 import AIThemeGenerationModal from './AIThemeGenerationModal';
 import ColorInput from './ColorInput';
 import ReadabilityModal from './ReadabilityModal';
@@ -24,32 +32,32 @@ import ReadabilityModal from './ReadabilityModal';
 extend([a11yPlugin]);
 
 const COMMON_BUTTON_PROPS: Omit<ButtonProps, 'ref'> = { className: 'w-full', variant: 'filled' };
-const zColor = (color: string) =>
-  z
-    .string()
-    .trim()
-    .min(1, `${color} color is required`)
-    .refine((color) => validateColor(color).isValid, 'Invalid color');
-const formSchema = z.object({
-  name: z
-    .string()
-    .trim()
-    .min(1, 'Name is required')
-    .max(30, 'Name must have at most 30 characters'),
-  colors: z.object({
-    bg: zColor('Background'),
-    main: zColor('Main'),
-    caret: zColor('Caret'),
-    sub: zColor('Sub'),
-    subAlt: zColor('Sub alt'),
-    text: zColor('Text'),
-    error: zColor('Error'),
-    errorExtra: zColor('Error extra'),
-    colorfulError: zColor('Colorful error'),
-    colorfulErrorExtra: zColor('Colorful error extra'),
+const color = (color: string) =>
+  string([
+    toTrimmed(),
+    minLength(1, `${color} color is required`),
+    custom((color) => validateColor(color).isValid, 'Invalid color'),
+  ]);
+const customThemeSchema = object({
+  name: string([
+    toTrimmed(),
+    minLength(1, 'Name is required'),
+    maxLength(32, 'Name must have at most 32 characters'),
+  ]),
+  colors: object({
+    bg: color('Background'),
+    main: color('Main'),
+    caret: color('Caret'),
+    sub: color('Sub'),
+    subAlt: color('Sub alt'),
+    text: color('Text'),
+    error: color('Error'),
+    errorExtra: color('Error extra'),
+    colorfulError: color('Colorful error'),
+    colorfulErrorExtra: color('Colorful error extra'),
   }),
 });
-type FormValues = z.infer<typeof formSchema>;
+type CustomThemeForm = ValiInput<typeof customThemeSchema>;
 
 export default function CustomTheme({ className, ...props }: HTMLMotionProps<'div'>) {
   const { theme, customThemes, customTheme: customThemeId, setSettings } = useSettings();
@@ -62,10 +70,10 @@ export default function CustomTheme({ className, ...props }: HTMLMotionProps<'di
     register,
     setValue,
     watch,
-  } = useForm<FormValues>({
+  } = useForm<CustomThemeForm>({
     defaultValues: { name: '', colors: {} },
     mode: 'onChange',
-    resolver: zodResolver(formSchema),
+    resolver: valibotResolver(customThemeSchema),
   });
   const colors = watch('colors');
   const [themeModalOpen, themeModalHandler] = useDisclosure(false);
@@ -121,7 +129,7 @@ export default function CustomTheme({ className, ...props }: HTMLMotionProps<'di
       .writeText(`${window.location.origin}?customTheme=${encodedTheme}`)
       .then(() => toast.success('URL copied to clipboard!'));
   };
-  const onSubmit: SubmitHandler<FormValues> = ({ name, colors }) => {
+  const onSubmit: SubmitHandler<CustomThemeForm> = ({ name, colors }) => {
     setSettings((draft) => {
       const index = draft.customThemes.findIndex(({ id }) => id === draft.customTheme);
       if (index >= 0) {
@@ -258,7 +266,7 @@ export default function CustomTheme({ className, ...props }: HTMLMotionProps<'di
                 onClick={() => {
                   if (customTheme) {
                     showRestoreThemeToast(customTheme);
-                    deleteTheme(customThemeId);
+                    deleteTheme(customTheme.id);
                   }
                 }}
               >

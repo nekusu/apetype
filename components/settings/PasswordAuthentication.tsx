@@ -1,7 +1,7 @@
 'use client';
 
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useDidUpdate, useDisclosure } from '@mantine/hooks';
+import { valibotResolver } from '@hookform/resolvers/valibot';
+import { useDisclosure } from '@mantine/hooks';
 import { ZxcvbnResult } from '@zxcvbn-ts/core';
 import { PasswordInput, PasswordStrength, ReauthenticationModal } from 'components/auth';
 import { Button, Modal, Text } from 'components/core';
@@ -14,7 +14,7 @@ import { toast } from 'react-hot-toast';
 import { RiLoaderLine } from 'react-icons/ri';
 import { twJoin } from 'tailwind-merge';
 import { getFirebaseAuth } from 'utils/firebase';
-import { z } from 'zod';
+import { Input as ValiInput, custom, forward, minLength, number, object, string } from 'valibot';
 import Setting from './Setting';
 
 interface PasswordModalProps extends ModalProps {
@@ -22,46 +22,53 @@ interface PasswordModalProps extends ModalProps {
   passwordAuthenticated?: boolean;
 }
 
-const formSchema = z
-  .object({
-    password: z
-      .string()
-      .min(1, 'Password is required')
-      .min(8, 'Password must have at least 8 characters'),
-    confirmPassword: z.string().min(1, 'Password confirmation is required'),
-  })
-  .refine(({ password, confirmPassword }) => password === confirmPassword, {
-    path: ['confirmPassword'],
-    message: 'Passwords do not match',
-  });
-type FormValues = z.infer<typeof formSchema>;
+const passwordSchema = object(
+  {
+    password: string([
+      minLength(1, 'Password is required'),
+      minLength(8, 'Password must have at least 8 characters'),
+    ]),
+    confirmPassword: string([minLength(1, 'Password confirmation is required')]),
+    passwordStrength: number(),
+  },
+  [
+    forward(
+      custom(
+        ({ password, confirmPassword }) => password === confirmPassword,
+        'Passwords do not match',
+      ),
+      ['confirmPassword'],
+    ),
+    forward(
+      custom(({ passwordStrength }) => passwordStrength >= 2, 'Password is too weak'),
+      ['password'],
+    ),
+  ],
+);
+type PasswordForm = ValiInput<typeof passwordSchema>;
 
 function PasswordModal({ updatePassword, passwordAuthenticated, ...props }: PasswordModalProps) {
   const { currentUser } = useAuth();
-  const [passwordStrength, setPasswordStrength] = useState<ZxcvbnResult | null>(null);
   const {
-    formState: { isSubmitted, errors },
+    formState: { errors },
     handleSubmit,
     register,
-    trigger,
+    setValue,
     watch,
-  } = useForm<FormValues>({
+  } = useForm<PasswordForm>({
     defaultValues: { password: '', confirmPassword: '' },
-    resolver: zodResolver(
-      formSchema.refine(() => passwordStrength && passwordStrength.score >= 2, {
-        path: ['password'],
-        message: 'Password is too weak',
-      }),
-    ),
-    reValidateMode: 'onSubmit',
+    resolver: valibotResolver(passwordSchema),
   });
   const [reauthModalOpen, reauthModalHandler] = useDisclosure(false);
   const [visiblePassword, setVisiblePassword] = useState(false);
-  const [password, confirmPassword] = watch(['password', 'confirmPassword']);
+  const password = watch('password');
   const [userInputs, setUserInputs] = useState(['', '']);
   const deferredPassword = useDeferredValue(password);
   const [isLoading, setIsLoading] = useState(false);
-  const handleResult = useCallback((result: ZxcvbnResult) => setPasswordStrength(result), []);
+  const handleResult = useCallback(
+    (result: ZxcvbnResult | null) => setValue('passwordStrength', result ? result.score : 0),
+    [setValue],
+  );
 
   const handlePassword = async (password: string) => {
     try {
@@ -75,14 +82,11 @@ function PasswordModal({ updatePassword, passwordAuthenticated, ...props }: Pass
       setIsLoading(false);
     }
   };
-  const onSubmit: SubmitHandler<FormValues> = async ({ password }) => handlePassword(password);
+  const onSubmit: SubmitHandler<PasswordForm> = async ({ password }) => handlePassword(password);
 
   useEffect(() => {
     setUserInputs([currentUser?.displayName ?? '', currentUser?.email ?? '']);
   }, [currentUser?.displayName, currentUser?.email]);
-  useDidUpdate(() => {
-    if (isSubmitted) void trigger();
-  }, [passwordStrength, confirmPassword]);
 
   return (
     <>

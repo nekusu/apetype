@@ -42,7 +42,7 @@ export default function CommandLine() {
     const settings = settingsListValues;
     const options = setting?.options ?? [];
     if (setting) {
-      const haystack = options.map(({ alt, value }) => `${alt ?? ''}¦${value.toString()}`);
+      const haystack = options.map(({ alt, value }) => `${alt ?? ''}¦${value}`);
       const indexes = uf.filter(haystack, input);
       const results = indexes?.map((i) => options[i]);
       return { settings: [] as typeof settings, options: results ?? options };
@@ -82,7 +82,7 @@ export default function CommandLine() {
     }
     isUsingKeyboard.current = true;
   };
-  const saveSetting = (value: string | number | boolean) => {
+  const saveSetting = (value: string | number | boolean | null) => {
     if (!setting?.id || value === '') return;
     setSettings((draft) => void (draft[setting.id] = value as never));
     setInput('');
@@ -128,7 +128,7 @@ export default function CommandLine() {
   useEffect(() => {
     if (isUsingKeyboard.current) listRef.current?.scrollToIndex({ index });
     if (setting && ['theme', 'customTheme'].includes(setting.id))
-      previewTheme(items.options[index]?.value.toString());
+      previewTheme(items.options[index]?.value!.toString());
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [index]);
   useWindowEvent('keydown', (event) => {
@@ -226,7 +226,7 @@ export default function CommandLine() {
             initialIndex={selectedIndex}
           >
             {({ alt, value }, i) => {
-              const key = typeof value === 'string' ? value : alt ?? value.toString();
+              const key = typeof value === 'string' ? value : alt ?? `${value}`;
               const active = index === i;
               const selected = selectedIndex === i;
               return (
@@ -237,8 +237,7 @@ export default function CommandLine() {
                   selected={selected && (!isLoading || !active)}
                   layoutId={key}
                   style={{
-                    fontFamily:
-                      setting.id === 'fontFamily' ? `var(${value.toString()})` : undefined,
+                    fontFamily: setting.id === 'fontFamily' ? `var(${value})` : undefined,
                   }}
                   onClick={() => select()}
                   onMouseMove={() => hoverItem(i)}
@@ -251,7 +250,7 @@ export default function CommandLine() {
                           colors={
                             setting.id === 'customTheme'
                               ? customThemes.find(({ id }) => value === id)?.colors ?? {}
-                              : { ...themes[value.toString()] }
+                              : { ...themes[`${value}`] }
                           }
                           withBackground
                         />
@@ -281,7 +280,7 @@ export default function CommandLine() {
             layoutId='custom'
             active={index === items.options.length}
             label={`custom ${
-              customSelected && !input ? `(${settings[setting.id].toString()})` : ''
+              customSelected && !input ? `(${settings[setting.id]!.toString()})` : ''
             }`}
             selected={customSelected && !input}
             onClick={() => select()}

@@ -1,6 +1,6 @@
 'use client';
 
-import { zodResolver } from '@hookform/resolvers/zod';
+import { valibotResolver } from '@hookform/resolvers/valibot';
 import { useFocusTrap } from '@mantine/hooks';
 import { EmailToast } from 'components/auth';
 import { Button, Input, Text, Transition } from 'components/core';
@@ -8,16 +8,16 @@ import { FirebaseError } from 'firebase/app';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
-import toast from 'react-hot-toast';
+import { toast } from 'react-hot-toast';
 import { RiLoaderLine, RiMailFill } from 'react-icons/ri';
 import { twJoin } from 'tailwind-merge';
 import { getFirebaseAuth } from 'utils/firebase';
-import { z } from 'zod';
+import { Input as ValiInput, email, minLength, object, string, toTrimmed } from 'valibot';
 
-const formSchema = z.object({
-  email: z.string().trim().email('Invalid email').min(1, 'Email is required'),
+const resetPasswordSchema = object({
+  email: string([toTrimmed(), minLength(1, 'Email is required'), email('Invalid email')]),
 });
-type FormValues = z.infer<typeof formSchema>;
+type ResetPasswordForm = ValiInput<typeof resetPasswordSchema>;
 
 export default function ResetPasswordPage() {
   const router = useRouter();
@@ -26,14 +26,14 @@ export default function ResetPasswordPage() {
     handleSubmit,
     register,
     setError,
-  } = useForm<FormValues>({
+  } = useForm<ResetPasswordForm>({
     defaultValues: { email: '' },
-    resolver: zodResolver(formSchema),
+    resolver: valibotResolver(resetPasswordSchema),
   });
   const focusTrapRef = useFocusTrap();
   const [isLoading, setIsLoading] = useState(false);
 
-  const onSubmit: SubmitHandler<FormValues> = async ({ email }) => {
+  const onSubmit: SubmitHandler<ResetPasswordForm> = async ({ email }) => {
     const { auth, sendPasswordResetEmail } = await getFirebaseAuth();
     try {
       setIsLoading(true);

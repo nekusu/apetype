@@ -1,6 +1,6 @@
 'use client';
 
-import { zodResolver } from '@hookform/resolvers/zod';
+import { valibotResolver } from '@hookform/resolvers/valibot';
 import { shallowEqual, useDidUpdate, useListState } from '@mantine/hooks';
 import Loading from 'app/loading';
 import { colord } from 'colord';
@@ -12,7 +12,7 @@ import { SubmitHandler, useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
 import { RiLoaderLine, RiLockFill, RiLockUnlockFill, RiQuestionLine } from 'react-icons/ri';
 import { CustomTheme, ThemeColors } from 'utils/theme';
-import { z } from 'zod';
+import { Input as ValiInput, maxLength, minLength, object, string, toTrimmed } from 'valibot';
 
 interface ModalProps {
   open: boolean;
@@ -49,23 +49,23 @@ const CREATIVITY: Record<Creativity, number> = { low: 1, medium: 1.5, high: 2 };
 const DEFAULT_PALETTE = Array(6).fill('-') as string[];
 const LABELS = ['background', 'main', 'sub', 'sub alt', 'text', 'error'] as const;
 
-const formSchema = z.object({
-  name: z
-    .string()
-    .trim()
-    .min(1, 'Name is required')
-    .max(30, 'Name must have at most 30 characters'),
+const themeSchema = object({
+  name: string([
+    toTrimmed(),
+    minLength(1, 'Name is required'),
+    maxLength(32, 'Name must have at most 32 characters'),
+  ]),
 });
-type FormValues = z.infer<typeof formSchema>;
+type ThemeForm = ValiInput<typeof themeSchema>;
 
 export default function AIThemeGenerationModal({ open, onClose, addTheme }: ModalProps) {
   const {
     formState: { errors },
     handleSubmit,
     register,
-  } = useForm<FormValues>({
+  } = useForm<ThemeForm>({
     defaultValues: { name: '' },
-    resolver: zodResolver(formSchema),
+    resolver: valibotResolver(themeSchema),
   });
   const [model, setModel] = useState<Model>('transformer');
   const [creativity, setCreativity] = useState(1.5);
@@ -81,7 +81,7 @@ export default function AIThemeGenerationModal({ open, onClose, addTheme }: Moda
     [lockedColors, lastUsedOptions, lastUsedOptions.current, model, creativity],
   );
 
-  const onSubmit: SubmitHandler<FormValues> = ({ name }) => {
+  const onSubmit: SubmitHandler<ThemeForm> = ({ name }) => {
     const palette = palettes[activePalette];
     const errorColor = colord(palette[5]);
     const colors: ThemeColors = {

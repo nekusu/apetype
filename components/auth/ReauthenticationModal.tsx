@@ -1,6 +1,6 @@
 'use client';
 
-import { zodResolver } from '@hookform/resolvers/zod';
+import { valibotResolver } from '@hookform/resolvers/valibot';
 import { useDisclosure } from '@mantine/hooks';
 import { Button, Divider, Modal, Text } from 'components/core';
 import { ModalProps } from 'components/core/Modal';
@@ -15,20 +15,20 @@ import { RiLoaderLine } from 'react-icons/ri';
 import { twJoin } from 'tailwind-merge';
 import { getFirebaseAuth } from 'utils/firebase';
 import { AuthenticationMethod } from 'utils/firebase/auth';
-import { z } from 'zod';
+import { Input as ValiInput, minLength, object, string } from 'valibot';
 import { PasswordInput } from '.';
 
 export interface ReauthenticationModalProps extends ModalProps {
   onReauthenticate?: (credential: AuthCredential | null) => void;
 }
 
-const formSchema = z.object({
-  password: z
-    .string()
-    .min(1, 'Password is required')
-    .min(8, 'Password must have at least 8 characters'),
+const passwordSchema = object({
+  password: string([
+    minLength(1, 'Password is required'),
+    minLength(8, 'Password must have at least 8 characters'),
+  ]),
 });
-type FormValues = z.infer<typeof formSchema>;
+type PasswordForm = ValiInput<typeof passwordSchema>;
 
 export default function ReauthenticationModal({
   onClose,
@@ -41,9 +41,9 @@ export default function ReauthenticationModal({
     handleSubmit,
     register,
     setError,
-  } = useForm<FormValues>({
+  } = useForm<PasswordForm>({
     defaultValues: { password: '' },
-    resolver: zodResolver(formSchema),
+    resolver: valibotResolver(passwordSchema),
   });
   const [popupOpen, popupHandler] = useDisclosure(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -78,7 +78,7 @@ export default function ReauthenticationModal({
     },
     [popupHandler, reauthenticate],
   );
-  const onSubmit: SubmitHandler<FormValues> = async ({ password }) => {
+  const onSubmit: SubmitHandler<PasswordForm> = async ({ password }) => {
     const { auth, EmailAuthProvider } = await getFirebaseAuth();
     if (!auth.currentUser?.email) return;
     try {

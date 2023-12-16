@@ -1,6 +1,6 @@
 'use client';
 
-import { zodResolver } from '@hookform/resolvers/zod';
+import { valibotResolver } from '@hookform/resolvers/valibot';
 import { useDisclosure, useFocusTrap } from '@mantine/hooks';
 import { PasswordInput, SignInMethods } from 'components/auth';
 import { Button, Checkbox, Divider, Input, Text, Transition } from 'components/core';
@@ -8,21 +8,21 @@ import { FirebaseError } from 'firebase/app';
 import Link from 'next/link';
 import { useState } from 'react';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
-import toast from 'react-hot-toast';
+import { toast } from 'react-hot-toast';
 import { RiLoaderLine, RiMailFill } from 'react-icons/ri';
 import { twJoin } from 'tailwind-merge';
 import { getFirebaseAuth } from 'utils/firebase';
-import { z } from 'zod';
+import { Input as ValiInput, boolean, email, minLength, object, string, toTrimmed } from 'valibot';
 
-const formSchema = z.object({
-  email: z.string().trim().email('Invalid email').min(1, 'Email is required'),
-  password: z
-    .string()
-    .min(1, 'Password is required')
-    .min(8, 'Password must have at least 8 characters'),
-  remember: z.boolean(),
+const loginSchema = object({
+  email: string([toTrimmed(), minLength(1, 'Email is required'), email('Invalid email')]),
+  password: string([
+    minLength(1, 'Password is required'),
+    minLength(8, 'Password must have at least 8 characters'),
+  ]),
+  remember: boolean(),
 });
-type FormValues = z.infer<typeof formSchema>;
+type LoginForm = ValiInput<typeof loginSchema>;
 
 export default function LoginPage() {
   const {
@@ -32,15 +32,15 @@ export default function LoginPage() {
     register,
     setError,
     setValue,
-  } = useForm<FormValues>({
+  } = useForm<LoginForm>({
     defaultValues: { email: '', password: '', remember: true },
-    resolver: zodResolver(formSchema),
+    resolver: valibotResolver(loginSchema),
   });
   const focusTrapRef = useFocusTrap();
   const [popupOpen, popupHandler] = useDisclosure(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  const onSubmit: SubmitHandler<FormValues> = async ({ email, password, remember }) => {
+  const onSubmit: SubmitHandler<LoginForm> = async ({ email, password, remember }) => {
     const {
       auth,
       browserLocalPersistence,
