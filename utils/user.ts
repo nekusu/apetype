@@ -85,9 +85,9 @@ export function getPersonalBest(
   const currentPersonalBest = user.personalBests?.[mode]?.[
     mode2 as keyof Required<User>['personalBests'][typeof mode]
   ] as PersonalBest | undefined;
-  let bestTest: PersonalBest | undefined;
   if (otherTests && otherTests.length > 0) {
     const filteredTests = otherTests.filter((test) => test.mode === mode && test.mode2 === mode2);
+    if (!filteredTests.length) return currentPersonalBest;
     const highestWpmTest = filteredTests.reduce((prev, current) =>
       prev.result.wpm > current.result.wpm ? prev : current,
     );
@@ -95,9 +95,11 @@ export function getPersonalBest(
       date,
       result: { wpm, raw, accuracy, consistency },
     } = highestWpmTest;
-    bestTest = { wpm, raw, accuracy, consistency, date: Timestamp.fromDate(date) };
+    return !currentPersonalBest || highestWpmTest.result.wpm > currentPersonalBest.wpm
+      ? { wpm, raw, accuracy, consistency, date: Timestamp.fromDate(date) }
+      : currentPersonalBest;
   }
-  return (currentPersonalBest?.wpm ?? 0) > (bestTest?.wpm ?? 0) ? currentPersonalBest : bestTest;
+  return currentPersonalBest;
 }
 
 export function isPersonalBest(
