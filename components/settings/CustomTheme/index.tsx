@@ -10,6 +10,7 @@ import { ThemeButton } from 'components/settings';
 import { useSettings } from 'context/settingsContext';
 import { useTheme } from 'context/themeContext';
 import { AnimatePresence, HTMLMotionProps } from 'framer-motion';
+import { nanoid } from 'nanoid/non-secure';
 import { useEffect, useRef } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
@@ -82,7 +83,7 @@ export default function CustomTheme({ className, ...props }: HTMLMotionProps<'di
   const customTheme = customThemes.find(({ id }) => id === customThemeId);
 
   const addTheme = (theme: Optional<CustomTheme, 'id'>) => {
-    const id = theme.id ?? crypto.randomUUID();
+    const id = theme.id ?? nanoid(28);
     setSettings((draft) => {
       if (!draft.customThemes.some((theme) => theme.id === id)) {
         draft.customThemes.push({ ...theme, id });

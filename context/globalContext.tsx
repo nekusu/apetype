@@ -2,6 +2,7 @@
 
 import { LazyMotion } from 'framer-motion';
 import { useThrottle } from 'hooks/useThrottle';
+import { nanoid } from 'nanoid/non-secure';
 import { ReactNode, createContext, useContext, useMemo } from 'react';
 import { Updater, useImmer } from 'use-immer';
 import { settingsList } from 'utils/settings';
@@ -79,7 +80,7 @@ export function GlobalProvider({ children, languages, layouts, themes }: GlobalP
     [setGlobalValues],
   );
   const restartTest = useThrottle(() => {
-    const newTestId = crypto.randomUUID();
+    const newTestId = nanoid(10);
     setGlobalValues((draft) => {
       draft.testId = newTestId;
       draft.isUserTyping = false;
