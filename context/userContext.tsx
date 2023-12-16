@@ -134,7 +134,8 @@ export function UserProvider({ children }: { children: ReactNode }) {
   const deleteCachedUserData = useCallback(
     async (path?: string) => {
       if (!currentUser) return;
-      await mutate((key: string | KeyParams<unknown>) => {
+      await mutate((key?: string | KeyParams<unknown>) => {
+        if (!key) return;
         const item = typeof key === 'string' ? key : key.path;
         return item.includes(`users/${currentUser.uid}`) && (path ? item.includes(path) : true);
       }, undefined);
