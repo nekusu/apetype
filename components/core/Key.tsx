@@ -8,15 +8,15 @@ export interface KeyProps extends ComponentPropsWithoutRef<'div'> {
 
 const Key = forwardRef<ElementRef<'div'>, KeyProps>(function Key(
   { asChild, className, ...props },
-  ref
+  ref,
 ) {
   const Component = asChild ? Slot : 'span';
   return (
     <Component
-      className={twMerge([
+      className={twMerge(
         'mx-px inline-block rounded bg-sub px-1 text-xs text-bg transition',
         className,
-      ])}
+      )}
       ref={ref}
       {...props}
     />

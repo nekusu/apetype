@@ -175,10 +175,10 @@ export default function CustomTheme({ className, ...props }: HTMLMotionProps<'di
 
   return (
     <Transition
-      className={twMerge([
+      className={twMerge(
         customThemes.length ? 'grid grid-cols-[1fr_3fr] gap-5' : 'flex flex-col items-center gap-3',
         className,
-      ])}
+      )}
       {...props}
     >
       {customThemes.length ? (

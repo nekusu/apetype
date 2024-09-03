@@ -14,7 +14,7 @@ export default function EmailToast({ emailDomain, ...t }: EmailToastProps) {
   return (
     <div className='flex flex-col gap-2'>
       <div className='flex items-center gap-2.5'>
-        <span className='shrink-0 text-size-lg text-main'>
+        <span className='shrink-0 text-lg text-main'>
           <RiInformationFill />
         </span>
         <Text className='leading-tight'>{resolvedValue}</Text>

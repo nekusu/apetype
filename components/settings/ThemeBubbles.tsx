@@ -11,11 +11,11 @@ function ThemeBubbles({ className, colors, style, withBackground, ...props }: Th
   const { bg, main, sub, text } = colors;
   return (
     <div
-      className={twMerge([
+      className={twMerge(
         'flex gap-1.5 rounded-full',
         withBackground && 'rounded-full p-1',
         className,
-      ])}
+      )}
       style={{ background: withBackground ? bg : undefined, ...style }}
       {...props}
     >

@@ -27,7 +27,7 @@ export default async function UserPage({ params }: { params: { id: string } }) {
     </Transition>
   ) : (
     <Transition className='flex flex-col cursor-default items-center self-center gap-6'>
-      <Text className='text-[120px] font-bold leading-none' dimmed>
+      <Text className='text-9xl font-bold leading-none' dimmed>
         404
       </Text>
       <Text className='text-center'>User not found.</Text>

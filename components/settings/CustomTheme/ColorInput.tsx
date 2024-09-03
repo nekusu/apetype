@@ -41,7 +41,7 @@ const ColorInput = forwardRef<ElementRef<'input'>, ColorInputProps>(function Col
     const toastId = toast(
       (t) => (
         <div className='flex items-center gap-2.5 -mb-0.5'>
-          <span className='shrink-0 text-size-lg text-main'>{t.icon}</span>
+          <span className='shrink-0 text-lg text-main'>{t.icon}</span>
           <Text className='leading-tight'>
             Press <Key className='text-sm'>esc</Key> to cancel selection.
           </Text>

@@ -50,14 +50,14 @@ function PasswordStrength({
         {STRENGTH.map((_, index) => (
           <div
             key={index}
-            className={twMerge([
+            className={twMerge(
               'h-1 w-full rounded-lg transition-colors',
               result &&
-              (result.score > index || index === 0) &&
-              password.length >= minPasswordLength
+                (result.score > index || index === 0) &&
+                password.length >= minPasswordLength
                 ? ['bg-error', result.score === 2 && 'bg-text', result.score >= 3 && 'bg-main']
                 : 'bg-sub',
-            ])}
+            )}
           />
         ))}
       </div>

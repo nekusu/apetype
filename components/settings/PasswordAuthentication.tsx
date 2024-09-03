@@ -92,10 +92,10 @@ function PasswordModal({ updatePassword, passwordAuthenticated, ...props }: Pass
     <>
       <Modal centered {...props}>
         <div
-          className={twJoin([
+          className={twJoin(
             'max-w-xs min-w-xs flex flex-col gap-3.5 transition',
             isLoading && 'pointer-events-none opacity-60',
-          ])}
+          )}
         >
           <Text asChild className='text-2xl'>
             <h3>{passwordAuthenticated ? 'Change' : 'Add'} password</h3>

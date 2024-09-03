@@ -150,10 +150,10 @@ export default function ProfileEditModal({ open, onClose }: ModalProps) {
   return (
     <Modal centered open={open} onClose={onClose}>
       <form
-        className={twJoin([
+        className={twJoin(
           'max-w-sm min-w-sm flex flex-col gap-3.5 transition',
           isLoading && '!pointer-events-none !opacity-60',
-        ])}
+        )}
         onSubmit={(e) => void handleSubmit(onSubmit)(e)}
       >
         <Text asChild className='text-2xl'>

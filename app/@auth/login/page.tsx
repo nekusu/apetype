@@ -68,10 +68,10 @@ export default function LoginPage() {
   return (
     <Transition
       ref={focusTrapRef}
-      className={twJoin([
+      className={twJoin(
         'max-w-xs min-w-xs flex flex-col gap-3.5 transition',
         (popupOpen || isLoading) && '!pointer-events-none !opacity-60',
-      ])}
+      )}
     >
       <Text asChild className='text-2xl'>
         <h3>Login</h3>
@@ -100,7 +100,7 @@ export default function LoginPage() {
             render={({ field: { value } }) => (
               <Checkbox
                 label='Remember me'
-                className='p-0.5 !rounded-1.5'
+                className='p-0.5 !rounded-[6px]'
                 labelClassName='text-sm'
                 checked={value}
                 setChecked={(value) => setValue('remember', value)}

@@ -100,11 +100,11 @@ export default function UserDetails({
                 editable={editable}
                 imageProps={{ src: profilePicture?.url }}
                 shape={profilePicture?.shape}
-                wrapperClassName={twJoin([
-                  'absolute bottom-0 left-0 transition transition-duration-300 transform-origin-bl',
-                  smallProfilePicture && 'scale-[0.4375] translate-y-12 transition-delay-500',
-                ])}
-                className={twJoin(smallProfilePicture && 'border-0 transition-delay-500')}
+                wrapperClassName={twJoin(
+                  'absolute bottom-0 left-0 transition duration-300 origin-bottom-left',
+                  smallProfilePicture && 'scale-[0.4375] translate-y-12 delay-500',
+                )}
+                className={twJoin(smallProfilePicture && 'border-0 delay-500')}
               />
             </div>
             {actions}
@@ -150,11 +150,11 @@ export default function UserDetails({
               <div className='flex flex-col gap-3'>
                 <Text
                   asChild
-                  className={twJoin([
-                    'text-3xl text-main transform-origin-l transition-duration-300',
+                  className={twJoin(
+                    'text-3xl text-main origin-left duration-300',
                     smallProfilePicture &&
-                      'scale-[1.25] -translate-y-7 translate-x-26 transition-delay-500',
-                  ])}
+                      'scale-[1.25] -translate-y-7 translate-x-[104px] delay-500',
+                  )}
                 >
                   <h2>{name}</h2>
                 </Text>

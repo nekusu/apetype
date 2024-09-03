@@ -24,7 +24,7 @@ const Letter = forwardRef<HTMLSpanElement, LetterProps>(function Letter(
     flipTestColors,
     colorfulMode,
   },
-  ref
+  ref,
 ) {
   const color = useCallback(
     (status: LetterType['status']) => {
@@ -41,23 +41,23 @@ const Letter = forwardRef<HTMLSpanElement, LetterProps>(function Letter(
           return 'text-sub';
       }
     },
-    [colorfulMode, flipTestColors]
+    [colorfulMode, flipTestColors],
   );
 
   return (
     <span
-      className={twJoin([
+      className={twJoin(
         'relative inline-block',
         (blindMode || hideExtraLetters) && status === 'extra' && 'hidden',
         blindMode && !!status ? color('correct') : color(status),
-      ])}
+      )}
       ref={ref}
     >
       {!blindMode && indicateTypos === 'replace' && typed && typed !== ' '
         ? typed
         : typed === ' ' && status === 'extra'
-        ? '_'
-        : original}
+          ? '_'
+          : original}
       {!blindMode && indicateTypos === 'below' && status === 'incorrect' && (
         <span className='absolute left-0 top-[1.35em] w-full flex justify-center text-[.75em] text-text opacity-50'>
           {typed}

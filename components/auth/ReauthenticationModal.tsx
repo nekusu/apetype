@@ -105,10 +105,10 @@ export default function ReauthenticationModal({
   return (
     <Modal onClose={onClose} centered {...props}>
       <div
-        className={twJoin([
+        className={twJoin(
           'max-w-xs min-w-xs flex flex-col gap-3.5 transition',
           (popupOpen || isLoading) && '!pointer-events-none !opacity-60',
-        ])}
+        )}
       >
         <Text asChild className='text-2xl'>
           <h3>Reauthenticate</h3>

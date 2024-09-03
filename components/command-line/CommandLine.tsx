@@ -179,7 +179,7 @@ export default function CommandLine() {
         )}
         <m.input
           ref={focusLockRef}
-          className='flex-1 bg-transparent py-3.5 text-text caret-caret outline-0 transition-colors placeholder:text-sub'
+          className='flex-1 bg-transparent py-3.5 text-text caret-caret outline-0 border-0 transition-colors placeholder:text-sub'
           min={0}
           type={setting?.custom && typeof setting.options[0].value === 'number' ? 'number' : 'text'}
           placeholder={`type ${setting ? 'value' : 'command'}`}

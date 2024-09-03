@@ -66,14 +66,14 @@ export default function ProfilePicture({
   const [changePictureModalOpen, changePictureModalHandler] = useDisclosure(false);
 
   return (
-    <div className={twMerge(['group relative', wrapperClassName])}>
+    <div className={twMerge('group relative', wrapperClassName)}>
       <div
-        className={twMerge([
+        className={twMerge(
           'relative aspect-square w-48 bg-bg border-4 border-sub-alt overflow-hidden transition-all',
           src ? 'active:scale-[.925] cursor-pointer' : 'flex items-center justify-center',
-          shape === 'rect' ? 'rounded-xl' : 'rounded-[50%]',
+          shape === 'rect' ? 'rounded-xl' : 'rounded-full',
           className,
-        ])}
+        )}
         onClick={() => expandable && src && imageModalHandler.open()}
         {...props}
       >
@@ -85,10 +85,10 @@ export default function ProfilePicture({
           <Tooltip className='bg-bg' label='Change profile picture'>
             <Button
               active
-              className={twJoin([
+              className={twJoin(
                 'absolute px-2 opacity-0 group-has-focus-visible:opacity-100 group-hover:opacity-100 shadow-md',
                 shape === 'rect' ? 'bottom-3 right-3' : 'bottom-4 right-4 rounded-full',
-              ])}
+              )}
               variant='filled'
               onClick={changePictureModalHandler.open}
             >

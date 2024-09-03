@@ -41,7 +41,7 @@ export default function LogoIcon({
       fill='none'
       strokeWidth='18'
       strokeLinecap='round'
-      className={twMerge(['transition-colors', className])}
+      className={twMerge('transition-colors', className)}
       {...props}
     >
       <m.path d='M123.961 49.6772H126.685' {..._pathProps} />

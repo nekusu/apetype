@@ -49,10 +49,10 @@ const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(function Tooltip(
         <AnimatePresence>
           {open && !disabled && (
             <Transition
-              className={twMerge([
+              className={twMerge(
                 'pointer-events-none rounded-lg bg-sub-alt px-3 py-2 text-center text-sm leading-tight text-text shadow-md transition z-50',
                 className,
-              ])}
+              )}
               ref={mergedRef}
               style={{
                 position: strategy,

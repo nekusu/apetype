@@ -29,15 +29,13 @@ export default function Caret({ width = '.5em', x, y }: CaretProps) {
           default: { ease: 'easeOut', duration: smoothCaret ? 0.08 : 0 },
         },
       }}
-      className={twJoin([
+      className={twJoin(
         'absolute rounded-[.1em]',
         caretStyle === 'outline' ? 'border-[.05em] border-caret bg-transparent' : 'bg-caret',
         caretStyle === 'underline' ? 'mt-[1.1em] h-[.1em]' : 'mt-[-.075em] h-[1.2em]',
-        smoothCaret ? 'transition-[width] duration-75' : !isUserTyping && 'animate-caret',
-      ])}
-      style={{
-        width: caretStyle === 'default' ? '.1em' : width,
-      }}
+        smoothCaret ? 'transition-[width] duration-75' : !isUserTyping && 'animate-caret-blink',
+      )}
+      style={{ width: caretStyle === 'default' ? '.1em' : width }}
     />
   );
 }

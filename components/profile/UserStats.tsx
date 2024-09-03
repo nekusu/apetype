@@ -43,7 +43,7 @@ export default function UserStats({ user, ...props }: UserStatsProps) {
   }, [entry?.isIntersecting]);
 
   return (
-    <table ref={ref} className='border-spacing-none cursor-default'>
+    <table ref={ref} className='border-spacing-0 cursor-default'>
       <thead>
         <tr className='text-2xl text-sub transition-colors'>
           <th />

@@ -28,12 +28,12 @@ export default function Item({
 
   return (
     <m.div
-      className={twMerge([
+      className={twMerge(
         'flex h-9 cursor-pointer items-center gap-2 px-4 text-sm',
         active ? 'bg-main text-bg' : selected ? 'text-text' : 'bg-transparent text-sub',
         active && selected && 'bg-text',
         className,
-      ])}
+      )}
       layoutId={label}
       transition={{ ease: 'easeOut', duration: 0.175 }}
       {...props}
@@ -42,14 +42,14 @@ export default function Item({
       {keyTips && active && !selected && (
         <div className='flex items-center gap-1 text-xs'>
           select
-          <Key className={twJoin(['bg-bg', selected ? 'text-text' : 'text-main'])}>enter</Key>
+          <Key className={twJoin('bg-bg', selected ? 'text-text' : 'text-main')}>enter</Key>
         </div>
       )}
       {selected && <RiCheckLine size={18} />}
       {children}
       {description && (
         <Tooltip
-          className='z-50 max-w-[min(550px,_70vw)] text-xs'
+          className='z-50 max-w-[min(550px,70vw)] text-xs'
           label={description}
           placement='left'
         >

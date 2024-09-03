@@ -31,7 +31,7 @@ const COMMON_BUTTON_PROPS: Omit<ButtonProps, 'ref'> = { className: 'w-full', var
 function Warning({ icon: Icon, properties, type }: WarningProps) {
   return properties?.length ? (
     <div className='flex items-center gap-1.5'>
-      <Icon className='flex-shrink-0 text-error' />
+      <Icon className='shrink-0 text-error' />
       <Text className='text-sm text-sub leading-tight'>
         <Tooltip
           className='z-50 max-w-xs text-xs'
@@ -106,7 +106,7 @@ function ImportSettingsModal({ className, ...props }: ModalProps) {
   }, [open]);
 
   return (
-    <Modal className={twMerge(['w-full max-w-sm', className])} centered {...props}>
+    <Modal className={twMerge('w-full max-w-sm', className)} centered {...props}>
       <form
         ref={formRef}
         className='flex flex-col gap-3.5'
@@ -119,7 +119,7 @@ function ImportSettingsModal({ className, ...props }: ModalProps) {
           <h3>Import settings</h3>
         </Text>
         <div className='grid grid-cols-[auto_1fr] items-center gap-x-2'>
-          <Button asChild className={twJoin(['px-3', file && 'row-span-2'])} variant='filled'>
+          <Button asChild className={twJoin('px-3', file && 'row-span-2')} variant='filled'>
             <label tabIndex={0}>
               select file
               <RiBracesLine />
@@ -138,7 +138,7 @@ function ImportSettingsModal({ className, ...props }: ModalProps) {
         <div className='flex flex-col gap-2 empty:hidden'>
           {error && (
             <div className='flex items-center gap-1.5 text-error'>
-              <RiErrorWarningLine className='flex-shrink-0' />
+              <RiErrorWarningLine className='shrink-0' />
               <Text className='text-sm text-error'>{error}</Text>
             </div>
           )}

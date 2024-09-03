@@ -37,10 +37,10 @@ function PersonalBest({ mode, amount, data }: PersonalBestProps) {
         </div>
       )}
       <div
-        className={twJoin([
+        className={twJoin(
           'absolute inset-0 flex flex-col items-center justify-center gap-1',
           data && 'group-hover:opacity-0 transition',
-        ])}
+        )}
       >
         {testType}
         <Text className='text-4xl leading-tight'>{data?.wpm ? Math.floor(data.wpm) : '-'}</Text>

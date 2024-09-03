@@ -15,7 +15,7 @@ export default function MainLayout({ children }: { children: ReactNode }) {
 
   return (
     <div
-      className='grid grid-rows-[auto_1fr_17.5px] min-h-[100dvh] w-screen gap-5 p-8'
+      className='grid grid-rows-[auto_1fr_17.5px] min-h-dvh w-dvw gap-5 p-8'
       style={{ maxWidth: pageWidth }}
     >
       <Header />

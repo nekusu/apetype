@@ -76,7 +76,7 @@ export default function Header() {
         }}
       >
         <LogoIcon
-          className={twJoin(['animate-fade-in', isUserTyping ? 'stroke-sub' : 'stroke-main'])}
+          className={twJoin('animate-fade-in', isUserTyping ? 'stroke-sub' : 'stroke-main')}
           controls={animationControls}
         />
         <Transition transition={{ duration: 0.75 }}>
@@ -84,7 +84,7 @@ export default function Header() {
             <AnimatePresence>
               {!isUserTyping && (
                 <Transition
-                  className='absolute left-3 top-[-3px]'
+                  className='absolute left-3 -top-[3px]'
                   variants={{
                     initial: { opacity: 0, x: -30 },
                     animate: {

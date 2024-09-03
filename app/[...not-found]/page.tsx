@@ -5,7 +5,7 @@ import { RiKeyboardBoxFill } from 'react-icons/ri';
 export default function NotFound() {
   return (
     <Transition className='flex flex-col cursor-default items-center self-center gap-6'>
-      <Text className='text-[120px] font-bold leading-none' dimmed>
+      <Text className='text-9xl font-bold leading-none' dimmed>
         404
       </Text>
       <Text className='text-center'>Looks like you found a page that doesn&apos;t exist.</Text>

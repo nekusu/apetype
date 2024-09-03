@@ -35,20 +35,20 @@ function Group({ title, titleClassName, value, valueClassName }: GroupProps) {
     <div className='flex flex-col gap-1'>
       <Text
         asChild={typeof title === 'object'}
-        className={twMerge([
+        className={twMerge(
           'text-[1rem] !leading-none',
           titleClassName,
           typeof title === 'object' && title.props.className,
-        ])}
+        )}
         dimmed
       >
         {title}
       </Text>
       <div
-        className={twJoin([
+        className={twJoin(
           'flex leading-none text-main text-[2rem] transition-colors',
           valueClassName,
-        ])}
+        )}
       >
         {(value as ReactNode[]).map((value, index) =>
           ['string', 'number'].includes(typeof value) ? <div key={index}>{value}</div> : value,

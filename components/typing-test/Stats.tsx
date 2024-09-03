@@ -95,11 +95,11 @@ export default function Stats() {
       <FloatingPortal>
         {isTestRunning && (
           <m.div
-            className={twJoin([
+            className={twJoin(
               'fixed inset-x-0 top-0 h-2 transition-colors',
               (!timerProgress || !['bar', 'both'].includes(timerProgressStyle) || time === 0) &&
                 '!bg-transparent',
-            ])}
+            )}
             style={{ background: `var(--${statsColor}-color)`, opacity: statsOpacity }}
             initial={{ width: mode === 'time' && time !== 0 ? '100%' : 0 }}
             animate={{

@@ -224,10 +224,10 @@ export default function SetImageModal({
       onAnimationComplete={(definition) => definition === 'hidden' && setImageURL(null)}
     >
       <div
-        className={twJoin([
+        className={twJoin(
           'min-w-[300px] flex flex-col gap-3.5 transition',
           isLoading && '!pointer-events-none !opacity-60',
-        ])}
+        )}
       >
         <Text asChild className='text-2xl'>
           <h3>{title}</h3>
@@ -332,7 +332,7 @@ export default function SetImageModal({
         {(enableShapeSelection || imageURL || onDelete) && (
           <>
             {enableShapeSelection && (
-              <div className='grid grid-rows-[auto_auto_auto] grid-cols-2 gap-x-2 gap-y-1'>
+              <div className='grid grid-rows-[repeat(3,auto)] grid-cols-2 gap-x-2 gap-y-1'>
                 <Text className='col-span-full' dimmed>
                   image shape
                 </Text>

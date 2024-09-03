@@ -94,16 +94,16 @@ export default function SettingsPage() {
   return (
     <Transition className='relative cursor-default'>
       <div className='absolute inset-0 h-full flex gap-x-5'>
-        <nav className='relative flex flex-shrink-0 flex-col gap-3 overflow-x-hidden overflow-y-auto py-1 pr-2.5'>
+        <nav className='relative flex shrink-0 flex-col gap-3 overflow-x-hidden overflow-y-auto py-1 pr-2.5'>
           {categories.map((category) => (
             <Button
               key={category}
-              className={twJoin([
+              className={twJoin(
                 'group relative -my-0.5 px-0 py-1.5 transition-all',
                 category === 'danger zone' && 'hover:text-error',
                 currentCategory === category &&
                   'ml-2.5 text-bg hover:text-bg focus-visible:text-bg',
-              ])}
+              )}
               onClick={() =>
                 document
                   .getElementById(replaceSpaces(category))
@@ -112,10 +112,10 @@ export default function SettingsPage() {
             >
               {currentCategory === category && (
                 <m.div
-                  className={twJoin([
+                  className={twJoin(
                     'absolute -z-10 box-content h-full w-full px-2.5 transition-colors group-hover:bg-text group-focus-visible:bg-text',
                     currentCategory === 'danger zone' ? 'bg-error' : 'bg-main',
-                  ])}
+                  )}
                   layoutId='navigation-box'
                   style={{ borderRadius: 8 }}
                   transition={{ duration: 0.15 }}
@@ -130,10 +130,10 @@ export default function SettingsPage() {
             <section key={category} className='flex flex-col gap-6' id={replaceSpaces(category)}>
               <Text
                 asChild
-                className={twJoin([
+                className={twJoin(
                   '-mb-1 pt-1 text-[28px] leading-none',
                   category === 'danger zone' ? 'text-error' : 'text-main',
-                ])}
+                )}
               >
                 <h2>{category}</h2>
               </Text>

@@ -59,22 +59,22 @@ export default function Modal({
         {open && (
           <RemoveScroll enabled={lockScroll && open} forwardProps>
             <Transition
-              className={twMerge([
+              className={twMerge(
                 'inset-0 z-50 flex h-full w-full justify-center bg-black/50 py-16 px-8 backdrop-blur-[2.5px]',
                 centered ? 'items-center' : 'items-start',
                 overflow === 'outside' && 'overflow-y-auto',
                 target ? 'absolute' : 'fixed',
                 backdropClassName,
-              ])}
+              )}
               onClick={handleOutsideClick}
             >
               <Transition
                 ref={focusTrapRef}
-                className={twMerge([
+                className={twMerge(
                   'relative rounded-xl bg-bg p-6 shadow-2xl transition-colors cursor-default',
                   overflow === 'inside' && 'max-h-full overflow-y-auto',
                   className,
-                ])}
+                )}
                 variants={{
                   hidden: { scale: 0.95, transition: { duration: 0.15 } },
                   visible: { scale: 1, transition: { type: 'spring', bounce: 0.6 } },

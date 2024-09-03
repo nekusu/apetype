@@ -18,7 +18,7 @@ export interface WordProps
 
 const Word = forwardRef<HTMLDivElement, WordProps>(function Word(
   { letters, letterRef, error, ...settings },
-  ref
+  ref,
 ) {
   const lastTypedIndex = useMemo(() => {
     let index = 0;
@@ -33,10 +33,10 @@ const Word = forwardRef<HTMLDivElement, WordProps>(function Word(
 
   return (
     <div
-      className={twJoin([
+      className={twJoin(
         'm-[.25em] flex border-b-2',
         !settings.blindMode && error ? 'border-colorful-error' : 'border-transparent',
-      ])}
+      )}
       ref={ref}
     >
       {letters.map((letter, index) => (

@@ -29,7 +29,7 @@ interface KeyProps extends ComponentPropsWithoutRef<'div'> {
 const Key = memo(
   forwardRef<ElementRef<'div'>, KeyProps>(function Key(
     { bump, children, className, blindMode, keymap, order, status, style, ...props },
-    ref
+    ref,
   ) {
     const keyRef = useRef<HTMLDivElement>(null);
     const bumpRef = useRef<HTMLSpanElement>(null);
@@ -63,10 +63,10 @@ const Key = memo(
     return (
       <div
         ref={mergedRef}
-        className={twMerge([
+        className={twMerge(
           'relative flex h-8 w-8 items-center justify-center rounded-lg border border-sub text-sub transition',
           className,
-        ])}
+        )}
         style={{ order, ...style }}
         {...props}
       >
@@ -74,7 +74,7 @@ const Key = memo(
         {bump && <span ref={bumpRef} className='bump absolute bottom-[0.2rem] h-px w-2' />}
       </div>
     );
-  })
+  }),
 );
 
 export default function Keymap() {
@@ -142,11 +142,11 @@ export default function Keymap() {
         {Object.values(layout.keys).map((row, rowIndex) => (
           <div
             key={rowIndex}
-            className={twMerge([
+            className={twMerge(
               'flex',
               rowIndex === 4 ? 'justify-center gap-10' : 'gap-1',
               !rowIndex && hideTopRow && 'hidden',
-            ])}
+            )}
             style={{
               marginLeft:
                 !isMatrix && rowIndex !== 4
@@ -159,11 +159,11 @@ export default function Keymap() {
                 <Fragment key='space'>
                   <Tooltip className='text-xs' label='Change layout' offset={6}>
                     <Key
-                      className={twJoin([
+                      className={twJoin(
                         'cursor-pointer px-1 text-[10px] hover:border-main hover:text-main hover:duration-150 active:scale-[.925]',
                         isSplit ? (isMatrix ? 'w-[104px]' : 'w-28') : isMatrix ? 'w-36' : 'w-56',
                         !isMatrix && '-ml-5',
-                      ])}
+                      )}
                       blindMode={blindMode}
                       keymap={keymap}
                       onClick={() => commandLine.handler?.open('keymapLayout')}
@@ -190,7 +190,7 @@ export default function Keymap() {
                     rowIndex === 0 && keyIndex === 0 && 'hidden',
                     isMatrix
                       ? keyIndex > (rowIndex === 0 ? 10 : 9) && 'hidden'
-                      : layout.type === 'ansi' && rowIndex === 1 && 'last-of-type:hidden'
+                      : layout.type === 'ansi' && rowIndex === 1 && 'last-of-type:hidden',
                   )}
                   bump={rowIndex === 2 && [3, 6].includes(keyIndex)}
                   blindMode={blindMode}
@@ -200,7 +200,7 @@ export default function Keymap() {
                 >
                   {getLegend(rowIndex, keyIndex)}
                 </Key>
-              )
+              ),
             )}
             {isSplit && rowIndex !== 4 && (
               <span

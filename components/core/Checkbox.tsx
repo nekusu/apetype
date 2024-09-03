@@ -42,7 +42,7 @@ const Checkbox = forwardRef<ElementRef<'input'>, CheckboxProps>(function Checkbo
 
   const Label = ({ className, ...props }: ComponentPropsWithoutRef<'label'>) => (
     <label
-      className={twMerge(['text-sub transition active:translate-y-0.5', className, labelClassName])}
+      className={twMerge('text-sub transition active:translate-y-0.5', className, labelClassName)}
       htmlFor={uuid}
       {...props}
     >
@@ -52,20 +52,20 @@ const Checkbox = forwardRef<ElementRef<'input'>, CheckboxProps>(function Checkbo
 
   return (
     <div
-      className={twMerge([
+      className={twMerge(
         'group relative flex transition items-center select-none',
         disabled && 'pointer-events-none opacity-60',
         wrapperClassName,
-      ])}
+      )}
     >
       {label && labelPosition === 'left' && <Label className='pr-2' />}
       <Button
         active={_checked}
-        className={twMerge(['p-1 text-bg text-sm group-hover:bg-text', className])}
+        className={twMerge('p-1 text-bg text-sm group-hover:bg-text', className)}
         variant={variant}
         onClick={() => handleChecked(!_checked)}
       >
-        <RiCheckLine className={twJoin(['transition', _checked ? 'opacity-100' : 'opacity-0'])} />
+        <RiCheckLine className={twJoin('transition', _checked ? 'opacity-100' : 'opacity-0')} />
       </Button>
       <input
         ref={ref}

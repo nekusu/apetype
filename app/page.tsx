@@ -23,7 +23,7 @@ export default function Home() {
             {keyTips && <Tips key='tips' />}
             <Tooltip label='Open command line' offset={8} placement='left'>
               <Button
-                className='absolute bottom-0 right-0 rounded-[50%] p-2.5'
+                className='absolute bottom-0 right-0 rounded-full p-2.5'
                 variant='filled'
                 active
                 onClick={() => commandLine.handler?.open()}

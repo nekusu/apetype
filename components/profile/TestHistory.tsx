@@ -73,11 +73,11 @@ const HeaderCell = forwardRef<ElementRef<'th'>, HeaderCellProps>(function Header
   return (
     <th
       ref={ref}
-      className={twMerge([
+      className={twMerge(
         'rounded-t-lg px-3 py-2 font-normal transition-colors group',
         sortable && 'cursor-pointer hover:bg-sub-alt hover:text-text',
         className,
-      ])}
+      )}
       scope='col'
       onClick={() => {
         if (!sortable) return;
@@ -92,11 +92,11 @@ const HeaderCell = forwardRef<ElementRef<'th'>, HeaderCellProps>(function Header
         <div className='flex items-center gap-1.5 transition-transform group-active:translate-y-0.5'>
           {property ?? children}
           <RiArrowUpSFill
-            className={twJoin([
-              'transition-property-[transform,opacity] transition-duration-150',
+            className={twJoin(
+              'transition-[transform,opacity]',
               orderBy !== property && 'opacity-0',
               direction === 'desc' && 'rotate-180',
-            ])}
+            )}
           />
         </div>
       ) : (
@@ -137,17 +137,17 @@ export default function TestHistory() {
     <div className='flex flex-col items-center gap-4'>
       <table ref={ref} className='w-full border-spacing-none cursor-default'>
         <thead className='sticky top-0'>
-          <tr className='absolute inset-0 rounded-b-lg bg-bg transition-colors -top-[1px] -z-1' />
+          <tr className='absolute inset-0 rounded-b-lg bg-bg transition-colors -top-[px -z-1' />
           <TableHeaderContext.Provider
             value={{ orderBy, direction, setOrderBy, setDirection, setLimit }}
           >
             <tr className='text-left text-sm text-sub'>
               <HeaderCell className='pl-4 pr-0'>
                 <RiLoaderLine
-                  className={twJoin([
+                  className={twJoin(
                     'transition text-main',
                     isLoading ? 'opacity-100 animate-spin' : 'opacity-0',
-                  ])}
+                  )}
                 />
               </HeaderCell>
               <HeaderCell property='wpm' sortable />
@@ -232,7 +232,7 @@ export default function TestHistory() {
       </table>
       {user && tests && tests.length < user.typingStats.completedTests && (
         <Button
-          className='min-w-1/4 px-3'
+          className='min-w-[25%] px-3'
           disabled={isLoading}
           variant='filled'
           onClick={() => setLimit((value) => value + 10)}

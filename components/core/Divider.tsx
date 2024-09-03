@@ -13,7 +13,7 @@ const Divider = forwardRef<ElementRef<'div'>, DividerProps>(function Divider(
 ) {
   return label ? (
     <div ref={ref} className='grid grid-cols-[1fr_auto_1fr] gap-2' {...props}>
-      <div className={twMerge(['self-center rounded bg-sub transition h-0.5', className])} />
+      <div className={twMerge('self-center rounded bg-sub transition h-0.5', className)} />
       {typeof label === 'string' ? (
         <Text asChild className='text-xs' dimmed>
           <span>{label}</span>
@@ -21,15 +21,15 @@ const Divider = forwardRef<ElementRef<'div'>, DividerProps>(function Divider(
       ) : (
         label
       )}
-      <div className={twMerge(['self-center rounded bg-sub transition h-0.5', className])} />
+      <div className={twMerge('self-center rounded bg-sub transition h-0.5', className)} />
     </div>
   ) : (
     <div
-      className={twMerge([
+      className={twMerge(
         'self-stretch rounded bg-bg transition',
         orientation === 'vertical' ? 'my-2 w-1' : 'mx-2 h-1',
         className,
-      ])}
+      )}
       ref={ref}
       {...props}
     />

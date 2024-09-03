@@ -117,10 +117,10 @@ export default function Words() {
         value={inputValue}
       />
       <div
-        className={twJoin([
+        className={twJoin(
           'relative mx-[-.25em] flex max-h-full flex-wrap overflow-hidden transition duration-200',
           outOfFocusWarning && isBlurred && 'opacity-40 blur',
-        ])}
+        )}
         ref={wordsetRef}
       >
         {isFocused && caretStyle && (

@@ -1,26 +1,64 @@
-@unocss all;
+@import 'tailwindcss';
 
-input[type='number']::-webkit-outer-spin-button,
-input[type='number']::-webkit-inner-spin-button,
-input[type='number'] {
-  -webkit-appearance: none;
-  -moz-appearance: textfield !important;
-  appearance: none;
-  @apply m-0;
+@theme {
+  --color-bg: var(--bg-color);
+  --color-main: var(--main-color);
+  --color-caret: var(--caret-color);
+  --color-sub: var(--sub-color);
+  --color-sub-alt: var(--sub-alt-color);
+  --color-text: var(--text-color);
+  --color-error: var(--error-color);
+  --color-error-extra: var(--error-extra-color);
+  --color-colorful-error: var(--colorful-error-color);
+  --color-colorful-error-extra: var(--colorful-error-extra-color);
+  --font-family-default: var(--font);
+  --animate-caret-blink: caret-blink 1s steps(2, jump-none) infinite;
+  --animate-fade-in: fade-in 1s linear 1;
+
+  @keyframes caret-blink {
+    from {
+      opacity: 1;
+    }
+
+    to {
+      opacity: 0;
+    }
+  }
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+
+    to {
+      opacity: 1;
+    }
+  }
 }
 
-::-webkit-scrollbar {
-  @apply w-2;
-}
-::-webkit-scrollbar-thumb {
-  @apply bg-main rounded-md;
-}
-::-webkit-scrollbar-thumb:hover {
-  @apply bg-text;
-}
+@layer base {
 
-::selection {
-  @apply bg-main text-sub-alt;
+  input[type='number']::-webkit-outer-spin-button,
+  input[type='number']::-webkit-inner-spin-button,
+  input[type='number'] {
+    @apply appearance-none m-0;
+  }
+
+  ::-webkit-scrollbar {
+    @apply w-2;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-main rounded-md;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-text;
+  }
+
+  ::selection {
+    @apply bg-main text-sub-alt;
+  }
 }
 
 :root {

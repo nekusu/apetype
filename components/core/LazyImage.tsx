@@ -40,7 +40,7 @@ export default function LazyImage({
       <AnimatePresence>
         {isLoading && (
           <Loading
-            className={twMerge(['absolute bg-bg -inset-1', loadingClassName])}
+            className={twMerge('absolute bg-bg -inset-1', loadingClassName)}
             logoIconProps={{ width: '60' }}
             transition={{ duration: 0.25 }}
             {...loadingProps}

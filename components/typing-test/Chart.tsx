@@ -61,10 +61,10 @@ interface ChartTooltipProps {
 function ChartTooltip({ position: { top, left }, data, disabled }: ChartTooltipProps) {
   return (
     <div
-      className={twJoin([
+      className={twJoin(
         'pointer-events-none absolute rounded-lg bg-sub-alt py-2.5 px-3 shadow-md transition-all',
         disabled ? 'opacity-0' : 'opacity-100',
-      ])}
+      )}
       style={{ top, left }}
     >
       {data && (

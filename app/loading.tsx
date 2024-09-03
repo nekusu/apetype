@@ -28,12 +28,12 @@ export default function Loading({
 
   return (
     <Transition
-      className={twMerge(['flex items-center justify-center', className])}
+      className={twMerge('flex items-center justify-center', className)}
       transition={{ duration: 0.5 }}
       {...props}
     >
       <LogoIcon
-        className={twMerge(['animate-pulse-alt stroke-sub', logoIconClassName])}
+        className={twMerge('animate-pulse stroke-sub', logoIconClassName)}
         width='70'
         controls={animationControls}
         {...logoIconProps}

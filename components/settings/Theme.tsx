@@ -45,7 +45,7 @@ export default function Theme() {
         ))}
       </div>
       {themeType === 'preset' ? (
-        <div className='grid col-span-full grid-cols-[repeat(4,_1fr)] items-center gap-2'>
+        <div className='grid col-span-full grid-cols-[repeat(4,1fr)] items-center gap-2'>
           {sortedOptions.map(({ value }) => {
             const selectedTheme = themes[value];
             const selected = theme === value;

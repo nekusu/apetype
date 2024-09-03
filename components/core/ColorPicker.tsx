@@ -24,7 +24,7 @@ export default function ColorPicker({
     <Popover.Root offset={offset} {...props}>
       <Popover.Trigger asChild>
         <div
-          className={twMerge(['cursor-pointer rounded-full border border-sub', triggerClassName])}
+          className={twMerge('cursor-pointer rounded-full border border-sub', triggerClassName)}
           style={{ minHeight: '1rem', minWidth: '1rem', background: hexString }}
         />
       </Popover.Trigger>

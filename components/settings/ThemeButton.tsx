@@ -16,17 +16,17 @@ export interface ThemeButtonProps extends Omit<ButtonProps, 'ref' | 'name'> {
 
 const ThemeButton = forwardRef<HTMLButtonElement, ThemeButtonProps>(function ThemeButton(
   { className, colors, leftNode, loading, name, selected, style, ...props },
-  ref
+  ref,
 ) {
   const { bg, text } = colors;
   return (
     <Button
       ref={ref}
-      className={twMerge([
+      className={twMerge(
         'group grid w-full grid-cols-[1fr_auto_1fr] justify-items-end text-sm hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0.5 active:transform-none',
         selected && 'outline-solid',
         className,
-      ])}
+      )}
       variant='filled'
       style={{ background: bg, color: text, outlineColor: text, ...style }}
       {...props}

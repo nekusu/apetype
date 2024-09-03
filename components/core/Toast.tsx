@@ -46,11 +46,11 @@ export default function Toast({
     <AnimatePresence>
       {t.visible && (
         <Transition
-          className={twMerge([
+          className={twMerge(
             'relative rounded-lg min-w-xs cursor-default max-w-xs overflow-hidden bg-sub-alt text-text px-4 pt-3 pb-3.5 shadow-xl transition-colors',
             className,
             t.className,
-          ])}
+          )}
           variants={{ hidden: { opacity: 0, scale: 0.95 }, visible: { opacity: 1, scale: 1 } }}
           transition={{ scale: { type: 'spring', bounce: 0.6 } }}
           onClick={() => toast.dismiss(t.id)}
@@ -62,10 +62,10 @@ export default function Toast({
             <div className='flex items-center gap-2.5'>
               {t.icon && (
                 <span
-                  className={twJoin([
+                  className={twJoin(
                     'shrink-0 text-size-lg',
                     t.type === 'error' ? 'text-error' : 'text-main',
-                  ])}
+                  )}
                 >
                   {t.icon}
                 </span>
@@ -75,11 +75,11 @@ export default function Toast({
           )}
           {!!t.duration && t.duration !== Infinity && (
             <m.div
-              className={twJoin([
+              className={twJoin(
                 'absolute bottom-0 left-0 h-1 rounded transition-colors',
                 t.type === 'error' ? 'bg-error-extra' : 'bg-sub',
                 progressBarClassName,
-              ])}
+              )}
               initial={{ width: '100%' }}
               animate={animationControls}
               {...progressBarProps}

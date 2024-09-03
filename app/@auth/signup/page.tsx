@@ -131,10 +131,10 @@ export default function SignupPage() {
   return (
     <Transition
       ref={focusTrapRef}
-      className={twJoin([
+      className={twJoin(
         'max-w-xs min-w-xs flex flex-col gap-3.5 transition',
         (popupOpen || isLoading) && '!pointer-events-none !opacity-60',
-      ])}
+      )}
     >
       <Text asChild className='text-2xl'>
         <h3>Create account</h3>

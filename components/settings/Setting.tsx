@@ -39,17 +39,17 @@ export default function Setting({
   const twoColumns = (fullWidth == null && !!description) || childrenCount === 1;
 
   return (
-    <div className={twJoin(['grid gap-x-5 gap-y-1.5', twoColumns && 'grid-cols-[2fr_1.2fr]'])}>
+    <div className={twJoin('grid gap-x-5 gap-y-1.5', twoColumns && 'grid-cols-[2fr_1.2fr]')}>
       <Text asChild className='text-lg'>
         <h3>{command}</h3>
       </Text>
       {description && (
-        <Text className={twJoin(['text-sm', twoColumns && 'row-start-2'])} dimmed>
+        <Text className={twJoin('text-sm', twoColumns && 'row-start-2')} dimmed>
           {description}
         </Text>
       )}
       <div
-        className={twJoin(['grid gap-2 self-center', twoColumns && !!description && 'row-span-2'])}
+        className={twJoin('grid gap-2 self-center', twoColumns && !!description && 'row-span-2')}
         style={{ gridTemplateColumns: `repeat(${columns ? columns : childrenCount}, 1fr)` }}
       >
         {options.length < 16 ? (
@@ -61,7 +61,7 @@ export default function Setting({
                 {customButtons?.({ alt, value }) || (
                   <Button
                     active={settings[id as keyof Settings] === value}
-                    className={twMerge(['w-full', className])}
+                    className={twMerge('w-full', className)}
                     onClick={() =>
                       setSettings((draft) => void (draft[id as keyof Settings] = value as never))
                     }

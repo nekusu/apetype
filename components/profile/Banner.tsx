@@ -53,7 +53,7 @@ export default function Banner({
 
   return (
     <div
-      className={twMerge(['group relative w-full', src ? 'aspect-[4/1]' : 'h-[156px]', className])}
+      className={twMerge('group relative w-full', src ? 'aspect-[4/1]' : 'h-[156px]', className)}
       {...props}
     >
       <LazyImage src={src} alt={alt} fill priority {...imageProps} />
