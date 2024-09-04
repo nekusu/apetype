@@ -1,9 +1,9 @@
 'use client';
 
+import { Button, Tooltip } from '@/components/core';
+import Input, { type InputProps } from '@/components/core/Input';
 import { useDidUpdate, useMergedRef, useUncontrolled } from '@mantine/hooks';
-import { Button, Tooltip } from 'components/core';
-import Input, { InputProps } from 'components/core/Input';
-import { ElementRef, forwardRef, useRef } from 'react';
+import { type ElementRef, forwardRef, useRef } from 'react';
 import { RiEyeLine, RiEyeOffLine, RiLockPasswordFill } from 'react-icons/ri';
 
 export interface PasswordInputProps extends InputProps {

@@ -1,7 +1,7 @@
 'use client';
 
-import { Modal } from 'components/core';
-import { ModalProps } from 'components/core/Modal';
+import { Modal } from '@/components/core';
+import type { ModalProps } from '@/components/core/Modal';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 

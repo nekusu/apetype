@@ -1,15 +1,11 @@
 {
-  "$schema": "https://biomejs.dev/schemas/1.4.1/schema.json",
+  "$schema": "https://biomejs.dev/schemas/1.8.3/schema.json",
   "organizeImports": {
-    "enabled": false
-  },
-  "linter": {
-    "enabled": false
+    "enabled": true
   },
   "formatter": {
     "enabled": true,
     "indentStyle": "space",
-    "indentWidth": 2,
     "lineWidth": 100
   },
   "javascript": {
@@ -17,5 +13,71 @@
       "quoteStyle": "single",
       "jsxQuoteStyle": "single"
     }
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": true,
+      "a11y": {
+        "noSvgWithoutTitle": "off",
+        "useKeyWithClickEvents": "off"
+      },
+      "complexity": {
+        "noExcessiveCognitiveComplexity": "error",
+        "useSimplifiedLogicExpression": {
+          "level": "error",
+          "fix": "unsafe"
+        }
+      },
+      "correctness": {
+        "noUnusedImports": "error",
+        "noUnusedVariables": "error",
+        "useHookAtTopLevel": "error"
+      },
+      "style": {
+        "noNegationElse": "error",
+        "useCollapsedElseIf": "error",
+        "useNamingConvention": {
+          "level": "error",
+          "options": {
+            "strictCase": false
+          }
+        },
+        "useForOf": "error",
+        "useShorthandArrayType": "error",
+        "useShorthandAssign": "error"
+      },
+      "nursery": {
+        "noDuplicateElseIf": "error",
+        "noEvolvingTypes": "error",
+        "noUnusedFunctionParameters": "error",
+        "noUselessStringConcat": {
+          "level": "error",
+          "fix": "unsafe"
+        },
+        "noUselessUndefinedInitialization": "error",
+        "noYodaExpression": "error",
+        "useSortedClasses": {
+          "level": "error",
+          "fix": "unsafe",
+          "options": {
+            "attributes": ["classNames"],
+            "functions": ["clsx"]
+          }
+        }
+      },
+      "suspicious": {
+        "noEmptyBlockStatements": "error",
+        "noRedeclare": "off",
+        "useAwait": "error"
+      }
+    },
+    "ignore": ["utils/misc.ts"]
+  },
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true,
+    "defaultBranch": "main"
   }
 }

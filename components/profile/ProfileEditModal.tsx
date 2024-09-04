@@ -1,24 +1,24 @@
 'use client';
 
+import { Button, Input, Modal, Text, Textarea, Tooltip } from '@/components/core';
+import { useUser } from '@/context/userContext';
+import { getFirebaseFirestore } from '@/utils/firebase';
+import { capitalize } from '@/utils/misc';
+import { type Social, socialIcons, socialNames, socialURLs } from '@/utils/socials';
+import type { User } from '@/utils/user';
 import { valibotResolver } from '@hookform/resolvers/valibot';
-import { Button, Input, Modal, Text, Textarea, Tooltip } from 'components/core';
-import { useUser } from 'context/userContext';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
-import { FirebaseError } from 'firebase/app';
+import type { FirebaseError } from 'firebase/app';
 import { useEffect, useState } from 'react';
-import { SubmitHandler, useForm } from 'react-hook-form';
+import { type SubmitHandler, useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
 import { RiExternalLinkLine, RiGlobalFill, RiLoaderLine } from 'react-icons/ri';
 import { twJoin } from 'tailwind-merge';
-import { getFirebaseFirestore } from 'utils/firebase';
-import { capitalize } from 'utils/misc';
-import { Social, socialIcons, socialNames, socialURLs } from 'utils/socials';
-import { User } from 'utils/user';
 import {
-  OptionalSchema,
-  StringSchema,
-  Input as ValiInput,
+  type OptionalSchema,
+  type StringSchema,
+  type Input as ValiInput,
   maxLength,
   minLength,
   object,
@@ -151,7 +151,7 @@ export default function ProfileEditModal({ open, onClose }: ModalProps) {
     <Modal centered open={open} onClose={onClose}>
       <form
         className={twJoin(
-          'max-w-sm min-w-sm flex flex-col gap-3.5 transition',
+          'flex min-w-sm max-w-sm flex-col gap-3.5 transition',
           isLoading && '!pointer-events-none !opacity-60',
         )}
         onSubmit={(e) => void handleSubmit(onSubmit)(e)}
@@ -169,12 +169,12 @@ export default function ProfileEditModal({ open, onClose }: ModalProps) {
             label='username'
             {...register('username')}
           />
-          <div className='flex flex-col -mt-2'>
-            <Text className='text-xs text-sub'>
+          <div className='-mt-2 flex flex-col'>
+            <Text className='text-sub text-xs'>
               You can only change your username every 30 days.
             </Text>
             {user?.nameLastChangedAt && (
-              <Text className='text-xs text-error'>
+              <Text className='text-error text-xs'>
                 Last changed {dayjs(user.nameLastChangedAt).fromNow()}.
               </Text>
             )}
@@ -182,7 +182,7 @@ export default function ProfileEditModal({ open, onClose }: ModalProps) {
           <Textarea error={errors.bio?.message} label='bio' {...register('bio')} />
           <Textarea error={errors.keyboard?.message} label='keyboard' {...register('keyboard')} />
           <div className='flex flex-col gap-1.5'>
-            <Text className='text-sm leading-none -mb-0.5' dimmed>
+            <Text className='-mb-0.5 text-sm leading-none' dimmed>
               socials
             </Text>
             {socialNames.map((name) => (
@@ -192,7 +192,7 @@ export default function ProfileEditModal({ open, onClose }: ModalProps) {
                 leftNode={
                   <div className='flex items-center gap-2'>
                     {socialIcons[name]}
-                    <span className='leading-none -mr-2'>{socialURLs[name]}</span>
+                    <span className='-mr-2 leading-none'>{socialURLs[name]}</span>
                   </div>
                 }
                 rightNode={
@@ -207,7 +207,7 @@ export default function ProfileEditModal({ open, onClose }: ModalProps) {
               leftNode={
                 <div className='flex items-center gap-2'>
                   <RiGlobalFill />
-                  {socials.website && <span className='leading-none -mr-2'>https://</span>}
+                  {socials.website && <span className='-mr-2 leading-none'>https://</span>}
                 </div>
               }
               rightNode={socials.website && <SocialLink url={socials.website} />}

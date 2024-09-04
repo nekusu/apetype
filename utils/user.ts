@@ -1,8 +1,8 @@
-import { Paths } from '@tatsuokaniwa/swr-firestore/dist/util/type';
+import type { Paths } from '@tatsuokaniwa/swr-firestore/dist/util/type';
 import { Timestamp } from 'firebase/firestore';
-import { Settings, Time, Words, settingsList } from './settings';
-import { Social } from './socials';
-import { TypingTestValues } from './typingTest';
+import { type Settings, type Time, type Words, settingsList } from './settings';
+import type { Social } from './socials';
+import type { TypingTestValues } from './typingTest';
 
 export interface TypingTest extends Pick<TypingTestValues, 'words' | 'stats'> {
   id: string;
@@ -48,7 +48,7 @@ export interface User {
   bio: string;
   keyboard?: string;
   socials?: {
-    [key in Social]?: string;
+    [Key in Social]?: string;
   } & { website?: string };
   typingStats: {
     startedTests: number;
@@ -58,8 +58,8 @@ export interface User {
     average: { wpm: number; raw: number; accuracy: number; consistency: number };
   };
   personalBests?: {
-    time?: { [key in Time]?: PersonalBest };
-    words?: { [key in Words]?: PersonalBest };
+    time?: { [Key in Time]?: PersonalBest };
+    words?: { [Key in Words]?: PersonalBest };
   };
 }
 

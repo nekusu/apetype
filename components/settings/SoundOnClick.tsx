@@ -1,10 +1,10 @@
 'use client';
 
-import { Button } from 'components/core';
-import { useSettings } from 'context/settingsContext';
-import { useSound } from 'hooks/useSound';
+import { Button } from '@/components/core';
+import { useSettings } from '@/context/settingsContext';
+import { useSound } from '@/hooks/useSound';
+import type { Settings } from '@/utils/settings';
 import { RiLoaderLine, RiPlayFill, RiVolumeUpFill } from 'react-icons/ri';
-import { Settings } from 'utils/settings';
 import Setting from './Setting';
 
 export interface SoundButtonProps {
@@ -19,16 +19,18 @@ export function SoundButton({ alt, value }: SoundButtonProps) {
   return (
     <Button
       active={soundOnClick === value}
-      className='group grid grid-cols-[1fr_auto_1fr] w-full justify-items-end'
+      className='group grid w-full grid-cols-[1fr_auto_1fr] justify-items-end'
       variant='filled'
       onClick={() => {
-        setSettings((draft) => void (draft.soundOnClick = value));
+        setSettings((draft) => {
+          draft.soundOnClick = value;
+        });
         play();
       }}
     >
       <span className='col-start-2'>{alt ?? value}</span>
       {value && (
-        <span className='pr-1 opacity-0 transition-opacity group-focus-visible:opacity-100 group-hover:opacity-100'>
+        <span className='pr-1 opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100'>
           {state === 'playing' ? (
             <RiVolumeUpFill />
           ) : state === 'loading' ? (
@@ -47,7 +49,7 @@ export default function SoundOnClick() {
     <Setting
       id='soundOnClick'
       customButtons={({ alt, value }) => (
-        <SoundButton key={value.toString()} alt={alt} value={value as Settings['soundOnClick']} />
+        <SoundButton key={value?.toString()} alt={alt} value={value as Settings['soundOnClick']} />
       )}
       columns={4}
       fullWidth

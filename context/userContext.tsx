@@ -1,17 +1,17 @@
 'use client';
 
+import { getFirebaseAuth, getFirebaseFirestore } from '@/utils/firebase';
+import { type TypingTest, type User, isPersonalBest, parseDates } from '@/utils/user';
 import { flatto } from '@alizeait/flatto';
 import { useLocalStorage } from '@mantine/hooks';
-import { KeyParams, useDoc } from '@tatsuokaniwa/swr-firestore';
+import { type KeyParams, useDoc } from '@tatsuokaniwa/swr-firestore';
 import dayjs from 'dayjs';
-import { UpdateData } from 'firebase/firestore';
+import type { UpdateData } from 'firebase/firestore';
 import { produce } from 'immer';
-import { ReactNode, createContext, useCallback, useContext, useEffect } from 'react';
+import { type ReactNode, createContext, useCallback, useContext, useEffect } from 'react';
 import SuperJSON from 'superjson';
 import { useSWRConfig } from 'swr';
-import { Updater } from 'use-immer';
-import { getFirebaseAuth, getFirebaseFirestore } from 'utils/firebase';
-import { TypingTest, User, isPersonalBest, parseDates } from 'utils/user';
+import type { Updater } from 'use-immer';
 import { useAuth } from './authContext';
 
 interface PendingData {
@@ -72,7 +72,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
         getFirebaseAuth(),
         getFirebaseFirestore(),
       ]);
-      if (!currentUser || !user) return;
+      if (!(currentUser && user)) return;
       if (data.name !== user.name)
         await updateProfile(currentUser, { displayName: data.name as string });
       return await updateDocument<User>('users', currentUser.uid, data);
@@ -87,18 +87,19 @@ export function UserProvider({ children }: { children: ReactNode }) {
     [_setPendingData],
   );
   const savePendingData = useCallback(async () => {
-    if (!currentUser || !localStorage.getItem('pendingData')) return;
+    if (!(currentUser && localStorage.getItem('pendingData'))) return;
     const { collection, db, doc, increment, runTransaction } = await getFirebaseFirestore();
     const incrementalKeys = ['startedTests', 'completedTests', 'timeTyping'];
     const { tests, ...data } = pendingData;
     const userRef = doc(db, 'users', currentUser.uid);
+    // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: todo
     await runTransaction(db, async (transaction) => {
       const userDoc = await transaction.get(userRef);
       if (!userDoc.exists()) throw 'User not found';
       const user = userDoc.data() as User;
       const newData: UpdateData<User> = {};
       const flattenedData: Record<string, number> = flatto(data);
-      Object.entries(flattenedData).forEach(([_key, value]) => {
+      for (const [_key, value] of Object.entries(flattenedData)) {
         const key = _key as keyof UpdateData<Pick<User, 'typingStats'>>;
         if (incrementalKeys.some((k) => key.includes(k))) newData[key] = increment(value);
         else if (key.includes('highest')) {
@@ -111,12 +112,11 @@ export function UserProvider({ children }: { children: ReactNode }) {
           newData[`typingStats.average.${lastKey}`] =
             (oldAverage + value) / (completedTests + data.typingStats.completedTests);
         } else newData[key] = value;
-      });
-      if (tests.length > 0) {
-        tests.forEach((test) => {
+      }
+      if (tests.length > 0)
+        for (const test of tests) {
           const isPb = test.isPb || isPersonalBest(user, test, tests);
           if (isPb) {
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
             const { characterStats, ...stats } = test.result;
             newData[`personalBests.${test.mode}`] = {
               ...user.personalBests?.[test.mode],
@@ -124,8 +124,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
             };
           }
           transaction.set(doc(collection(userRef, 'tests')), { ...test, isPb });
-        });
-      }
+        }
       newData.testsLastUpdatedAt = new Date();
       transaction.update(userRef, newData);
     });

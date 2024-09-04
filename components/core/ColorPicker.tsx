@@ -4,7 +4,7 @@ import { colord } from 'colord';
 import { HexAlphaColorPicker } from 'react-colorful';
 import { twMerge } from 'tailwind-merge';
 import { Popover } from '.';
-import { PopoverOptions } from './Popover';
+import type { PopoverOptions } from './Popover';
 
 export interface ColorPickerProps extends PopoverOptions {
   color: string;
@@ -32,7 +32,7 @@ export default function ColorPicker({
         <HexAlphaColorPicker
           color={hexString}
           onChange={onChange}
-          className='rounded-lg shadow-lg !h-40 !w-40'
+          className='!h-40 !w-40 rounded-lg shadow-lg'
         />
       </Popover.Content>
     </Popover.Root>

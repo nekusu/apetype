@@ -1,11 +1,11 @@
 'use client';
 
+import { Button, Tooltip } from '@/components/core';
+import { version } from '@/utils/version';
 import { useLocalStorage } from '@mantine/hooks';
-import { Button, Tooltip } from 'components/core';
 import { useEffect } from 'react';
 import { toast } from 'react-hot-toast';
 import { RiGitBranchFill } from 'react-icons/ri';
-import { version } from 'utils/version';
 
 const RELEASE_URL = `https://github.com/nekusu/apetype/releases/tag/v${version}`;
 
@@ -30,7 +30,7 @@ export default function Version() {
             </div>
           </div>
         ),
-        { duration: Infinity },
+        { duration: Number.POSITIVE_INFINITY },
       );
     setLastVersion(version);
   }, [lastVersion, setLastVersion]);

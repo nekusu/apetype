@@ -1,21 +1,21 @@
 'use client';
 
+import { EmailToast, PasswordInput, PasswordStrength, SignInMethods } from '@/components/auth';
+import { Button, Divider, Input, Text, Transition } from '@/components/core';
+import { getFirebaseAuth, getFirebaseFirestore } from '@/utils/firebase';
+import { type User, defaultUserDetails } from '@/utils/user';
 import { valibotResolver } from '@hookform/resolvers/valibot';
 import { useDisclosure, useFocusTrap } from '@mantine/hooks';
-import { ZxcvbnResult } from '@zxcvbn-ts/core';
-import { EmailToast, PasswordInput, PasswordStrength, SignInMethods } from 'components/auth';
-import { Button, Divider, Input, Text, Transition } from 'components/core';
-import { FirebaseError } from 'firebase/app';
+import type { ZxcvbnResult } from '@zxcvbn-ts/core';
+import type { FirebaseError } from 'firebase/app';
 import Link from 'next/link';
 import { useCallback, useDeferredValue, useMemo, useState } from 'react';
-import { SubmitHandler, useForm } from 'react-hook-form';
+import { type SubmitHandler, useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
 import { RiLoaderLine, RiMailFill, RiUser4Fill } from 'react-icons/ri';
 import { twJoin } from 'tailwind-merge';
-import { getFirebaseAuth, getFirebaseFirestore } from 'utils/firebase';
-import { User, defaultUserDetails } from 'utils/user';
 import {
-  Input as ValiInput,
+  type Input as ValiInput,
   custom,
   email,
   forward,
@@ -115,7 +115,7 @@ export default function SignupPage() {
             emailDomain={email.split('@')[1]}
           />
         ),
-        { duration: Infinity },
+        { duration: Number.POSITIVE_INFINITY },
       );
       toast.success(`Account created successfully! Welcome aboard, ${user.displayName}!`);
     } catch (e) {
@@ -132,7 +132,7 @@ export default function SignupPage() {
     <Transition
       ref={focusTrapRef}
       className={twJoin(
-        'max-w-xs min-w-xs flex flex-col gap-3.5 transition',
+        'flex min-w-xs max-w-xs flex-col gap-3.5 transition',
         (popupOpen || isLoading) && '!pointer-events-none !opacity-60',
       )}
     >
@@ -187,7 +187,7 @@ export default function SignupPage() {
         Already have an account?{' '}
         <Button
           asChild
-          className='inline-flex p-0 text-xs text-text focus-visible:text-main hover:text-main'
+          className='inline-flex p-0 text-text text-xs hover:text-main focus-visible:text-main'
         >
           <Link href='/login'>Sign in</Link>
         </Button>

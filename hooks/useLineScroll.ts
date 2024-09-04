@@ -1,4 +1,4 @@
-import { useSettings } from 'context/settingsContext';
+import { useSettings } from '@/context/settingsContext';
 import { useEffect, useRef } from 'react';
 
 export function useLineScroll(wrapperHeight: number, currentWord?: HTMLDivElement) {

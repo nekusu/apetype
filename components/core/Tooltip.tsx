@@ -5,7 +5,7 @@ import {
   flip,
   FloatingPortal,
   offset as offsetMiddleware,
-  Placement,
+  type Placement,
   shift,
   useFloating,
   useFocus,
@@ -13,8 +13,8 @@ import {
   useInteractions,
 } from '@floating-ui/react';
 import { useMergedRef } from '@mantine/hooks';
-import { AnimatePresence, HTMLMotionProps } from 'framer-motion';
-import { cloneElement, forwardRef, ReactNode, useState } from 'react';
+import { AnimatePresence, type HTMLMotionProps } from 'framer-motion';
+import { cloneElement, forwardRef, type ReactNode, useState } from 'react';
 import { twMerge } from 'tailwind-merge';
 import Transition from './Transition';
 
@@ -50,7 +50,7 @@ const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(function Tooltip(
           {open && !disabled && (
             <Transition
               className={twMerge(
-                'pointer-events-none rounded-lg bg-sub-alt px-3 py-2 text-center text-sm leading-tight text-text shadow-md transition z-50',
+                'pointer-events-none z-50 rounded-lg bg-sub-alt px-3 py-2 text-center text-sm text-text leading-tight shadow-md transition',
                 className,
               )}
               ref={mergedRef}

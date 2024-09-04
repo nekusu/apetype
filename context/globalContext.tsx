@@ -1,13 +1,13 @@
 'use client';
 
+import { useThrottle } from '@/hooks/useThrottle';
+import { settingsList } from '@/utils/settings';
+import type { ThemeInfo } from '@/utils/theme';
+import type { KeymapLayout } from '@/utils/typingTest';
 import { LazyMotion } from 'framer-motion';
-import { useThrottle } from 'hooks/useThrottle';
 import { nanoid } from 'nanoid/non-secure';
-import { ReactNode, createContext, useContext, useMemo } from 'react';
-import { Updater, useImmer } from 'use-immer';
-import { settingsList } from 'utils/settings';
-import { ThemeInfo } from 'utils/theme';
-import { KeymapLayout } from 'utils/typingTest';
+import { type ReactNode, createContext, useContext, useMemo } from 'react';
+import { type Updater, useImmer } from 'use-immer';
 
 export interface GlobalValues {
   testId?: string;

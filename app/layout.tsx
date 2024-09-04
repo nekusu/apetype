@@ -1,10 +1,13 @@
-import { MainLayout } from 'components/layout';
-import { AuthProvider } from 'context/authContext';
-import { GlobalProvider } from 'context/globalContext';
-import { SettingsProvider } from 'context/settingsContext';
-import { ThemeProvider } from 'context/themeContext';
-import { UserProvider } from 'context/userContext';
-import { Metadata } from 'next';
+import { MainLayout } from '@/components/layout';
+import { AuthProvider } from '@/context/authContext';
+import { GlobalProvider } from '@/context/globalContext';
+import { SettingsProvider } from '@/context/settingsContext';
+import { ThemeProvider } from '@/context/themeContext';
+import { UserProvider } from '@/context/userContext';
+import { STATIC_URL } from '@/utils/monkeytype';
+import type { ThemeInfo } from '@/utils/theme';
+import type { KeymapLayout } from '@/utils/typingTest';
+import type { Metadata } from 'next';
 import dynamic from 'next/dynamic';
 import {
   Fira_Code,
@@ -21,15 +24,12 @@ import {
   Ubuntu,
   Ubuntu_Mono,
 } from 'next/font/google';
-import { ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { twJoin } from 'tailwind-merge';
-import { STATIC_URL } from 'utils/monkeytype';
-import { ThemeInfo } from 'utils/theme';
-import { KeymapLayout } from 'utils/typingTest';
 import './globals.css';
 
-const CommandLine = dynamic(() => import('components/command-line/CommandLine'));
-const ParallelRouteModal = dynamic(() => import('components/layout/ParallelRouteModal'));
+const CommandLine = dynamic(() => import('@/components/command-line/CommandLine'));
+const ParallelRouteModal = dynamic(() => import('@/components/layout/ParallelRouteModal'));
 
 const firaCode = Fira_Code({ variable: '--font-fira-code', subsets: ['latin'] });
 const inconsolata = Inconsolata({ variable: '--font-inconsolata', subsets: ['latin'] });

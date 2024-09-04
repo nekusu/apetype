@@ -1,12 +1,12 @@
 'use client';
 
+import Loading from '@/app/loading';
+import { Button, Divider, Input, Modal, Text, Tooltip, Transition } from '@/components/core';
 import { valibotResolver } from '@hookform/resolvers/valibot';
 import { useDidUpdate } from '@mantine/hooks';
-import Loading from 'app/loading';
-import { Button, Divider, Input, Modal, Text, Tooltip, Transition } from 'components/core';
 import dynamic from 'next/dynamic';
 import { useState } from 'react';
-import { Area } from 'react-easy-crop';
+import type { Area } from 'react-easy-crop';
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
 import {
@@ -17,7 +17,7 @@ import {
   RiUpload2Fill,
 } from 'react-icons/ri';
 import { twJoin } from 'tailwind-merge';
-import { Input as ValiInput, object, optional, string, toTrimmed, url } from 'valibot';
+import { url, type Input as ValiInput, object, optional, string, toTrimmed } from 'valibot';
 
 const Cropper = dynamic(() => import('react-easy-crop'), {
   loading: () => <Loading transition={{ duration: 0.15 }} style={{ height: 448 }} />,
@@ -121,6 +121,7 @@ async function getCroppedImage(
 const imageSchema = object({ imageURL: optional(string([toTrimmed(), url()])) });
 type ImageForm = ValiInput<typeof imageSchema>;
 
+// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: todo
 export default function SetImageModal({
   open,
   onClose,
@@ -157,11 +158,33 @@ export default function SetImageModal({
 
   const handleFile = (file?: File | null) => {
     if (!file) return;
-    if (!file.type.includes('image')) toast.error('Invalid file type.');
-    else {
+    if (file.type.includes('image')) {
       const reader = new FileReader();
       reader.addEventListener('load', () => setImageURL(reader.result as string), false);
       reader.readAsDataURL(file);
+    } else toast.error('Invalid file type.');
+  };
+  const pasteFromClipboard = async () => {
+    if (imageURLValue) {
+      reset();
+      return;
+    }
+    try {
+      const items = await navigator.clipboard.read();
+      for (const item of items) {
+        const imageType = item.types.find((type) => type.includes('image'));
+        if (imageType) {
+          const blob = await item.getType(imageType);
+          const file = new File([blob], 'image.png', { type: imageType });
+          handleFile(file);
+        } else if (item.types.includes('text/plain')) {
+          const blob = await item.getType('text/plain');
+          const value = await blob.text();
+          setValue('imageURL', value, { shouldValidate: true });
+        }
+      }
+    } catch (e) {
+      toast.error(`Failed to read clipboard! ${(e as Error).message}`);
     }
   };
   const deleteImage = async () => {
@@ -225,76 +248,15 @@ export default function SetImageModal({
     >
       <div
         className={twJoin(
-          'min-w-[300px] flex flex-col gap-3.5 transition',
+          'flex min-w-[300px] flex-col gap-3.5 transition',
           isLoading && '!pointer-events-none !opacity-60',
         )}
       >
         <Text asChild className='text-2xl'>
           <h3>{title}</h3>
         </Text>
-        {!imageURL ? (
-          <div className='flex flex-col gap-2'>
-            <Input
-              error={errors.imageURL?.message}
-              placeholder='paste image or url'
-              leftNode={<RiImageFill />}
-              rightNode={
-                isValidatingImage ? (
-                  <RiLoaderLine className='animate-spin' />
-                ) : (
-                  <Tooltip label={imageURLValue ? 'Clear' : 'Paste from clipboard'}>
-                    <Button
-                      className='p-0'
-                      onMouseDown={() => {
-                        void (async () => {
-                          if (imageURLValue) {
-                            reset();
-                            return;
-                          }
-                          try {
-                            const items = await navigator.clipboard.read();
-                            for (const item of items) {
-                              const imageType = item.types.find((type) => type.includes('image'));
-                              if (imageType) {
-                                const blob = await item.getType(imageType);
-                                const file = new File([blob], 'image.png', { type: imageType });
-                                handleFile(file);
-                              } else if (item.types.includes('text/plain')) {
-                                const blob = await item.getType('text/plain');
-                                const value = await blob.text();
-                                setValue('imageURL', value, { shouldValidate: true });
-                              }
-                            }
-                          } catch (e) {
-                            toast.error(`Failed to read clipboard! ${(e as Error).message}`);
-                          }
-                        })();
-                      }}
-                    >
-                      {imageURLValue ? <RiCloseLine /> : <RiClipboardLine />}
-                    </Button>
-                  </Tooltip>
-                )
-              }
-              onPaste={(e) => handleFile(e.clipboardData.files[0])}
-              {...register('imageURL')}
-            />
-            <Divider label='or' />
-            <Button asChild className='w-full' variant='filled'>
-              <label tabIndex={0}>
-                upload image
-                <RiUpload2Fill />
-                <input
-                  accept='image/*'
-                  className='hidden'
-                  onChange={(e) => handleFile(e.target.files?.[0])}
-                  type='file'
-                />
-              </label>
-            </Button>
-          </div>
-        ) : (
-          <div className='aspect-square max-w-[calc(100vw-7rem)] w-md'>
+        {imageURL ? (
+          <div className='aspect-square w-md max-w-[calc(100vw-7rem)]'>
             <Transition
               className='relative h-full w-full overflow-hidden rounded-lg'
               variants={{
@@ -328,11 +290,45 @@ export default function SetImageModal({
               />
             </Transition>
           </div>
+        ) : (
+          <div className='flex flex-col gap-2'>
+            <Input
+              error={errors.imageURL?.message}
+              placeholder='paste image or url'
+              leftNode={<RiImageFill />}
+              rightNode={
+                isValidatingImage ? (
+                  <RiLoaderLine className='animate-spin' />
+                ) : (
+                  <Tooltip label={imageURLValue ? 'Clear' : 'Paste from clipboard'}>
+                    <Button className='p-0' onMouseDown={() => pasteFromClipboard()}>
+                      {imageURLValue ? <RiCloseLine /> : <RiClipboardLine />}
+                    </Button>
+                  </Tooltip>
+                )
+              }
+              onPaste={(e) => handleFile(e.clipboardData.files[0])}
+              {...register('imageURL')}
+            />
+            <Divider label='or' />
+            <Button asChild className='w-full' variant='filled'>
+              <label>
+                upload image
+                <RiUpload2Fill />
+                <input
+                  accept='image/*'
+                  className='hidden'
+                  onChange={(e) => handleFile(e.target.files?.[0])}
+                  type='file'
+                />
+              </label>
+            </Button>
+          </div>
         )}
         {(enableShapeSelection || imageURL || onDelete) && (
           <>
             {enableShapeSelection && (
-              <div className='grid grid-rows-[repeat(3,auto)] grid-cols-2 gap-x-2 gap-y-1'>
+              <div className='grid grid-cols-2 grid-rows-[repeat(3,auto)] gap-x-2 gap-y-1'>
                 <Text className='col-span-full' dimmed>
                   image shape
                 </Text>

@@ -1,14 +1,14 @@
 'use client';
 
+import { Transition } from '@/components/core';
+import { useGlobal } from '@/context/globalContext';
+import { useSettings } from '@/context/settingsContext';
+import { useTypingTest } from '@/context/typingTestContext';
+import { useCaretPosition } from '@/hooks/useCaretPosition';
+import { useDidMount } from '@/hooks/useDidMount';
+import { useLineScroll } from '@/hooks/useLineScroll';
+import { useWords } from '@/hooks/useWords';
 import { getHotkeyHandler, useDidUpdate, useTimeout, useWindowEvent } from '@mantine/hooks';
-import { Transition } from 'components/core';
-import { useGlobal } from 'context/globalContext';
-import { useSettings } from 'context/settingsContext';
-import { useTypingTest } from 'context/typingTestContext';
-import { useCaretPosition } from 'hooks/useCaretPosition';
-import { useDidMount } from 'hooks/useDidMount';
-import { useLineScroll } from 'hooks/useLineScroll';
-import { useWords } from 'hooks/useWords';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { RiCursorFill } from 'react-icons/ri';
 import { twJoin } from 'tailwind-merge';
@@ -38,7 +38,10 @@ export default function Words() {
   const [isBlurred, setIsBlurred] = useState(modalOpen);
   const { start: startBlur, clear: clearBlur } = useTimeout(() => setIsBlurred(true), 1000);
   const { start: startIdle, clear: clearIdle } = useTimeout(
-    () => setGlobalValues((draft) => void (draft.isUserTyping = false)),
+    () =>
+      setGlobalValues((draft) => {
+        draft.isUserTyping = false;
+      }),
     1000,
   );
   const inputRef = useRef<HTMLInputElement>(null);
@@ -57,15 +60,24 @@ export default function Words() {
   const handleInput = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (isTestFinished) return;
     const { value } = event.target;
-    if (!isTestRunning) setValues((draft) => void (draft.isTestRunning = true));
+    if (!isTestRunning)
+      setValues((draft) => {
+        draft.isTestRunning = true;
+      });
     wordsCollection.update(value);
-    setGlobalValues((draft) => void (draft.isUserTyping = true));
+    setGlobalValues((draft) => {
+      draft.isUserTyping = true;
+    });
     clearIdle();
     startIdle();
   };
   const finishTest = () => {
-    setValues((draft) => void (draft.isTestRunning = false));
-    setGlobalValues((draft) => void (draft.isTestFinished = true));
+    setValues((draft) => {
+      draft.isTestRunning = false;
+    });
+    setGlobalValues((draft) => {
+      draft.isTestFinished = true;
+    });
   };
 
   useDidMount(() => {
@@ -76,12 +88,13 @@ export default function Words() {
   }, [focusWords, modalOpen]);
   useDidUpdate(() => {
     if (wordIndex > highestWordIndex.current) {
-      if (mode === 'time' || words.length < (wordAmount || Infinity)) wordsCollection.add(1);
+      if (mode === 'time' || words.length < (wordAmount || Number.POSITIVE_INFINITY))
+        wordsCollection.add(1);
       highestWordIndex.current = wordIndex;
     }
   }, [wordIndex]);
   useWindowEvent('keyup', (event) => {
-    if (!modalOpen && !isFocused && !['Tab', 'Escape'].includes(event.key)) {
+    if (!(modalOpen || isFocused || ['Tab', 'Escape'].includes(event.key))) {
       event.preventDefault();
       focusWords();
     }
@@ -94,7 +107,7 @@ export default function Words() {
       onClick={focusWords}
     >
       <input
-        className='absolute opacity-0 -z-10'
+        className='-z-10 absolute opacity-0'
         autoCapitalize='off'
         onBlur={blurWords}
         onChange={handleInput}
@@ -126,9 +139,9 @@ export default function Words() {
         {isFocused && caretStyle && (
           <Caret width={letterRef.current?.offsetWidth} {...caretPosition} />
         )}
-        {words.map(({ original, isCorrect, letters }, index) => (
+        {words.map(({ isCorrect, letters }, index) => (
           <Word
-            key={`${original}-${index}`}
+            key={`${letters[0].original}-${index}`}
             ref={wordIndex === index ? wordRef : null}
             letters={letters}
             letterRef={letterRef}

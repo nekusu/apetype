@@ -1,8 +1,8 @@
 'use client';
 
-import { createContext, ReactNode, useContext } from 'react';
-import { Updater, useImmer } from 'use-immer';
-import { initialValues, TypingTestValues } from 'utils/typingTest';
+import { type TypingTestValues, initialValues } from '@/utils/typingTest';
+import { type ReactNode, createContext, useContext } from 'react';
+import { type Updater, useImmer } from 'use-immer';
 
 interface TypingTestContext extends TypingTestValues {
   setValues: Updater<TypingTestValues>;

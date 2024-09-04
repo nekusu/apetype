@@ -1,7 +1,7 @@
 'use client';
 
 import { useFocusWithin, useId, useMergedRef } from '@mantine/hooks';
-import { ComponentPropsWithoutRef, ElementRef, ReactNode, forwardRef } from 'react';
+import { type ComponentPropsWithoutRef, type ElementRef, type ReactNode, forwardRef } from 'react';
 import { RiErrorWarningLine } from 'react-icons/ri';
 import { twMerge } from 'tailwind-merge';
 import Tooltip from './Tooltip';
@@ -55,7 +55,7 @@ const Input = forwardRef<ElementRef<'input'>, InputProps>(function Input(
       <Tooltip className='bg-error text-bg' label={error} disabled={!error}>
         <div
           className={twMerge(
-            'flex w-full cursor-text items-center rounded-lg bg-sub-alt px-3 py-2 text-sub caret-main focus-within:outline-2 transition focus-within:text-text outline-main -outline-offset-2 active:translate-y-0.5',
+            '-outline-offset-2 flex w-full cursor-text items-center rounded-lg bg-sub-alt px-3 py-2 text-sub caret-main outline-main transition focus-within:text-text focus-within:outline-2 active:translate-y-0.5',
             error && 'outline-error',
             className,
           )}
@@ -65,7 +65,7 @@ const Input = forwardRef<ElementRef<'input'>, InputProps>(function Input(
           <input
             ref={mergedRef}
             className={twMerge(
-              'h-full w-full bg-transparent outline-0 border-0 placeholder:text-sub',
+              'h-full w-full border-0 bg-transparent outline-0 placeholder:text-sub',
               error && 'text-error',
               leftNode && 'pl-2',
               (rightNode || isErrorVisible) && 'pr-2',
@@ -77,7 +77,7 @@ const Input = forwardRef<ElementRef<'input'>, InputProps>(function Input(
             {...props}
           />
           {isErrorVisible && (
-            <RiErrorWarningLine className='min-w-max text-error not-last:mr-1.5' />
+            <RiErrorWarningLine className='not-last:mr-1.5 min-w-max text-error' />
           )}
           {rightNode}
         </div>

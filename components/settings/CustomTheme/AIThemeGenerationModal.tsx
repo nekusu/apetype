@@ -1,18 +1,18 @@
 'use client';
 
+import Loading from '@/app/loading';
+import { Button, Input, Modal, Text, Tooltip, Transition } from '@/components/core';
+import { useColorPalette } from '@/hooks/useColorPalette';
+import type { CustomTheme, ThemeColors } from '@/utils/theme';
 import { valibotResolver } from '@hookform/resolvers/valibot';
 import { shallowEqual, useDidUpdate, useListState } from '@mantine/hooks';
-import Loading from 'app/loading';
 import { colord } from 'colord';
-import { Button, Input, Modal, Text, Tooltip, Transition } from 'components/core';
 import { AnimatePresence } from 'framer-motion';
-import { useColorPalette } from 'hooks/useColorPalette';
 import { useMemo, useState } from 'react';
-import { SubmitHandler, useForm } from 'react-hook-form';
+import { type SubmitHandler, useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
 import { RiLoaderLine, RiLockFill, RiLockUnlockFill, RiQuestionLine } from 'react-icons/ri';
-import { CustomTheme, ThemeColors } from 'utils/theme';
-import { Input as ValiInput, maxLength, minLength, object, string, toTrimmed } from 'valibot';
+import { type Input as ValiInput, maxLength, minLength, object, string, toTrimmed } from 'valibot';
 
 interface ModalProps {
   open: boolean;
@@ -77,7 +77,6 @@ export default function AIThemeGenerationModal({ open, onClose, addTheme }: Moda
       !shallowEqual(lockedColors, lastUsedOptions.current.palette) ||
       model !== lastUsedOptions.current.model ||
       creativity !== lastUsedOptions.current.creativity,
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [lockedColors, lastUsedOptions, lastUsedOptions.current, model, creativity],
   );
 
@@ -106,7 +105,7 @@ export default function AIThemeGenerationModal({ open, onClose, addTheme }: Moda
   return (
     <Modal centered open={open} onClose={onClose}>
       <form
-        className='max-w-sm flex flex-col gap-3.5 text-sm'
+        className='flex max-w-sm flex-col gap-3.5 text-sm'
         onSubmit={(e) => void handleSubmit(onSubmit)(e)}
       >
         <Text asChild className='text-2xl'>
@@ -118,7 +117,7 @@ export default function AIThemeGenerationModal({ open, onClose, addTheme }: Moda
         <div className='flex flex-col gap-3'>
           <Input error={errors.name?.message} label='name' data-autofocus {...register('name')} />
           <div className='grid grid-cols-3 gap-2'>
-            <div className='col-span-full flex gap-1 text-sm text-sub leading-none -mb-1'>
+            <div className='-mb-1 col-span-full flex gap-1 text-sm text-sub leading-none'>
               model
             </div>
             {(Object.keys(MODELS) as Model[]).map((m) => (
@@ -135,7 +134,7 @@ export default function AIThemeGenerationModal({ open, onClose, addTheme }: Moda
             ))}
           </div>
           <div className='grid grid-cols-3 gap-2'>
-            <div className='col-span-full flex gap-1 text-sm text-sub leading-none -mb-1'>
+            <div className='-mb-1 col-span-full flex gap-1 text-sm text-sub leading-none'>
               creativity
               <Tooltip
                 className='max-w-xs text-xs'
@@ -166,7 +165,7 @@ export default function AIThemeGenerationModal({ open, onClose, addTheme }: Moda
         </div>
         <AnimatePresence mode='wait'>
           {palettes.length ? (
-            <Transition key='colors' className='grid grid-cols-2 my-1 gap-2'>
+            <Transition key='colors' className='my-1 grid grid-cols-2 gap-2'>
               {palettes[activePalette]?.map((color, i) => {
                 const palette = palettes[activePalette];
                 const highestContrastColor = palette.reduce((highest, _color) => {
@@ -176,9 +175,9 @@ export default function AIThemeGenerationModal({ open, onClose, addTheme }: Moda
                 const isColorLocked = lockedColors.includes(color);
 
                 return (
-                  <div key={i} className='flex gap-2'>
+                  <div key={LABELS[i]} className='flex gap-2'>
                     <Button
-                      className='group w-full justify-start px-3 text-sm active:translate-y-0.5 active:transform-none hover:shadow-lg hover:-translate-y-0.5'
+                      className='group hover:-translate-y-0.5 w-full justify-start px-3 text-sm hover:shadow-lg active:translate-y-0.5 active:transform-none'
                       style={{ backgroundColor: color, color: highestContrastColor }}
                       variant='filled'
                       onClick={() =>
@@ -249,7 +248,12 @@ export default function AIThemeGenerationModal({ open, onClose, addTheme }: Moda
         </div>
         <Text className='text-[length:inherit]' dimmed>
           Powered by{' '}
-          <a className='text-main hover:underline' href='https://huemint.com' target='_blank'>
+          <a
+            className='text-main hover:underline'
+            href='https://huemint.com'
+            target='_blank'
+            rel='noreferrer'
+          >
             Huemint
           </a>
           .

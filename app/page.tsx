@@ -1,9 +1,9 @@
 'use client';
 
-import { Button, Tooltip, Transition } from 'components/core';
-import { Settings, Test, Tips } from 'components/typing-test';
-import { useGlobal } from 'context/globalContext';
-import { useSettings } from 'context/settingsContext';
+import { Button, Tooltip, Transition } from '@/components/core';
+import { Settings, Test, Tips } from '@/components/typing-test';
+import { useGlobal } from '@/context/globalContext';
+import { useSettings } from '@/context/settingsContext';
 import { AnimatePresence } from 'framer-motion';
 import { RiTerminalLine } from 'react-icons/ri';
 
@@ -12,9 +12,9 @@ export default function Home() {
   const { keyTips } = useSettings();
 
   return (
-    <Transition className='relative grid grid-rows-[1fr_auto_1.25fr] w-full gap-3'>
+    <Transition className='relative grid w-full grid-rows-[1fr_auto_1.25fr] gap-3'>
       <AnimatePresence>
-        {!isUserTyping && !isTestFinished && <Settings key='settings' />}
+        {!(isUserTyping || isTestFinished) && <Settings key='settings' />}
         <AnimatePresence mode='wait'>
           <Test key={testId} />
         </AnimatePresence>
@@ -23,7 +23,7 @@ export default function Home() {
             {keyTips && <Tips key='tips' />}
             <Tooltip label='Open command line' offset={8} placement='left'>
               <Button
-                className='absolute bottom-0 right-0 rounded-full p-2.5'
+                className='absolute right-0 bottom-0 rounded-full p-2.5'
                 variant='filled'
                 active
                 onClick={() => commandLine.handler?.open()}

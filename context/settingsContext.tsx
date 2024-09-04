@@ -1,13 +1,13 @@
 'use client';
 
+import { useCacheProvider } from '@/hooks/useCacheProvider';
+import { useDidMount } from '@/hooks/useDidMount';
+import { type Settings, defaultSettings, validateSettings } from '@/utils/settings';
 import { useIsomorphicEffect, useLocalStorage } from '@mantine/hooks';
-import { useCacheProvider } from 'hooks/useCacheProvider';
-import { useDidMount } from 'hooks/useDidMount';
 import { freeze, produce } from 'immer';
-import { ReactNode, createContext, useCallback, useContext, useEffect } from 'react';
+import { type ReactNode, createContext, useCallback, useContext, useEffect } from 'react';
 import { SWRConfig } from 'swr';
-import { Updater } from 'use-immer';
-import { Settings, defaultSettings, validateSettings } from 'utils/settings';
+import type { Updater } from 'use-immer';
 import { picklist } from 'valibot';
 import { useGlobal } from './globalContext';
 
@@ -58,12 +58,12 @@ export function SettingsProvider({ children }: SettingsProviderProps) {
     _setSettings((settings) => validate(settings)[0]);
   });
   useEffect(() => {
-    setGlobalValues(
-      (draft) =>
-        void (draft.settingsList.customTheme.options = settings.customThemes.map(
-          ({ id, name }) => ({ alt: name, value: id }),
-        )),
-    );
+    setGlobalValues((draft) => {
+      draft.settingsList.customTheme.options = settings.customThemes.map(({ id, name }) => ({
+        alt: name,
+        value: id,
+      }));
+    });
   }, [setGlobalValues, settings.customThemes]);
   useIsomorphicEffect(() => {
     const fontFamily = settings.fontFamily;

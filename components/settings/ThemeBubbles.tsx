@@ -1,6 +1,6 @@
-import { ComponentPropsWithoutRef, memo } from 'react';
+import type { ThemeColors } from '@/utils/theme';
+import { type ComponentPropsWithoutRef, memo } from 'react';
 import { twMerge } from 'tailwind-merge';
-import { ThemeColors } from 'utils/theme';
 
 export interface ThemeBubblesProps extends ComponentPropsWithoutRef<'div'> {
   colors: Partial<ThemeColors>;

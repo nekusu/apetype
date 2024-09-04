@@ -1,6 +1,6 @@
 import { compress, decompress } from 'lz-ts';
 import { useCallback, useEffect, useRef } from 'react';
-import { State } from 'swr';
+import type { State } from 'swr';
 
 type CacheMap = Map<string, State<unknown, unknown>>;
 

@@ -1,7 +1,7 @@
 'use client';
 
-import { HTMLMotionProps, m, Variants } from 'framer-motion';
-import { ElementRef, forwardRef } from 'react';
+import { type HTMLMotionProps, m, type Variants } from 'framer-motion';
+import { type ElementRef, forwardRef } from 'react';
 
 const DEFAULT_VARIANTS: Variants = {
   hidden: { opacity: 0, pointerEvents: 'none' },

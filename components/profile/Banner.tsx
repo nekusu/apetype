@@ -1,14 +1,14 @@
 'use client';
 
+import { Button, LazyImage, Tooltip } from '@/components/core';
+import type { LazyImageProps } from '@/components/core/LazyImage';
+import { getFirebaseAuth, getFirebaseFirestore, getFirebaseStorage } from '@/utils/firebase';
+import type { User } from '@/utils/user';
 import { useDisclosure } from '@mantine/hooks';
-import { Button, LazyImage, Tooltip } from 'components/core';
-import { LazyImageProps } from 'components/core/LazyImage';
-import { ComponentPropsWithoutRef } from 'react';
+import type { ComponentPropsWithoutRef } from 'react';
 import toast from 'react-hot-toast';
 import { RiPencilFill } from 'react-icons/ri';
 import { twMerge } from 'tailwind-merge';
-import { getFirebaseAuth, getFirebaseFirestore, getFirebaseStorage } from 'utils/firebase';
-import { User } from 'utils/user';
 import SetImageModal from './SetImageModal';
 
 export interface BannerProps extends ComponentPropsWithoutRef<'div'> {
@@ -34,7 +34,7 @@ async function deleteBanner() {
 async function saveBanner(imageBlob: Blob | null) {
   const [{ auth }, { updateDocument }, { getDownloadURL, ref, storage, uploadBytes }] =
     await Promise.all([getFirebaseAuth(), getFirebaseFirestore(), getFirebaseStorage()]);
-  if (!auth.currentUser || !imageBlob) return;
+  if (!(auth.currentUser && imageBlob)) return;
   const userId = auth.currentUser.uid;
   const bannerRef = ref(storage, `users/${userId}/banner`);
   await uploadBytes(bannerRef, imageBlob);
@@ -62,7 +62,7 @@ export default function Banner({
           <Tooltip className='bg-bg' label='Change banner'>
             <Button
               active
-              className='absolute bottom-4 right-6 px-2 opacity-0 shadow-md group-has-focus-visible:opacity-100 group-hover:opacity-100'
+              className='absolute right-6 bottom-4 px-2 opacity-0 shadow-md group-hover:opacity-100 group-has-focus-visible:opacity-100'
               variant='filled'
               onClick={changeBannerModalHandler.open}
             >

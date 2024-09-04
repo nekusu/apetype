@@ -1,13 +1,13 @@
 'use client';
 
+import { Button, Text } from '@/components/core';
+import { useGlobal } from '@/context/globalContext';
+import { useSettings } from '@/context/settingsContext';
+import { useTheme } from '@/context/themeContext';
+import type { Settings } from '@/utils/settings';
 import { colord, extend } from 'colord';
 import a11yPlugin from 'colord/plugins/a11y';
-import { Button, Text } from 'components/core';
-import { useGlobal } from 'context/globalContext';
-import { useSettings } from 'context/settingsContext';
-import { useTheme } from 'context/themeContext';
 import { useMemo } from 'react';
-import { Settings } from 'utils/settings';
 import { CustomTheme, ThemeButton } from '.';
 
 extend([a11yPlugin]);
@@ -38,14 +38,18 @@ export default function Theme() {
             className='w-full'
             variant='filled'
             active={themeType === type}
-            onClick={() => setSettings((draft) => void (draft.themeType = type))}
+            onClick={() =>
+              setSettings((draft) => {
+                draft.themeType = type;
+              })
+            }
           >
             {type}
           </Button>
         ))}
       </div>
       {themeType === 'preset' ? (
-        <div className='grid col-span-full grid-cols-[repeat(4,1fr)] items-center gap-2'>
+        <div className='col-span-full grid grid-cols-[repeat(4,1fr)] items-center gap-2'>
           {sortedOptions.map(({ value }) => {
             const selectedTheme = themes[value];
             const selected = theme === value;
@@ -55,7 +59,11 @@ export default function Theme() {
                 name={value}
                 loading={isLoading}
                 selected={selected}
-                onClick={() => setSettings((draft) => void (draft.theme = value))}
+                onClick={() =>
+                  setSettings((draft) => {
+                    draft.theme = value;
+                  })
+                }
                 colors={{ ...selectedTheme }}
               />
             );

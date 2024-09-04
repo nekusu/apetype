@@ -1,9 +1,9 @@
 'use client';
 
+import { useSettings } from '@/context/settingsContext';
+import { useTypingTest } from '@/context/typingTestContext';
+import { useSound } from '@/hooks/useSound';
 import { useDidUpdate } from '@mantine/hooks';
-import { useSettings } from 'context/settingsContext';
-import { useTypingTest } from 'context/typingTestContext';
-import { useSound } from 'hooks/useSound';
 import { useRef } from 'react';
 
 export default function Sound() {

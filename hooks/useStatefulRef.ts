@@ -1,7 +1,6 @@
-import { MutableRefObject, useRef, useState } from 'react';
+import { type MutableRefObject, useRef, useState } from 'react';
 
 export function useStatefulRef<T>(initialValue?: T): MutableRefObject<T> {
-  // eslint-disable-next-line prefer-const
   let [current, setCurrent] = useState<T | undefined>(initialValue);
   const { current: ref } = useRef({
     current,

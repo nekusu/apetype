@@ -36,5 +36,5 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           status: ${{ job.status }}
           env: ${{ steps.deployment.outputs.env }}
-          env_url: 'https://apetype.vercel.app/'
+          env_url: 'https://apetype.vercel.@/app/'
           deployment_id: ${{ steps.deployment.outputs.deployment_id }}

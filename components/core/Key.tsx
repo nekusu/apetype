@@ -1,5 +1,5 @@
 import { Slot } from '@radix-ui/react-slot';
-import { ComponentPropsWithoutRef, ElementRef, forwardRef } from 'react';
+import { type ComponentPropsWithoutRef, type ElementRef, forwardRef } from 'react';
 import { twMerge } from 'tailwind-merge';
 
 export interface KeyProps extends ComponentPropsWithoutRef<'div'> {
@@ -14,7 +14,7 @@ const Key = forwardRef<ElementRef<'div'>, KeyProps>(function Key(
   return (
     <Component
       className={twMerge(
-        'mx-px inline-block rounded bg-sub px-1 text-xs text-bg transition',
+        'mx-px inline-block rounded bg-sub px-1 text-bg text-xs transition',
         className,
       )}
       ref={ref}

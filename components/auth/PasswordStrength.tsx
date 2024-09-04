@@ -1,7 +1,7 @@
 'use client';
 
-import { ZxcvbnResult } from '@zxcvbn-ts/core';
-import { Text, Tooltip } from 'components/core';
+import { Text, Tooltip } from '@/components/core';
+import type { ZxcvbnResult } from '@zxcvbn-ts/core';
 import { memo, useEffect, useState } from 'react';
 import { RiQuestionLine } from 'react-icons/ri';
 import { twMerge } from 'tailwind-merge';
@@ -47,9 +47,9 @@ function PasswordStrength({
   return (
     <div className='flex flex-col gap-2'>
       <div className='flex gap-1.5'>
-        {STRENGTH.map((_, index) => (
+        {STRENGTH.map((s, index) => (
           <div
-            key={index}
+            key={s}
             className={twMerge(
               'h-1 w-full rounded-lg transition-colors',
               result &&
@@ -78,8 +78,8 @@ function PasswordStrength({
                       {result.feedback.warning}
                     </Text>
                   )}
-                  {result.feedback.suggestions.map((suggestion, i) => (
-                    <Text key={i} className='text-[length:inherit]' dimmed>
+                  {result.feedback.suggestions.map((suggestion) => (
+                    <Text key={suggestion} className='text-[length:inherit]' dimmed>
                       {suggestion}
                     </Text>
                   ))}

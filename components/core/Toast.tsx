@@ -1,9 +1,9 @@
 'use client';
 
-import { Text, Transition } from 'components/core';
-import { AnimatePresence, HTMLMotionProps, m, useAnimation } from 'framer-motion';
+import { Text, Transition } from '@/components/core';
+import { AnimatePresence, type HTMLMotionProps, m, useAnimation } from 'framer-motion';
 import { useEffect, useRef } from 'react';
-import { Toast, resolveValue, toast, useToasterStore } from 'react-hot-toast';
+import { type Toast, resolveValue, toast, useToasterStore } from 'react-hot-toast';
 import { twJoin, twMerge } from 'tailwind-merge';
 
 export interface ToastProps extends HTMLMotionProps<'div'> {
@@ -25,7 +25,7 @@ export default function Toast({
   const resolvedValue = resolveValue(t.message, t);
 
   useEffect(() => {
-    if (!duration.current && t.duration && t.duration !== Infinity)
+    if (!duration.current && t.duration && t.duration !== Number.POSITIVE_INFINITY)
       duration.current = t.duration / 1000;
     if (pausedAt) {
       animationControls.stop();
@@ -47,7 +47,7 @@ export default function Toast({
       {t.visible && (
         <Transition
           className={twMerge(
-            'relative rounded-lg min-w-xs cursor-default max-w-xs overflow-hidden bg-sub-alt text-text px-4 pt-3 pb-3.5 shadow-xl transition-colors',
+            'relative min-w-xs max-w-xs cursor-default overflow-hidden rounded-lg bg-sub-alt px-4 pt-3 pb-3.5 text-text shadow-xl transition-colors',
             className,
             t.className,
           )}
@@ -73,7 +73,7 @@ export default function Toast({
               <Text className='leading-tight'>{resolvedValue}</Text>
             </div>
           )}
-          {!!t.duration && t.duration !== Infinity && (
+          {!!t.duration && t.duration !== Number.POSITIVE_INFINITY && (
             <m.div
               className={twJoin(
                 'absolute bottom-0 left-0 h-1 rounded transition-colors',

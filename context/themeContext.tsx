@@ -1,23 +1,23 @@
 'use client';
 
-import { useDidUpdate, useIsomorphicEffect, useTimeout } from '@mantine/hooks';
-import { colord } from 'colord';
-import { useDidMount } from 'hooks/useDidMount';
-import { ReactNode, createContext, useCallback, useContext, useMemo, useState } from 'react';
-import { toast } from 'react-hot-toast';
-import { RiAlertFill } from 'react-icons/ri';
-import useSWRImmutable from 'swr/immutable';
-import { Updater, useImmer } from 'use-immer';
-import { getRandomNumber, replaceSpaces } from 'utils/misc';
-import { STATIC_URL } from 'utils/monkeytype';
+import { useDidMount } from '@/hooks/useDidMount';
+import { getRandomNumber, replaceSpaces } from '@/utils/misc';
+import { STATIC_URL } from '@/utils/monkeytype';
 import {
-  CustomTheme,
-  ThemeColors,
-  ThemeInfo,
+  type CustomTheme,
+  type ThemeColors,
+  type ThemeInfo,
   extractThemeColors,
   removeThemeColors,
   setThemeColors,
-} from 'utils/theme';
+} from '@/utils/theme';
+import { useDidUpdate, useIsomorphicEffect, useTimeout } from '@mantine/hooks';
+import { colord } from 'colord';
+import { type ReactNode, createContext, useCallback, useContext, useMemo, useState } from 'react';
+import { toast } from 'react-hot-toast';
+import { RiAlertFill } from 'react-icons/ri';
+import useSWRImmutable from 'swr/immutable';
+import { type Updater, useImmer } from 'use-immer';
 import { useGlobal } from './globalContext';
 import { useSettings } from './settingsContext';
 
@@ -106,7 +106,12 @@ export function ThemeProvider({ children, previewDelay, themes }: ThemeProviderP
       window.history.replaceState('', '', '/');
       setTimeout(() => {
         setSettings((draft) => {
-          if (!draft.customThemes.find(({ id }) => id === customTheme.id)) {
+          if (draft.customThemes.find(({ id }) => id === customTheme.id))
+            toast(`Custom theme '${customTheme.name}' already exists!`, {
+              id: toastId,
+              icon: <RiAlertFill />,
+            });
+          else {
             draft.themeType = 'custom';
             draft.customThemes.push(customTheme);
             draft.customThemes.sort((a, b) => a.name.localeCompare(b.name));
@@ -114,11 +119,7 @@ export function ThemeProvider({ children, previewDelay, themes }: ThemeProviderP
             toast.success(`Added '${customTheme.name}' custom theme successfully!`, {
               id: toastId,
             });
-          } else
-            toast(`Custom theme '${customTheme.name}' already exists!`, {
-              id: toastId,
-              icon: <RiAlertFill />,
-            });
+          }
         });
       }, 500);
     }
@@ -144,7 +145,9 @@ export function ThemeProvider({ children, previewDelay, themes }: ThemeProviderP
               (randomizeTheme === 'dark' && colord(bgColor).isDark())),
         );
         const randomTheme = themeList[getRandomNumber(themeList.length - 1)];
-        setSettings((draft) => void (randomTheme && (draft.theme = randomTheme.name)));
+        setSettings((draft) => {
+          if (randomTheme) draft.theme = randomTheme.name;
+        });
       } else {
         const themeList = customThemes.filter(
           ({ id, colors: { bg } }) =>
@@ -154,7 +157,9 @@ export function ThemeProvider({ children, previewDelay, themes }: ThemeProviderP
               (randomizeTheme === 'dark' && colord(bg).isDark())),
         );
         const randomTheme = themeList[getRandomNumber(themeList.length - 1)];
-        setSettings((draft) => void (randomTheme && (draft.customTheme = randomTheme.id)));
+        setSettings((draft) => {
+          if (randomTheme) draft.customTheme = randomTheme.id;
+        });
       }
     }
   }, [testId]);

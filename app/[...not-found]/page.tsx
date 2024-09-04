@@ -1,11 +1,11 @@
-import { Button, Text, Transition } from 'components/core';
+import { Button, Text, Transition } from '@/components/core';
 import Link from 'next/link';
 import { RiKeyboardBoxFill } from 'react-icons/ri';
 
 export default function NotFound() {
   return (
-    <Transition className='flex flex-col cursor-default items-center self-center gap-6'>
-      <Text className='text-9xl font-bold leading-none' dimmed>
+    <Transition className='flex cursor-default flex-col items-center gap-6 self-center'>
+      <Text className='font-bold text-9xl leading-none' dimmed>
         404
       </Text>
       <Text className='text-center'>Looks like you found a page that doesn&apos;t exist.</Text>

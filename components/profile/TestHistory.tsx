@@ -1,20 +1,21 @@
 'use client';
 
+import { Button, Modal, Tooltip } from '@/components/core';
+import { Chart } from '@/components/typing-test';
+import type { ChartProps } from '@/components/typing-test/Chart';
+import { useUser } from '@/context/userContext';
+import type { TypingTest } from '@/utils/user';
 import { useDisclosure, useIntersection, useIsomorphicEffect } from '@mantine/hooks';
 import { useGetDocs } from '@tatsuokaniwa/swr-firestore';
-import { Button, Modal, Tooltip } from 'components/core';
-import { Chart } from 'components/typing-test';
-import { ChartProps } from 'components/typing-test/Chart';
-import { useUser } from 'context/userContext';
 import dayjs from 'dayjs';
-import { OrderByDirection, Timestamp } from 'firebase/firestore';
+import type { OrderByDirection, Timestamp } from 'firebase/firestore';
 import { m } from 'framer-motion';
 import {
-  ComponentPropsWithoutRef,
-  Dispatch,
-  ElementRef,
-  ReactNode,
-  SetStateAction,
+  type ComponentPropsWithoutRef,
+  type Dispatch,
+  type ElementRef,
+  type ReactNode,
+  type SetStateAction,
   createContext,
   forwardRef,
   useContext,
@@ -31,7 +32,6 @@ import {
   RiZzzFill,
 } from 'react-icons/ri';
 import { twJoin, twMerge } from 'tailwind-merge';
-import { TypingTest } from 'utils/user';
 
 interface InfoIconProps extends ComponentPropsWithoutRef<'div'> {
   label: string;
@@ -74,7 +74,7 @@ const HeaderCell = forwardRef<ElementRef<'th'>, HeaderCellProps>(function Header
     <th
       ref={ref}
       className={twMerge(
-        'rounded-t-lg px-3 py-2 font-normal transition-colors group',
+        'group rounded-t-lg px-3 py-2 font-normal transition-colors',
         sortable && 'cursor-pointer hover:bg-sub-alt hover:text-text',
         className,
       )}
@@ -137,16 +137,16 @@ export default function TestHistory() {
     <div className='flex flex-col items-center gap-4'>
       <table ref={ref} className='w-full border-spacing-none cursor-default'>
         <thead className='sticky top-0'>
-          <tr className='absolute inset-0 rounded-b-lg bg-bg transition-colors -top-[px -z-1' />
+          <tr className='-top-[px -z-1 absolute inset-0 rounded-b-lg bg-bg transition-colors' />
           <TableHeaderContext.Provider
             value={{ orderBy, direction, setOrderBy, setDirection, setLimit }}
           >
             <tr className='text-left text-sm text-sub'>
-              <HeaderCell className='pl-4 pr-0'>
+              <HeaderCell className='pr-0 pl-4'>
                 <RiLoaderLine
                   className={twJoin(
-                    'transition text-main',
-                    isLoading ? 'opacity-100 animate-spin' : 'opacity-0',
+                    'text-main transition',
+                    isLoading ? 'animate-spin opacity-100' : 'opacity-0',
                   )}
                 />
               </HeaderCell>

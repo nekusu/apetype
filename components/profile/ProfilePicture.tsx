@@ -1,15 +1,15 @@
 'use client';
 
+import { Button, LazyImage, Modal, Tooltip } from '@/components/core';
+import type { LazyImageProps } from '@/components/core/LazyImage';
+import { getFirebaseAuth, getFirebaseFirestore, getFirebaseStorage } from '@/utils/firebase';
+import type { User } from '@/utils/user';
 import { useDisclosure } from '@mantine/hooks';
-import { Button, LazyImage, Modal, Tooltip } from 'components/core';
-import { LazyImageProps } from 'components/core/LazyImage';
-import { UpdateData } from 'firebase/firestore';
-import { ComponentPropsWithoutRef } from 'react';
+import type { UpdateData } from 'firebase/firestore';
+import type { ComponentPropsWithoutRef } from 'react';
 import toast from 'react-hot-toast';
 import { RiGhostLine, RiPencilFill } from 'react-icons/ri';
 import { twJoin, twMerge } from 'tailwind-merge';
-import { getFirebaseAuth, getFirebaseFirestore, getFirebaseStorage } from 'utils/firebase';
-import { User } from 'utils/user';
 import SetImageModal from './SetImageModal';
 
 export interface ProfilePictureProps extends ComponentPropsWithoutRef<'div'> {
@@ -69,8 +69,8 @@ export default function ProfilePicture({
     <div className={twMerge('group relative', wrapperClassName)}>
       <div
         className={twMerge(
-          'relative aspect-square w-48 bg-bg border-4 border-sub-alt overflow-hidden transition-all',
-          src ? 'active:scale-[.925] cursor-pointer' : 'flex items-center justify-center',
+          'relative aspect-square w-48 overflow-hidden border-4 border-sub-alt bg-bg transition-all',
+          src ? 'cursor-pointer active:scale-[.925]' : 'flex items-center justify-center',
           shape === 'rect' ? 'rounded-xl' : 'rounded-full',
           className,
         )}
@@ -86,8 +86,8 @@ export default function ProfilePicture({
             <Button
               active
               className={twJoin(
-                'absolute px-2 opacity-0 group-has-focus-visible:opacity-100 group-hover:opacity-100 shadow-md',
-                shape === 'rect' ? 'bottom-3 right-3' : 'bottom-4 right-4 rounded-full',
+                'absolute px-2 opacity-0 shadow-md group-hover:opacity-100 group-has-focus-visible:opacity-100',
+                shape === 'rect' ? 'right-3 bottom-3' : 'right-4 bottom-4 rounded-full',
               )}
               variant='filled'
               onClick={changePictureModalHandler.open}

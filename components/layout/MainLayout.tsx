@@ -1,10 +1,10 @@
 'use client';
 
-import { Toast } from 'components/core';
-import { useGlobal } from 'context/globalContext';
-import { useSettings } from 'context/settingsContext';
+import { Toast } from '@/components/core';
+import { useGlobal } from '@/context/globalContext';
+import { useSettings } from '@/context/settingsContext';
 import { AnimatePresence } from 'framer-motion';
-import { ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { Toaster } from 'react-hot-toast';
 import { RiCheckboxCircleFill, RiErrorWarningFill, RiLoaderLine } from 'react-icons/ri';
 import { Footer, Header } from '.';
@@ -15,7 +15,7 @@ export default function MainLayout({ children }: { children: ReactNode }) {
 
   return (
     <div
-      className='grid grid-rows-[auto_1fr_17.5px] min-h-dvh w-dvw gap-5 p-8'
+      className='grid min-h-dvh w-dvw grid-rows-[auto_1fr_17.5px] gap-5 p-8'
       style={{ maxWidth: pageWidth }}
     >
       <Header />

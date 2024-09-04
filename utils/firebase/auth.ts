@@ -1,13 +1,12 @@
-/* eslint-disable @typescript-eslint/unbound-method */
 import {
-  AuthCredential,
-  AuthProvider,
+  type AuthCredential,
+  type AuthProvider,
   GithubAuthProvider,
   GoogleAuthProvider,
-  UserCredential,
+  type UserCredential,
   getAuth,
 } from 'firebase/auth';
-import { IconType } from 'react-icons';
+import type { IconType } from 'react-icons';
 import { RiGithubFill, RiGoogleFill } from 'react-icons/ri';
 import { app } from './app';
 
@@ -16,7 +15,7 @@ export const auth = getAuth(app);
 export interface AuthenticationMethod {
   name: string;
   provider: AuthProvider;
-  Icon: IconType;
+  icon: IconType;
   credentialFromResult: (userCredential: UserCredential) => AuthCredential | null;
 }
 
@@ -24,13 +23,13 @@ export const authenticationMethods: AuthenticationMethod[] = [
   {
     name: 'Google',
     provider: new GoogleAuthProvider(),
-    Icon: RiGoogleFill,
+    icon: RiGoogleFill,
     credentialFromResult: GoogleAuthProvider.credentialFromResult,
   },
   {
     name: 'Github',
     provider: new GithubAuthProvider(),
-    Icon: RiGithubFill,
+    icon: RiGithubFill,
     credentialFromResult: GithubAuthProvider.credentialFromResult,
   },
 ];

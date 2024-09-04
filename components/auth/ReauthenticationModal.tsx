@@ -1,21 +1,21 @@
 'use client';
 
+import { Button, Divider, Modal, Text } from '@/components/core';
+import type { ModalProps } from '@/components/core/Modal';
+import { useAuth } from '@/context/authContext';
+import { useDidMount } from '@/hooks/useDidMount';
+import { getFirebaseAuth } from '@/utils/firebase';
+import type { AuthenticationMethod } from '@/utils/firebase/auth';
 import { valibotResolver } from '@hookform/resolvers/valibot';
 import { useDisclosure } from '@mantine/hooks';
-import { Button, Divider, Modal, Text } from 'components/core';
-import { ModalProps } from 'components/core/Modal';
-import { useAuth } from 'context/authContext';
-import { FirebaseError } from 'firebase/app';
-import { AuthCredential, AuthProvider } from 'firebase/auth';
-import { useDidMount } from 'hooks/useDidMount';
+import type { FirebaseError } from 'firebase/app';
+import type { AuthCredential, AuthProvider } from 'firebase/auth';
 import { useCallback, useState } from 'react';
-import { SubmitHandler, useForm } from 'react-hook-form';
+import { type SubmitHandler, useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
 import { RiLoaderLine } from 'react-icons/ri';
 import { twJoin } from 'tailwind-merge';
-import { getFirebaseAuth } from 'utils/firebase';
-import { AuthenticationMethod } from 'utils/firebase/auth';
-import { Input as ValiInput, minLength, object, string } from 'valibot';
+import { type Input as ValiInput, minLength, object, string } from 'valibot';
 import { PasswordInput } from '.';
 
 export interface ReauthenticationModalProps extends ModalProps {
@@ -52,7 +52,7 @@ export default function ReauthenticationModal({
   const reauthenticate = useCallback(
     async (credential: AuthCredential | null) => {
       const { auth, reauthenticateWithCredential } = await getFirebaseAuth();
-      if (!auth.currentUser || !credential) return;
+      if (!(auth.currentUser && credential)) return;
       await reauthenticateWithCredential(auth.currentUser, credential);
       onReauthenticate?.(credential);
       onClose?.();
@@ -106,7 +106,7 @@ export default function ReauthenticationModal({
     <Modal onClose={onClose} centered {...props}>
       <div
         className={twJoin(
-          'max-w-xs min-w-xs flex flex-col gap-3.5 transition',
+          'flex min-w-xs max-w-xs flex-col gap-3.5 transition',
           (popupOpen || isLoading) && '!pointer-events-none !opacity-60',
         )}
       >

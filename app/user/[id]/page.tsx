@@ -1,11 +1,11 @@
-import { DocumentData, getCollection, getDoc } from '@tatsuokaniwa/swr-firestore/server';
-import { Button, Text, Transition } from 'components/core';
-import { PersonalBests, UserDetails } from 'components/profile';
+import { Button, Text, Transition } from '@/components/core';
+import { PersonalBests, UserDetails } from '@/components/profile';
+import { setupFirebaseAdmin } from '@/utils/firebase/admin/app';
+import { parseTimestamps } from '@/utils/misc';
+import { type User, parseDates } from '@/utils/user';
+import { type DocumentData, getCollection, getDoc } from '@tatsuokaniwa/swr-firestore/server';
 import Link from 'next/link';
 import { RiKeyboardBoxFill } from 'react-icons/ri';
-import { setupFirebaseAdmin } from 'utils/firebase/admin/app';
-import { parseTimestamps } from 'utils/misc';
-import { User, parseDates } from 'utils/user';
 
 setupFirebaseAdmin();
 
@@ -21,13 +21,13 @@ export default async function UserPage({ params }: { params: { id: string } }) {
   const { ref, personalBests, ...user } = userByName ?? userById ?? {};
 
   return ref ? (
-    <Transition className='w-full flex flex-col self-center gap-6'>
+    <Transition className='flex w-full flex-col gap-6 self-center'>
       <UserDetails user={user} />
       <PersonalBests data={parseTimestamps(personalBests)} />
     </Transition>
   ) : (
-    <Transition className='flex flex-col cursor-default items-center self-center gap-6'>
-      <Text className='text-9xl font-bold leading-none' dimmed>
+    <Transition className='flex cursor-default flex-col items-center gap-6 self-center'>
+      <Text className='font-bold text-9xl leading-none' dimmed>
         404
       </Text>
       <Text className='text-center'>User not found.</Text>

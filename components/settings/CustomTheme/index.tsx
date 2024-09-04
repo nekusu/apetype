@@ -1,24 +1,24 @@
 'use client';
 
+import { Button, Input, Text, Tooltip, Transition } from '@/components/core';
+import type { ButtonProps } from '@/components/core/Button';
+import { ThemeButton } from '@/components/settings';
+import { useSettings } from '@/context/settingsContext';
+import { useTheme } from '@/context/themeContext';
+import { type CustomTheme, validateColor } from '@/utils/theme';
 import { valibotResolver } from '@hookform/resolvers/valibot';
 import { useDidUpdate, useDisclosure, useToggle } from '@mantine/hooks';
 import { colord, extend } from 'colord';
 import a11yPlugin from 'colord/plugins/a11y';
-import { Button, Input, Text, Tooltip, Transition } from 'components/core';
-import { ButtonProps } from 'components/core/Button';
-import { ThemeButton } from 'components/settings';
-import { useSettings } from 'context/settingsContext';
-import { useTheme } from 'context/themeContext';
-import { AnimatePresence, HTMLMotionProps } from 'framer-motion';
+import { AnimatePresence, type HTMLMotionProps } from 'framer-motion';
 import { nanoid } from 'nanoid/non-secure';
 import { useEffect, useRef } from 'react';
-import { SubmitHandler, useForm } from 'react-hook-form';
+import { type SubmitHandler, useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
 import { RiAlertLine, RiDeleteBin7Line, RiPaintBrushFill, RiSparklingFill } from 'react-icons/ri';
 import { twMerge } from 'tailwind-merge';
-import { CustomTheme, validateColor } from 'utils/theme';
 import {
-  Input as ValiInput,
+  type Input as ValiInput,
   custom,
   maxLength,
   minLength,
@@ -186,7 +186,7 @@ export default function CustomTheme({ className, ...props }: HTMLMotionProps<'di
           <div className='relative'>
             <div className='absolute inset-0 flex flex-col gap-4'>
               <CreateThemeButton />
-              <div className='h-full flex flex-col gap-2 overflow-y-auto pt-0.5'>
+              <div className='flex h-full flex-col gap-2 overflow-y-auto pt-0.5'>
                 <AnimatePresence>
                   {customThemes.map(({ id, name, colors }) => (
                     <Transition key={id} layoutId={id}>
@@ -205,7 +205,11 @@ export default function CustomTheme({ className, ...props }: HTMLMotionProps<'di
                         }
                         name={name}
                         selected={id === customThemeId}
-                        onClick={() => setSettings((draft) => void (draft.customTheme = id))}
+                        onClick={() =>
+                          setSettings((draft) => {
+                            draft.customTheme = id;
+                          })
+                        }
                         colors={colors}
                       />
                     </Transition>

@@ -1,11 +1,11 @@
 'use client';
 
+import { Button, Divider, Input, Key, Modal, Text, Transition } from '@/components/core';
+import { useGlobal } from '@/context/globalContext';
+import { useSettings } from '@/context/settingsContext';
 import { useDidUpdate, useDisclosure } from '@mantine/hooks';
-import { Button, Divider, Input, Key, Modal, Text, Transition } from 'components/core';
-import { useGlobal } from 'context/globalContext';
-import { useSettings } from 'context/settingsContext';
 import { useEffect, useState } from 'react';
-import { IconType } from 'react-icons';
+import type { IconType } from 'react-icons';
 import { RiInputMethodFill, RiTimeFill, RiToolsFill } from 'react-icons/ri';
 
 const DEFAULT_ICON_SIZE = 15;
@@ -55,7 +55,11 @@ export default function Settings() {
             key={value}
             active={mode === value}
             className='px-2 py-3 text-xs'
-            onClick={() => setSettings((draft) => void (draft.mode = value))}
+            onClick={() =>
+              setSettings((draft) => {
+                draft.mode = value;
+              })
+            }
           >
             <Icon size={DEFAULT_ICON_SIZE} />
             {value}
@@ -68,7 +72,11 @@ export default function Settings() {
           key={value}
           active={settings[mode] === value}
           className='px-2 py-3 text-xs'
-          onClick={() => setSettings((draft) => void (draft[mode] = value))}
+          onClick={() =>
+            setSettings((draft) => {
+              draft[mode] = value;
+            })
+          }
         >
           {value}
         </Button>
@@ -79,12 +87,14 @@ export default function Settings() {
           {customActive && (customAmount || 'Infinite')}
         </Button>
       )}
-      <Modal className='max-w-sm w-full' open={modalOpen} onClose={modalHandler.close} centered>
+      <Modal className='w-full max-w-sm' open={modalOpen} onClose={modalHandler.close} centered>
         <form
           className='flex flex-col gap-3.5'
           onSubmit={(event) => {
             event.preventDefault();
-            setSettings((draft) => void (draft[mode] = customAmount));
+            setSettings((draft) => {
+              draft[mode] = customAmount;
+            });
             modalHandler.close();
           }}
         >

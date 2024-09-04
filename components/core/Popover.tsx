@@ -3,7 +3,7 @@
 import {
   FloatingFocusManager,
   FloatingPortal,
-  Placement,
+  type Placement,
   autoPlacement,
   autoUpdate,
   hide,
@@ -17,9 +17,9 @@ import {
 } from '@floating-ui/react';
 import { Slot } from '@radix-ui/react-slot';
 import {
-  ComponentPropsWithoutRef,
-  ElementRef,
-  ReactNode,
+  type ComponentPropsWithoutRef,
+  type ElementRef,
+  type ReactNode,
   createContext,
   forwardRef,
   useContext,
@@ -68,7 +68,7 @@ export function usePopover({
 
   return useMemo(
     () => ({ disabled, modal, open, setOpen, ...interactions, ...data }),
-    [disabled, modal, open, setOpen, interactions, data]
+    [disabled, modal, open, setOpen, interactions, data],
   );
 }
 
@@ -104,34 +104,33 @@ const Trigger = forwardRef<
   return <Component ref={mergedRef} type='button' {...getReferenceProps(props)} />;
 });
 
-const Content = forwardRef<ElementRef<'div'>, ComponentPropsWithoutRef<'div'>>(function Content(
-  props,
-  propRef
-) {
-  const { context, open, modal, refs, strategy, x, y, getFloatingProps } = usePopoverContext();
-  const ref = useMergeRefs([refs.setFloating, propRef]);
+const Content = forwardRef<ElementRef<'div'>, ComponentPropsWithoutRef<'div'>>(
+  function Content(props, propRef) {
+    const { context, open, modal, refs, strategy, x, y, getFloatingProps } = usePopoverContext();
+    const ref = useMergeRefs([refs.setFloating, propRef]);
 
-  return (
-    <FloatingPortal>
-      {open && (
-        <FloatingFocusManager context={context} modal={modal}>
-          <div
-            ref={ref}
-            style={{
-              position: strategy,
-              top: y ?? 0,
-              left: x ?? 0,
-              width: 'max-content',
-              ...props.style,
-            }}
-            {...getFloatingProps(props)}
-          >
-            {props.children}
-          </div>
-        </FloatingFocusManager>
-      )}
-    </FloatingPortal>
-  );
-});
+    return (
+      <FloatingPortal>
+        {open && (
+          <FloatingFocusManager context={context} modal={modal}>
+            <div
+              ref={ref}
+              style={{
+                position: strategy,
+                top: y ?? 0,
+                left: x ?? 0,
+                width: 'max-content',
+                ...props.style,
+              }}
+              {...getFloatingProps(props)}
+            >
+              {props.children}
+            </div>
+          </FloatingFocusManager>
+        )}
+      </FloatingPortal>
+    );
+  },
+);
 
 export { Root, Trigger, Content };

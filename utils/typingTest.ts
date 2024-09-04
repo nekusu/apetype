@@ -105,7 +105,7 @@ export function mean(numbers: number[]) {
 
 export function standardDeviation(numbers: number[]) {
   const avg = mean(numbers);
-  return Math.sqrt(numbers.reduce((a, b) => a + Math.pow(b - avg, 2), 0) / numbers.length);
+  return Math.sqrt(numbers.reduce((a, b) => a + (b - avg) ** 2, 0) / numbers.length);
 }
 
 export function coefficientOfVariation(numbers: number[]) {
@@ -114,5 +114,5 @@ export function coefficientOfVariation(numbers: number[]) {
 
 export function consistency(numbers: number[]) {
   const cov = coefficientOfVariation(numbers);
-  return 100 * (1 - Math.tanh(cov + Math.pow(cov, 3) / 3 + Math.pow(cov, 5) / 5));
+  return 100 * (1 - Math.tanh(cov + cov ** 3 / 3 + cov ** 5 / 5));
 }

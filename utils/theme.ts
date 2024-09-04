@@ -44,8 +44,11 @@ export const themeColorVariables: Record<keyof ThemeColors, string> = {
 export function extractThemeColors(string: string) {
   const regex = /(?<!\/\*.*)(--.+):\s*(.+);/g;
   const matches: RegExpExecArray[] = [];
-  let match: RegExpExecArray | null;
-  while ((match = regex.exec(string)) !== null) matches.push(match);
+  let match = regex.exec(string);
+  while (match !== null) {
+    matches.push(match);
+    match = regex.exec(string);
+  }
   return Object.entries(themeColorVariables).reduce((colors, [key, variable]) => {
     const value = matches.find(([, _variable]) => _variable === variable)?.[2];
     colors[key as keyof ThemeColors] = value ?? '';
@@ -65,18 +68,16 @@ export function getThemeColors() {
 }
 
 export function setThemeColors(colors: ThemeColors, element = document.body) {
-  Object.entries(colors).forEach(([key, value]) =>
-    element.style.setProperty(themeColorVariables[key as keyof typeof themeColorVariables], value),
-  );
+  for (const [key, value] of Object.entries(colors))
+    element.style.setProperty(themeColorVariables[key as keyof typeof themeColorVariables], value);
 }
 
 export function removeThemeColors() {
-  Object.entries(themeColorVariables).forEach(([, value]) =>
-    document.body.style.removeProperty(value),
-  );
+  for (const [, value] of Object.entries(themeColorVariables))
+    document.body.style.removeProperty(value);
 }
 
-export function validateColor(value: string = '', colors?: ThemeColors) {
+export function validateColor(value = '', colors?: ThemeColors) {
   let color = value;
   const variableRegex = /^var\((--(.*)-color)\)$/;
   const match = value.match(variableRegex);

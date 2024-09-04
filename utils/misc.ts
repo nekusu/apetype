@@ -1,5 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { Timestamp } from 'firebase/firestore';
+import type { Timestamp } from 'firebase/firestore';
 
 export function getRandomNumber(max = 1, min = 0) {
   if (arguments.length === 1) min = 0;
@@ -45,7 +44,6 @@ export function parseTimestamps<T extends Record<string, any>>(obj?: T) {
 
     if (value && typeof value.toDate === 'function') {
       const { nanoseconds, seconds } = value as Timestamp;
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       replacedObj[key] = { nanoseconds, seconds } as any;
     } else if (typeof value === 'object') replacedObj[key] = parseTimestamps(value);
     else replacedObj[key] = value;

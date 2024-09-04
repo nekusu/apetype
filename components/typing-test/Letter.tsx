@@ -1,9 +1,9 @@
 'use client';
 
+import type { Settings } from '@/utils/settings';
+import type { Letter as LetterType } from '@/utils/typingTest';
 import { forwardRef, memo, useCallback } from 'react';
 import { twJoin } from 'tailwind-merge';
-import { Settings } from 'utils/settings';
-import { Letter as LetterType } from 'utils/typingTest';
 
 type LetterProps = LetterType &
   Partial<
@@ -27,6 +27,7 @@ const Letter = forwardRef<HTMLSpanElement, LetterProps>(function Letter(
   ref,
 ) {
   const color = useCallback(
+    // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: todo
     (status: LetterType['status']) => {
       switch (status) {
         case 'correct':
@@ -59,7 +60,7 @@ const Letter = forwardRef<HTMLSpanElement, LetterProps>(function Letter(
           ? '_'
           : original}
       {!blindMode && indicateTypos === 'below' && status === 'incorrect' && (
-        <span className='absolute left-0 top-[1.35em] w-full flex justify-center text-[.75em] text-text opacity-50'>
+        <span className='absolute top-[1.35em] left-0 flex w-full justify-center text-[.75em] text-text opacity-50'>
           {typed}
         </span>
       )}

@@ -1,7 +1,7 @@
 'use client';
 
-import { Button, Text } from 'components/core';
-import { Toast, resolveValue, toast } from 'react-hot-toast';
+import { Button, Text } from '@/components/core';
+import { type Toast, resolveValue, toast } from 'react-hot-toast';
 import { RiInformationFill } from 'react-icons/ri';
 
 export interface EmailToastProps extends Toast {

@@ -1,18 +1,26 @@
 'use client';
 
+import { PasswordInput, SignInMethods } from '@/components/auth';
+import { Button, Checkbox, Divider, Input, Text, Transition } from '@/components/core';
+import { getFirebaseAuth } from '@/utils/firebase';
 import { valibotResolver } from '@hookform/resolvers/valibot';
 import { useDisclosure, useFocusTrap } from '@mantine/hooks';
-import { PasswordInput, SignInMethods } from 'components/auth';
-import { Button, Checkbox, Divider, Input, Text, Transition } from 'components/core';
-import { FirebaseError } from 'firebase/app';
+import type { FirebaseError } from 'firebase/app';
 import Link from 'next/link';
 import { useState } from 'react';
-import { Controller, SubmitHandler, useForm } from 'react-hook-form';
+import { Controller, type SubmitHandler, useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
 import { RiLoaderLine, RiMailFill } from 'react-icons/ri';
 import { twJoin } from 'tailwind-merge';
-import { getFirebaseAuth } from 'utils/firebase';
-import { Input as ValiInput, boolean, email, minLength, object, string, toTrimmed } from 'valibot';
+import {
+  type Input as ValiInput,
+  boolean,
+  email,
+  minLength,
+  object,
+  string,
+  toTrimmed,
+} from 'valibot';
 
 const loginSchema = object({
   email: string([toTrimmed(), minLength(1, 'Email is required'), email('Invalid email')]),
@@ -69,7 +77,7 @@ export default function LoginPage() {
     <Transition
       ref={focusTrapRef}
       className={twJoin(
-        'max-w-xs min-w-xs flex flex-col gap-3.5 transition',
+        'flex min-w-xs max-w-xs flex-col gap-3.5 transition',
         (popupOpen || isLoading) && '!pointer-events-none !opacity-60',
       )}
     >
@@ -100,14 +108,14 @@ export default function LoginPage() {
             render={({ field: { value } }) => (
               <Checkbox
                 label='Remember me'
-                className='p-0.5 !rounded-[6px]'
+                className='!rounded-[6px] p-0.5'
                 labelClassName='text-sm'
                 checked={value}
                 setChecked={(value) => setValue('remember', value)}
               />
             )}
           />
-          <Button asChild className='p-0 text-xs text-text focus-visible:text-main hover:text-main'>
+          <Button asChild className='p-0 text-text text-xs hover:text-main focus-visible:text-main'>
             <Link href='/reset-password'>Forgot password?</Link>
           </Button>
         </div>
@@ -119,7 +127,7 @@ export default function LoginPage() {
         Don&apos;t have an account?{' '}
         <Button
           asChild
-          className='inline-flex p-0 text-xs text-text focus-visible:text-main hover:text-main'
+          className='inline-flex p-0 text-text text-xs hover:text-main focus-visible:text-main'
         >
           <Link href='/signup'>Sign up</Link>
         </Button>

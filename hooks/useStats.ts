@@ -1,6 +1,6 @@
+import { useSettings } from '@/context/settingsContext';
+import { useTypingTest } from '@/context/typingTestContext';
 import { useInterval } from '@mantine/hooks';
-import { useSettings } from 'context/settingsContext';
-import { useTypingTest } from 'context/typingTestContext';
 import { useEffect } from 'react';
 
 export function useStats() {
@@ -53,12 +53,14 @@ export function useStats() {
     });
   };
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: not needed
   useEffect(() => {
     return interval.stop;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   useEffect(() => {
-    setValues((draft) => void (draft.timer = mode === 'time' ? time : 0));
+    setValues((draft) => {
+      draft.timer = mode === 'time' ? time : 0;
+    });
   }, [mode, setValues, time]);
 
   return { start, update };

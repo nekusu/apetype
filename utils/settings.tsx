@@ -1,8 +1,8 @@
-import { Key } from 'components/core';
-import { ReactNode } from 'react';
+import { Key } from '@/components/core';
+import type { ReactNode } from 'react';
 import { clone, pathOr } from 'remeda';
 import {
-  BaseSchema,
+  type BaseSchema,
   array,
   boolean,
   custom,
@@ -25,7 +25,7 @@ import {
   uuid,
 } from 'valibot';
 import { toCamelCase } from './misc';
-import { CustomTheme } from './theme';
+import type { CustomTheme } from './theme';
 
 export type Sound = 'beep' | 'click' | 'hitmarker' | 'nk-creams' | 'osu' | 'pop' | 'typewriter';
 export type Time = 15 | 30 | 60 | 120;
@@ -680,6 +680,7 @@ interface Issue {
   defaultValue?: unknown;
 }
 
+// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: todo
 export function validateSettings(
   settings: Partial<Settings>,
   customProperties: Partial<Record<keyof Settings, BaseSchema>> = {},
@@ -692,7 +693,7 @@ export function validateSettings(
   const newSettings = clone(settings);
 
   if (!result.success)
-    result.issues.forEach(({ path, validation }) => {
+    for (const { path, validation } of result.issues) {
       if (!path) return;
       const pathKeys = path.map(({ key }) => key) as [keyof Settings];
       const lastKey = pathKeys.at(-1);
@@ -711,11 +712,11 @@ export function validateSettings(
             pathKeys,
             null as unknown as string,
           ) as never;
-          if (!value) missing.push(issue);
-          else invalid.push(issue);
+          if (value) invalid.push(issue);
+          else missing.push(issue);
         } else current = current[key] as never;
       }
-    });
+    }
 
   return [newSettings as Settings, { missing, invalid, unknown }] as const;
 }

@@ -1,18 +1,18 @@
 'use client';
 
+import { Transition } from '@/components/core';
+import { useAuth } from '@/context/authContext';
+import { useGlobal } from '@/context/globalContext';
+import { useSettings } from '@/context/settingsContext';
+import { useTypingTest } from '@/context/typingTestContext';
+import { useUser } from '@/context/userContext';
+import { useDidMount } from '@/hooks/useDidMount';
+import { useStats } from '@/hooks/useStats';
+import { accuracy as acc } from '@/utils/typingTest';
 import { FloatingPortal } from '@floating-ui/react';
 import { useDidUpdate } from '@mantine/hooks';
-import { Transition } from 'components/core';
-import { useAuth } from 'context/authContext';
-import { useGlobal } from 'context/globalContext';
-import { useSettings } from 'context/settingsContext';
-import { useTypingTest } from 'context/typingTestContext';
-import { useUser } from 'context/userContext';
 import { m } from 'framer-motion';
-import { useDidMount } from 'hooks/useDidMount';
-import { useStats } from 'hooks/useStats';
 import { twJoin } from 'tailwind-merge';
-import { accuracy as acc } from 'utils/typingTest';
 
 export default function Stats() {
   const { setGlobalValues } = useGlobal();
@@ -43,13 +43,15 @@ export default function Stats() {
     if (isTestRunning) {
       stats.start();
       startTime = performance.now();
-      setPendingData((draft) => void (draft.typingStats.startedTests += 1));
+      setPendingData((draft) => {
+        draft.typingStats.startedTests += 1;
+      });
     }
     return () => {
       if (startTime)
-        setPendingData(
-          (draft) => void (draft.typingStats.timeTyping += (performance.now() - startTime) / 1000),
-        );
+        setPendingData((draft) => {
+          draft.typingStats.timeTyping += (performance.now() - startTime) / 1000;
+        });
     };
   }, [isTestRunning]);
   useDidUpdate(() => {
@@ -57,8 +59,12 @@ export default function Stats() {
     const wordsFinished = mode === 'words' && words > 0 && wordIndex >= words;
     if (timeFinished || wordsFinished) {
       if (mode !== 'time') stats.update();
-      setValues((draft) => void (draft.isTestRunning = false));
-      setGlobalValues((draft) => void (draft.isTestFinished = true));
+      setValues((draft) => {
+        draft.isTestRunning = false;
+      });
+      setGlobalValues((draft) => {
+        draft.isTestFinished = true;
+      });
     }
   }, [timer, wordIndex]);
 
@@ -97,7 +103,7 @@ export default function Stats() {
           <m.div
             className={twJoin(
               'fixed inset-x-0 top-0 h-2 transition-colors',
-              (!timerProgress || !['bar', 'both'].includes(timerProgressStyle) || time === 0) &&
+              (!(timerProgress && ['bar', 'both'].includes(timerProgressStyle)) || time === 0) &&
                 '!bg-transparent',
             )}
             style={{ background: `var(--${statsColor}-color)`, opacity: statsOpacity }}

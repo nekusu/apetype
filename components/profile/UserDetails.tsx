@@ -1,16 +1,16 @@
 'use client';
 
+import { Button, Divider, Text, Tooltip, Transition } from '@/components/core';
+import { socialIcons, socialNames, socialURLs } from '@/utils/socials';
+import type { User } from '@/utils/user';
 import { useDidUpdate } from '@mantine/hooks';
-import { Button, Divider, Text, Tooltip, Transition } from 'components/core';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import { AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
-import { ReactNode, useState } from 'react';
+import { type ReactNode, useState } from 'react';
 import { RiCalendarEventFill, RiGlobalFill } from 'react-icons/ri';
 import { twJoin } from 'tailwind-merge';
-import { socialIcons, socialNames, socialURLs } from 'utils/socials';
-import { User } from 'utils/user';
 import { Banner, ProfilePicture } from '.';
 
 dayjs.extend(relativeTime);
@@ -30,7 +30,7 @@ interface SocialButtonProps {
 function SocialButton({ url, value, icon }: SocialButtonProps) {
   return (
     <Tooltip className='bg-bg' label={value ?? url}>
-      <Button asChild className='p-0 text-2xl text-text focus-visible:text-main hover:text-main'>
+      <Button asChild className='p-0 text-2xl text-text hover:text-main focus-visible:text-main'>
         <a href={`https://${url}`} target='_blank' rel='noopener noreferrer'>
           {icon}
         </a>
@@ -61,7 +61,7 @@ export default function UserDetails({
   const restartsPerTest = (startedTests - completedTests) / completedTests;
   const [isBannerHovered, setBannerHovered] = useState(false);
   const [showBlurredBanner, setShowBlurredBanner] = useState(false);
-  const smallProfilePicture = isBannerHovered || (!editable && !bannerURL);
+  const smallProfilePicture = isBannerHovered || !(editable || bannerURL);
 
   useDidUpdate(() => {
     setShowBlurredBanner(false);
@@ -71,7 +71,7 @@ export default function UserDetails({
     <div className='relative'>
       <AnimatePresence>
         {showBlurredBanner && bannerURL && (
-          <Transition className='absolute aspect-[4/1] w-full -z-10' transition={{ duration: 0.5 }}>
+          <Transition className='-z-10 absolute aspect-[4/1] w-full' transition={{ duration: 0.5 }}>
             <Image
               className='rounded-t-xl blur-[350px]'
               src={bannerURL}
@@ -93,7 +93,7 @@ export default function UserDetails({
             }}
           />
         )}
-        <div className='grid grid-cols-[1fr_180px] grid-rows-[36px_auto] cursor-default gap-x-6 gap-y-4 p-6'>
+        <div className='grid cursor-default grid-cols-[1fr_180px] grid-rows-[36px_auto] gap-x-6 gap-y-4 p-6'>
           <div className='flex justify-between gap-2'>
             <div className='relative'>
               <ProfilePicture
@@ -151,9 +151,9 @@ export default function UserDetails({
                 <Text
                   asChild
                   className={twJoin(
-                    'text-3xl text-main origin-left duration-300',
+                    'origin-left text-3xl text-main duration-300',
                     smallProfilePicture &&
-                      'scale-[1.25] -translate-y-7 translate-x-[104px] delay-500',
+                      '-translate-y-7 translate-x-[104px] scale-[1.25] delay-500',
                   )}
                 >
                   <h2>{name}</h2>

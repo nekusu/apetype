@@ -1,8 +1,8 @@
 'use client';
 
-import { Unsubscribe, User } from 'firebase/auth';
-import { ReactNode, createContext, useContext, useEffect, useState } from 'react';
-import { getFirebaseAuth } from 'utils/firebase';
+import { getFirebaseAuth } from '@/utils/firebase';
+import type { Unsubscribe, User } from 'firebase/auth';
+import { type ReactNode, createContext, useContext, useEffect, useState } from 'react';
 
 export interface AuthContext {
   signedIn: boolean;

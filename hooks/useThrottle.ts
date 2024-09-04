@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useCallback, useEffect, useRef } from 'react';
 
 interface ThrottleOptions {
@@ -6,6 +5,7 @@ interface ThrottleOptions {
   trailing?: boolean;
 }
 
+// biome-ignore lint/suspicious/noExplicitAny: this is intentional
 export function useThrottle<T extends (...args: any[]) => any>(
   cb: T,
   delay: number,
@@ -21,6 +21,7 @@ export function useThrottle<T extends (...args: any[]) => any>(
   }, [cb]);
 
   return useCallback(
+    // biome-ignore lint/suspicious/noExplicitAny: this is intentional
     function (this: any, ...args: Parameters<T>) {
       const waitFunc = () => {
         if (trailing && lastArgs.current) {

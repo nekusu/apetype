@@ -1,6 +1,6 @@
 'use client';
 
-import { Button, Text, Transition } from 'components/core';
+import { Button, Text, Transition } from '@/components/core';
 import {
   FontFamily,
   ImportExportSettings,
@@ -9,22 +9,24 @@ import {
   Setting,
   SoundOnClick,
   Theme,
-} from 'components/settings';
-import { useAuth } from 'context/authContext';
-import { useGlobal } from 'context/globalContext';
-import { useUser } from 'context/userContext';
+} from '@/components/settings';
+import { useAuth } from '@/context/authContext';
+import { useGlobal } from '@/context/globalContext';
+import { useUser } from '@/context/userContext';
+import { replaceSpaces } from '@/utils/misc';
+import { categories, type settingsList } from '@/utils/settings';
 import { m } from 'framer-motion';
 import dynamic from 'next/dynamic';
-import { ReactNode, useEffect, useMemo, useRef, useState } from 'react';
+import { type ReactNode, useEffect, useMemo, useRef, useState } from 'react';
 import { twJoin } from 'tailwind-merge';
-import { replaceSpaces } from 'utils/misc';
-import { categories, settingsList } from 'utils/settings';
 
-const AuthenticationMethods = dynamic(() => import('components/settings/AuthenticationMethods'));
-const PasswordAuthentication = dynamic(() => import('components/settings/PasswordAuthentication'));
-const ResetPersonalBests = dynamic(() => import('components/settings/ResetPersonalBests'));
-const ResetAccount = dynamic(() => import('components/settings/ResetAccount'));
-const DeleteAccount = dynamic(() => import('components/settings/DeleteAccount'));
+const AuthenticationMethods = dynamic(() => import('@/components/settings/AuthenticationMethods'));
+const PasswordAuthentication = dynamic(
+  () => import('@/components/settings/PasswordAuthentication'),
+);
+const ResetPersonalBests = dynamic(() => import('@/components/settings/ResetPersonalBests'));
+const ResetAccount = dynamic(() => import('@/components/settings/ResetAccount'));
+const DeleteAccount = dynamic(() => import('@/components/settings/DeleteAccount'));
 
 type SettingsList = typeof settingsList;
 type Category = (typeof categories)[number];
@@ -86,20 +88,19 @@ export default function SettingsPage() {
       },
       { root: listRef.current, rootMargin: '-10% 0px -90%' },
     );
-    if (listRef.current)
-      Array.from(listRef.current.children).forEach((child) => observer.observe(child));
+    if (listRef.current) for (const child of listRef.current.children) observer.observe(child);
     return () => observer.disconnect();
   }, []);
 
   return (
     <Transition className='relative cursor-default'>
-      <div className='absolute inset-0 h-full flex gap-x-5'>
-        <nav className='relative flex shrink-0 flex-col gap-3 overflow-x-hidden overflow-y-auto py-1 pr-2.5'>
+      <div className='absolute inset-0 flex h-full gap-x-5'>
+        <nav className='relative flex shrink-0 flex-col gap-3 overflow-y-auto overflow-x-hidden py-1 pr-2.5'>
           {categories.map((category) => (
             <Button
               key={category}
               className={twJoin(
-                'group relative -my-0.5 px-0 py-1.5 transition-all',
+                'group -my-0.5 relative px-0 py-1.5 transition-all',
                 category === 'danger zone' && 'hover:text-error',
                 currentCategory === category &&
                   'ml-2.5 text-bg hover:text-bg focus-visible:text-bg',
@@ -113,7 +114,7 @@ export default function SettingsPage() {
               {currentCategory === category && (
                 <m.div
                   className={twJoin(
-                    'absolute -z-10 box-content h-full w-full px-2.5 transition-colors group-hover:bg-text group-focus-visible:bg-text',
+                    '-z-10 absolute box-content h-full w-full px-2.5 transition-colors group-hover:bg-text group-focus-visible:bg-text',
                     currentCategory === 'danger zone' ? 'bg-error' : 'bg-main',
                   )}
                   layoutId='navigation-box'
@@ -125,7 +126,7 @@ export default function SettingsPage() {
             </Button>
           ))}
         </nav>
-        <main className='max-h-full flex flex-col gap-10 overflow-auto pb-2' ref={listRef}>
+        <main className='flex max-h-full flex-col gap-10 overflow-auto pb-2' ref={listRef}>
           {categories.map((category) => (
             <section key={category} className='flex flex-col gap-6' id={replaceSpaces(category)}>
               <Text

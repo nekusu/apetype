@@ -1,17 +1,17 @@
 'use client';
 
-import { useDisclosure } from '@mantine/hooks';
-import Loading from 'app/loading';
-import { Button, Tooltip, Transition } from 'components/core';
+import { Button, Tooltip, Transition } from '@/components/core';
 import {
   PersonalBests,
   ProfileEditModal,
   TestHistory,
   UserDetails,
   UserStats,
-} from 'components/profile';
-import { useAuth } from 'context/authContext';
-import { useUser } from 'context/userContext';
+} from '@/components/profile';
+import { useAuth } from '@/context/authContext';
+import { useUser } from '@/context/userContext';
+import { useDisclosure } from '@mantine/hooks';
+import Loading from '@/app/loading';
 import { redirect } from 'next/navigation';
 import { useEffect } from 'react';
 import toast from 'react-hot-toast';
@@ -36,7 +36,7 @@ export default function AccountPage() {
   if (!signedIn) redirect('/');
 
   return user ? (
-    <Transition className='w-full flex flex-col self-center gap-6'>
+    <Transition className='flex w-full flex-col gap-6 self-center'>
       <UserDetails
         user={user}
         actions={

@@ -1,10 +1,10 @@
 'use client';
 
+import { Button, Input, Modal, Text } from '@/components/core';
+import type { ButtonProps } from '@/components/core/Button';
+import { useGlobal } from '@/context/globalContext';
+import { useSettings } from '@/context/settingsContext';
 import { useDisclosure, useInputState } from '@mantine/hooks';
-import { Button, Input, Modal, Text } from 'components/core';
-import { ButtonProps } from 'components/core/Button';
-import { useGlobal } from 'context/globalContext';
-import { useSettings } from 'context/settingsContext';
 import { RiFontSize } from 'react-icons/ri';
 import Setting from './Setting';
 
@@ -22,19 +22,21 @@ export default function FontFamily() {
     <>
       <Setting
         id='fontFamily'
-        buttonProps={({ value }) => ({ style: { fontFamily: `var(${value.toString()})` } })}
+        buttonProps={({ value }) => ({ style: { fontFamily: `var(${value?.toString()})` } })}
         columns={4}
       >
         <Button active={isCustomFont} onClick={modalHandler.open} {...COMMON_BUTTON_PROPS}>
           custom {isCustomFont && `(${fontFamily})`}
         </Button>
       </Setting>
-      <Modal className='max-w-sm w-full' open={modalOpen} onClose={modalHandler.close} centered>
+      <Modal className='w-full max-w-sm' open={modalOpen} onClose={modalHandler.close} centered>
         <form
           className='flex flex-col gap-3.5'
           onSubmit={(event) => {
             event.preventDefault();
-            setSettings((draft) => void (draft.fontFamily = customFont));
+            setSettings((draft) => {
+              draft.fontFamily = customFont;
+            });
             modalHandler.close();
           }}
         >

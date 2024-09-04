@@ -1,9 +1,9 @@
 'use client';
 
-import { forwardRef, memo, MutableRefObject, useMemo } from 'react';
+import type { Settings } from '@/utils/settings';
+import type { Letter as LetterType } from '@/utils/typingTest';
+import { type MutableRefObject, forwardRef, memo, useMemo } from 'react';
 import { twJoin } from 'tailwind-merge';
-import { Settings } from 'utils/settings';
-import { Letter as LetterType } from 'utils/typingTest';
 import Letter from './Letter';
 
 export interface WordProps
@@ -41,7 +41,7 @@ const Word = forwardRef<HTMLDivElement, WordProps>(function Word(
     >
       {letters.map((letter, index) => (
         <Letter
-          key={index}
+          key={`${letter.original}-${index}`}
           ref={ref !== null && lastTypedIndex === index ? letterRef : null}
           {...letter}
           {...settings}

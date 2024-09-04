@@ -1,12 +1,12 @@
 'use client';
 
-import { Text } from 'components/core';
-import Button, { ButtonProps } from 'components/core/Button';
-import { useGlobal } from 'context/globalContext';
-import { useSettings } from 'context/settingsContext';
-import { Children, Fragment, ReactNode } from 'react';
+import { Text } from '@/components/core';
+import Button, { type ButtonProps } from '@/components/core/Button';
+import { useGlobal } from '@/context/globalContext';
+import { useSettings } from '@/context/settingsContext';
+import type { Settings, settingsList } from '@/utils/settings';
+import { Children, Fragment, type ReactNode } from 'react';
 import { twJoin, twMerge } from 'tailwind-merge';
-import { Settings, settingsList } from 'utils/settings';
 
 type Option = { alt?: string; value: Settings[keyof Settings] };
 export interface SettingProps {
@@ -57,18 +57,20 @@ export default function Setting({
             const { className, ...props } =
               typeof buttonProps === 'function' ? buttonProps({ alt, value }) : buttonProps;
             return (
-              <Fragment key={alt ?? value.toString()}>
+              <Fragment key={alt ?? value?.toString()}>
                 {customButtons?.({ alt, value }) || (
                   <Button
                     active={settings[id as keyof Settings] === value}
                     className={twMerge('w-full', className)}
                     onClick={() =>
-                      setSettings((draft) => void (draft[id as keyof Settings] = value as never))
+                      setSettings((draft) => {
+                        draft[id as keyof Settings] = value as never;
+                      })
                     }
                     variant='filled'
                     {...props}
                   >
-                    {alt ?? value.toString()}
+                    {alt ?? value?.toString()}
                   </Button>
                 )}
               </Fragment>

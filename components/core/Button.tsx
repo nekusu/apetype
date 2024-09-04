@@ -1,5 +1,5 @@
 import { Slot } from '@radix-ui/react-slot';
-import { ComponentPropsWithoutRef, ElementRef, forwardRef } from 'react';
+import { type ComponentPropsWithoutRef, type ElementRef, forwardRef } from 'react';
 import { twMerge } from 'tailwind-merge';
 
 export interface ButtonProps extends ComponentPropsWithoutRef<'button'> {
@@ -42,7 +42,7 @@ const Button = forwardRef<ElementRef<'button'>, ButtonProps>(function Button(
     <Component
       ref={ref}
       className={twMerge(
-        'flex w-max cursor-pointer select-none items-center justify-center gap-1.5 rounded-lg p-2 text-center text-base leading-tight transition outline-text',
+        'flex w-max cursor-pointer select-none items-center justify-center gap-1.5 rounded-lg p-2 text-center text-base leading-tight outline-text transition',
         getVariantStyles(variant),
         variant === 'filled' && active && 'bg-main text-bg',
         variant === 'text' && active && 'text-main',

@@ -1,13 +1,15 @@
 'use client';
 
+import { Tooltip } from '@/components/core';
+import { useGlobal } from '@/context/globalContext';
+import { useSettings } from '@/context/settingsContext';
+import { useTypingTest } from '@/context/typingTestContext';
+import { replaceSpaces } from '@/utils/misc';
+import type { Settings } from '@/utils/settings';
 import { useDidUpdate, useMergedRef, useTimeout, useWindowEvent } from '@mantine/hooks';
-import { Tooltip } from 'components/core';
-import { useGlobal } from 'context/globalContext';
-import { useSettings } from 'context/settingsContext';
-import { useTypingTest } from 'context/typingTestContext';
 import {
-  ComponentPropsWithoutRef,
-  ElementRef,
+  type ComponentPropsWithoutRef,
+  type ElementRef,
   Fragment,
   forwardRef,
   memo,
@@ -15,8 +17,6 @@ import {
   useState,
 } from 'react';
 import { twJoin, twMerge } from 'tailwind-merge';
-import { replaceSpaces } from 'utils/misc';
-import { Settings } from 'utils/settings';
 
 interface KeyProps extends ComponentPropsWithoutRef<'div'> {
   bump?: boolean;
@@ -35,6 +35,7 @@ const Key = memo(
     const bumpRef = useRef<HTMLSpanElement>(null);
     const mergedRef = useMergedRef(ref, keyRef);
 
+    // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: todo
     const setActive = (active: boolean) => {
       if (!keyRef.current) return;
       const getColor = (color: string) =>
@@ -100,6 +101,7 @@ export default function Keymap() {
     if (pressed?.key && key.includes(pressed.key)) return pressed.error ? 'error' : true;
     return false;
   };
+  // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: todo
   const getLegend = (rowIndex: number, keyIndex: number) => {
     const key = Object.values(layout.keys)[rowIndex][keyIndex];
     if (!key) return null;
@@ -111,7 +113,7 @@ export default function Keymap() {
         return key[isLetter ? 1 : 0];
       case 'dynamic':
         if (isLetter) return key[(capsLock ? !shift : shift) ? 1 : 0];
-        else return key[shift ? 1 : 0];
+        return key[shift ? 1 : 0];
       default:
         return null;
     }
@@ -138,10 +140,10 @@ export default function Keymap() {
 
   return (
     <div className='flex justify-center'>
-      <div className='mt-1 flex flex-col select-none justify-center gap-1'>
+      <div className='mt-1 flex select-none flex-col justify-center gap-1'>
         {Object.values(layout.keys).map((row, rowIndex) => (
           <div
-            key={rowIndex}
+            key={row[0]}
             className={twMerge(
               'flex',
               rowIndex === 4 ? 'justify-center gap-10' : 'gap-1',
@@ -154,6 +156,7 @@ export default function Keymap() {
                   : 0,
             }}
           >
+            {/* biome-ignore lint/complexity/noExcessiveCognitiveComplexity: todo */}
             {row.map((key, keyIndex) =>
               rowIndex === 4 && key === ' ' ? (
                 <Fragment key='space'>

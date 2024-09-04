@@ -1,4 +1,4 @@
-import { ComponentPropsWithoutRef, ElementRef, ReactNode, forwardRef } from 'react';
+import { type ComponentPropsWithoutRef, type ElementRef, type ReactNode, forwardRef } from 'react';
 import { twMerge } from 'tailwind-merge';
 import Text from './Text';
 
@@ -13,7 +13,7 @@ const Divider = forwardRef<ElementRef<'div'>, DividerProps>(function Divider(
 ) {
   return label ? (
     <div ref={ref} className='grid grid-cols-[1fr_auto_1fr] gap-2' {...props}>
-      <div className={twMerge('self-center rounded bg-sub transition h-0.5', className)} />
+      <div className={twMerge('h-0.5 self-center rounded bg-sub transition', className)} />
       {typeof label === 'string' ? (
         <Text asChild className='text-xs' dimmed>
           <span>{label}</span>
@@ -21,7 +21,7 @@ const Divider = forwardRef<ElementRef<'div'>, DividerProps>(function Divider(
       ) : (
         label
       )}
-      <div className={twMerge('self-center rounded bg-sub transition h-0.5', className)} />
+      <div className={twMerge('h-0.5 self-center rounded bg-sub transition', className)} />
     </div>
   ) : (
     <div

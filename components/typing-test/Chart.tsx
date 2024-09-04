@@ -1,16 +1,16 @@
 'use client';
 
-import Loading from 'app/loading';
-import { ChartData, ChartOptions, ChartTypeRegistry, TooltipModel } from 'chart.js';
-import { Text } from 'components/core';
-import { useSettings } from 'context/settingsContext';
-import { useTheme } from 'context/themeContext';
+import Loading from '@/app/loading';
+import { Text } from '@/components/core';
+import { useSettings } from '@/context/settingsContext';
+import { useTheme } from '@/context/themeContext';
+import { type ThemeColors, validateColor } from '@/utils/theme';
+import type { TypingTestValues } from '@/utils/typingTest';
+import type { ChartData, ChartOptions, ChartTypeRegistry, TooltipModel } from 'chart.js';
 import dynamic from 'next/dynamic';
 import { useMemo } from 'react';
 import { twJoin } from 'tailwind-merge';
 import { useImmer } from 'use-immer';
-import { ThemeColors, validateColor } from 'utils/theme';
-import { TypingTestValues } from 'utils/typingTest';
 
 const ReactChart = dynamic(
   async () => {
@@ -62,7 +62,7 @@ function ChartTooltip({ position: { top, left }, data, disabled }: ChartTooltipP
   return (
     <div
       className={twJoin(
-        'pointer-events-none absolute rounded-lg bg-sub-alt py-2.5 px-3 shadow-md transition-all',
+        'pointer-events-none absolute rounded-lg bg-sub-alt px-3 py-2.5 shadow-md transition-all',
         disabled ? 'opacity-0' : 'opacity-100',
       )}
       style={{ top, left }}
@@ -150,8 +150,10 @@ export default function Chart({ stats, elapsedTime }: ChartProps) {
       tooltip: {
         enabled: false,
         external: (context) => {
-          setTooltip((draft) => void (draft.disabled = context.tooltip.opacity == 0));
-          if (context.tooltip.opacity == 0) return;
+          setTooltip((draft) => {
+            draft.disabled = context.tooltip.opacity === 0;
+          });
+          if (context.tooltip.opacity === 0) return;
 
           const top = context.tooltip.y;
           const left = context.tooltip.x;

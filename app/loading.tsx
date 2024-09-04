@@ -1,9 +1,9 @@
 'use client';
 
-import { Transition } from 'components/core';
-import { LogoIcon } from 'components/layout';
-import { LogoIconProps } from 'components/layout/LogoIcon';
-import { HTMLMotionProps, useAnimation } from 'framer-motion';
+import { Transition } from '@/components/core';
+import { LogoIcon } from '@/components/layout';
+import type { LogoIconProps } from '@/components/layout/LogoIcon';
+import { type HTMLMotionProps, useAnimation } from 'framer-motion';
 import { useEffect } from 'react';
 import { twMerge } from 'tailwind-merge';
 
@@ -22,7 +22,7 @@ export default function Loading({
   useEffect(() => {
     void animationControls.start({
       pathOffset: [0, 1, 2],
-      transition: { repeat: Infinity, duration: 1 },
+      transition: { repeat: Number.POSITIVE_INFINITY, duration: 1 },
     });
   }, [animationControls]);
 

@@ -1,4 +1,4 @@
-import { EffectCallback, useEffect, useRef } from 'react';
+import { type EffectCallback, useEffect, useRef } from 'react';
 
 // Prevents the effect from running twice when using StrictMode
 export const useDidMount = (effect: EffectCallback) => {

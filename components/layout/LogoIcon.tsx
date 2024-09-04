@@ -1,7 +1,7 @@
 'use client';
 
-import { AnimationControls, SVGMotionProps, m } from 'framer-motion';
-import { ComponentPropsWithoutRef, useMemo } from 'react';
+import { type AnimationControls, type SVGMotionProps, m } from 'framer-motion';
+import { type ComponentPropsWithoutRef, useMemo } from 'react';
 import { twMerge } from 'tailwind-merge';
 
 export interface LogoIconProps extends ComponentPropsWithoutRef<'svg'> {

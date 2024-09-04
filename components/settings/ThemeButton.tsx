@@ -1,9 +1,9 @@
-import { Button } from 'components/core';
-import { ButtonProps } from 'components/core/Button';
-import { forwardRef, ReactNode } from 'react';
+import { Button } from '@/components/core';
+import type { ButtonProps } from '@/components/core/Button';
+import type { ThemeColors } from '@/utils/theme';
+import { type ReactNode, forwardRef } from 'react';
 import { RiCheckLine, RiLoaderLine } from 'react-icons/ri';
 import { twMerge } from 'tailwind-merge';
-import { ThemeColors } from 'utils/theme';
 import ThemeBubbles from './ThemeBubbles';
 
 export interface ThemeButtonProps extends Omit<ButtonProps, 'ref' | 'name'> {
@@ -23,7 +23,7 @@ const ThemeButton = forwardRef<HTMLButtonElement, ThemeButtonProps>(function The
     <Button
       ref={ref}
       className={twMerge(
-        'group grid w-full grid-cols-[1fr_auto_1fr] justify-items-end text-sm hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0.5 active:transform-none',
+        'group hover:-translate-y-0.5 grid w-full grid-cols-[1fr_auto_1fr] justify-items-end text-sm hover:shadow-lg active:translate-y-0.5 active:transform-none',
         selected && 'outline-solid',
         className,
       )}

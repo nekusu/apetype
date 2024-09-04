@@ -1,10 +1,10 @@
+import { Button, ColorPicker, Input, Key, Text, Tooltip } from '@/components/core';
+import type { InputProps } from '@/components/core/Input';
+import type { ThemeColors } from '@/utils/theme';
 import { useEyeDropper, useFocusWithin, useMergedRef } from '@mantine/hooks';
-import { Button, ColorPicker, Input, Key, Text, Tooltip } from 'components/core';
-import { InputProps } from 'components/core/Input';
-import { ElementRef, forwardRef, useRef } from 'react';
+import { type ElementRef, forwardRef, useRef } from 'react';
 import { toast } from 'react-hot-toast';
 import { RiForbidFill, RiSipLine } from 'react-icons/ri';
-import { ThemeColors } from 'utils/theme';
 
 const LABELS: ThemeColors = {
   bg: 'background',
@@ -40,18 +40,18 @@ const ColorInput = forwardRef<ElementRef<'input'>, ColorInputProps>(function Col
   const pickColor = async () => {
     const toastId = toast(
       (t) => (
-        <div className='flex items-center gap-2.5 -mb-0.5'>
+        <div className='-mb-0.5 flex items-center gap-2.5'>
           <span className='shrink-0 text-lg text-main'>{t.icon}</span>
           <Text className='leading-tight'>
             Press <Key className='text-sm'>esc</Key> to cancel selection.
           </Text>
         </div>
       ),
-      { duration: Infinity, icon: <RiForbidFill /> },
+      { duration: Number.POSITIVE_INFINITY, icon: <RiForbidFill /> },
     );
     try {
-      const { sRGBHex } = (await open())!;
-      setValue?.(sRGBHex);
+      const eyeDropper = await open();
+      if (eyeDropper) setValue?.(eyeDropper.sRGBHex);
     } catch (e) {
       toast.error(`Something went wrong! ${(e as Error).message}`);
     } finally {

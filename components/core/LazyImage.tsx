@@ -1,10 +1,10 @@
 'use client';
 
+import Loading, { type LoadingProps } from '@/app/loading';
 import { useDidUpdate } from '@mantine/hooks';
-import Loading, { LoadingProps } from 'app/loading';
 import { AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
-import { ComponentPropsWithoutRef, useState } from 'react';
+import { type ComponentPropsWithoutRef, useState } from 'react';
 import { twMerge } from 'tailwind-merge';
 
 export interface LazyImageProps extends Optional<ComponentPropsWithoutRef<typeof Image>, 'src'> {
@@ -27,7 +27,6 @@ export default function LazyImage({
   return (
     <>
       {src && (
-        // eslint-disable-next-line jsx-a11y/alt-text
         <Image
           src={src}
           onLoad={(img) => {
@@ -40,7 +39,7 @@ export default function LazyImage({
       <AnimatePresence>
         {isLoading && (
           <Loading
-            className={twMerge('absolute bg-bg -inset-1', loadingClassName)}
+            className={twMerge('-inset-1 absolute bg-bg', loadingClassName)}
             logoIconProps={{ width: '60' }}
             transition={{ duration: 0.25 }}
             {...loadingProps}

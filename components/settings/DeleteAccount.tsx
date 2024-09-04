@@ -1,14 +1,14 @@
 'use client';
 
+import { ReauthenticationModal } from '@/components/auth';
+import { Button, Modal, Text } from '@/components/core';
+import { useUser } from '@/context/userContext';
+import { getFirebaseAuth, getFirebaseFirestore } from '@/utils/firebase';
 import { useDisclosure } from '@mantine/hooks';
-import { ReauthenticationModal } from 'components/auth';
-import { Button, Modal, Text } from 'components/core';
-import { useUser } from 'context/userContext';
-import { FirebaseError } from 'firebase/app';
+import type { FirebaseError } from 'firebase/app';
 import { useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { RiLoaderLine } from 'react-icons/ri';
-import { getFirebaseAuth, getFirebaseFirestore } from 'utils/firebase';
 import Setting from './Setting';
 
 export default function DeleteAccount() {
@@ -50,7 +50,7 @@ export default function DeleteAccount() {
         </Button>
       </Setting>
       <Modal
-        className='max-w-sm w-full'
+        className='w-full max-w-sm'
         open={confirmationModalOpen}
         onClose={confirmationModalHandler.close}
         centered

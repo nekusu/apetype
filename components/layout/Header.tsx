@@ -1,10 +1,11 @@
 'use client';
 
-import { Button, Text, Tooltip, Transition } from 'components/core';
-import { ProfilePicture } from 'components/profile';
-import { useGlobal } from 'context/globalContext';
-import { useUser } from 'context/userContext';
-import { FirebaseError } from 'firebase-admin';
+import { Button, Text, Tooltip, Transition } from '@/components/core';
+import { ProfilePicture } from '@/components/profile';
+import { useGlobal } from '@/context/globalContext';
+import { useUser } from '@/context/userContext';
+import { getFirebaseAuth } from '@/utils/firebase';
+import type { FirebaseError } from 'firebase-admin';
 import { AnimatePresence, useAnimation } from 'framer-motion';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
@@ -20,7 +21,6 @@ import {
   RiVipCrownFill,
 } from 'react-icons/ri';
 import { twJoin } from 'tailwind-merge';
-import { getFirebaseAuth } from 'utils/firebase';
 import LogoIcon from './LogoIcon';
 
 const BUTTONS = [
@@ -58,6 +58,7 @@ export default function Header() {
     }
   }, [deleteCachedUserData, savePendingData]);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: this is intentional
   useEffect(() => {
     if (!isUserTyping)
       void animationControls.start({
@@ -67,7 +68,7 @@ export default function Header() {
   }, [isUserTyping, animationControls, testId]);
 
   return (
-    <div className='relative z-10 grid grid-cols-[auto_1fr_auto] w-full select-none gap-3'>
+    <div className='relative z-10 grid w-full select-none grid-cols-[auto_1fr_auto] gap-3'>
       <div
         className='flex items-center gap-2 font-[var(--font-lexend-deca)] transition-transform active:translate-y-0.5'
         onClick={() => {
@@ -84,7 +85,7 @@ export default function Header() {
             <AnimatePresence>
               {!isUserTyping && (
                 <Transition
-                  className='absolute left-3 -top-[3px]'
+                  className='-top-[3px] absolute left-3'
                   variants={{
                     initial: { opacity: 0, x: -30 },
                     animate: {

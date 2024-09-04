@@ -1,13 +1,15 @@
 'use client';
 
+import { Button, Modal, Text, Tooltip } from '@/components/core';
+import type { ButtonProps } from '@/components/core/Button';
+import type { ModalProps } from '@/components/core/Modal';
+import { useSettings } from '@/context/settingsContext';
+import { formatFileSize } from '@/utils/misc';
+import type { Settings } from '@/utils/settings';
 import { useDidUpdate, useDisclosure } from '@mantine/hooks';
-import { Button, Modal, Text, Tooltip } from 'components/core';
-import { ButtonProps } from 'components/core/Button';
-import { ModalProps } from 'components/core/Modal';
-import { useSettings } from 'context/settingsContext';
-import { ChangeEvent, useEffect, useRef, useState } from 'react';
+import { type ChangeEvent, useEffect, useRef, useState } from 'react';
 import { toast } from 'react-hot-toast';
-import { IconType } from 'react-icons';
+import type { IconType } from 'react-icons';
 import {
   RiAlertLine,
   RiBracesLine,
@@ -16,8 +18,6 @@ import {
   RiSpam2Line,
 } from 'react-icons/ri';
 import { twJoin, twMerge } from 'tailwind-merge';
-import { formatFileSize } from 'utils/misc';
-import { Settings } from 'utils/settings';
 import Setting from './Setting';
 
 interface WarningProps {
@@ -58,7 +58,7 @@ function Warning({ icon: Icon, properties, type }: WarningProps) {
           offset={6}
           placement='bottom-start'
         >
-          <span className='cursor-pointer border-b border-error border-dashed text-error transition hover:border-text hover:text-text'>
+          <span className='cursor-pointer border-error border-b border-dashed text-error transition hover:border-text hover:text-text'>
             {properties.length} {type} propert{properties.length > 1 ? 'ies' : 'y'}
           </span>
         </Tooltip>
@@ -120,7 +120,7 @@ function ImportSettingsModal({ className, ...props }: ModalProps) {
         </Text>
         <div className='grid grid-cols-[auto_1fr] items-center gap-x-2'>
           <Button asChild className={twJoin('px-3', file && 'row-span-2')} variant='filled'>
-            <label tabIndex={0}>
+            <label>
               select file
               <RiBracesLine />
               <input accept='.json' className='hidden' onChange={handleChange} type='file' />
@@ -139,7 +139,7 @@ function ImportSettingsModal({ className, ...props }: ModalProps) {
           {error && (
             <div className='flex items-center gap-1.5 text-error'>
               <RiErrorWarningLine className='shrink-0' />
-              <Text className='text-sm text-error'>{error}</Text>
+              <Text className='text-error text-sm'>{error}</Text>
             </div>
           )}
           <Warning icon={RiAlertLine} properties={invalid} type='invalid' />

@@ -1,4 +1,4 @@
-import { Button, Modal, Text } from 'components/core';
+import { Button, Modal, Text } from '@/components/core';
 
 interface ModalProps {
   open: boolean;
@@ -8,7 +8,7 @@ interface ModalProps {
 export default function ReadabilityModal({ open, onClose }: ModalProps) {
   return (
     <Modal centered open={open} onClose={onClose}>
-      <div className='max-w-sm flex flex-col gap-3.5 text-sm'>
+      <div className='flex max-w-sm flex-col gap-3.5 text-sm'>
         <Text asChild className='text-2xl'>
           <h3>Readability</h3>
         </Text>
@@ -23,6 +23,7 @@ export default function ReadabilityModal({ open, onClose }: ModalProps) {
             className='text-main hover:underline'
             href='https://www.w3.org/WAI/WCAG21/Understanding/contrast-minimum.html'
             target='_blank'
+            rel='noreferrer'
           >
             WCAG 2.1 accessibility guidelines
           </a>

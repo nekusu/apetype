@@ -1,21 +1,22 @@
 'use client';
 
+import { Button, Key, Modal, Transition } from '@/components/core';
+import { ThemeBubbles } from '@/components/settings';
+import { useGlobal } from '@/context/globalContext';
+import { useSettings } from '@/context/settingsContext';
+import { useTheme } from '@/context/themeContext';
+import { useFocusLock } from '@/hooks/useFocusLock';
 import uFuzzy from '@leeoniya/ufuzzy';
 import { useInputState, useIsomorphicEffect, useWindowEvent } from '@mantine/hooks';
-import { Button, Key, Modal, Transition } from 'components/core';
-import { ThemeBubbles } from 'components/settings';
-import { useGlobal } from 'context/globalContext';
-import { useSettings } from 'context/settingsContext';
-import { useTheme } from 'context/themeContext';
 import { m } from 'framer-motion';
-import { useFocusLock } from 'hooks/useFocusLock';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { RiArrowDownLine, RiArrowUpLine, RiLoaderLine, RiTerminalLine } from 'react-icons/ri';
-import { ViewportList, ViewportListRef } from 'react-viewport-list';
+import { ViewportList, type ViewportListRef } from 'react-viewport-list';
 import Item from './Item';
 
 const uf = new uFuzzy({ intraIns: 1, interChars: '.' });
 
+// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: todo
 export default function CommandLine() {
   const { modalOpen, settingsList, commandLine, setGlobalValues } = useGlobal();
   const { open, initialSetting, handler } = commandLine;
@@ -46,12 +47,11 @@ export default function CommandLine() {
       const indexes = uf.filter(haystack, input);
       const results = indexes?.map((i) => options[i]);
       return { settings: [] as typeof settings, options: results ?? options };
-    } else {
-      const haystack = settings.map(({ command }) => command);
-      const indexes = uf.filter(haystack, input);
-      const results = indexes?.map((i) => settings[i]);
-      return { settings: results ?? settings, options: [] as typeof options };
     }
+    const haystack = settings.map(({ command }) => command);
+    const indexes = uf.filter(haystack, input);
+    const results = indexes?.map((i) => settings[i]);
+    return { settings: results ?? settings, options: [] as typeof options };
   }, [input, setting, settingsListValues]);
 
   let selectedIndex = setting
@@ -84,27 +84,31 @@ export default function CommandLine() {
   };
   const saveSetting = (value: string | number | boolean | null) => {
     if (!setting?.id || value === '') return;
-    setSettings((draft) => void (draft[setting.id] = value as never));
+    setSettings((draft) => {
+      draft[setting.id] = value as never;
+    });
     setInput('');
   };
   const select = (e?: React.FormEvent<HTMLFormElement>) => {
     e?.preventDefault();
     if (setting) {
       if (setting.custom && index === items.options.length)
-        saveSetting(isNaN(+input) ? input : +input);
+        saveSetting(Number.isNaN(+input) ? input : +input);
       else saveSetting(items.options[index].value);
-    } else {
-      if (items.settings[index].id === 'theme' && themeType === 'custom')
-        setSetting(settingsList.customTheme);
-      else setSetting(items.settings[index]);
-    }
+    } else if (items.settings[index].id === 'theme' && themeType === 'custom')
+      setSetting(settingsList.customTheme);
+    else setSetting(items.settings[index]);
   };
   const toggleThemeType = () => {
     if (themeType === 'preset' && customThemes.length) {
-      setSettings((draft) => void (draft.themeType = 'custom'));
+      setSettings((draft) => {
+        draft.themeType = 'custom';
+      });
       setSetting(settingsList.customTheme);
     } else {
-      setSettings((draft) => void (draft.themeType = 'preset'));
+      setSettings((draft) => {
+        draft.themeType = 'preset';
+      });
       setSetting(settingsList.theme);
     }
   };
@@ -125,14 +129,16 @@ export default function CommandLine() {
   useEffect(() => {
     setIndex(input ? 0 : selectedIndex);
   }, [input, selectedIndex]);
+  // biome-ignore lint/correctness/useExhaustiveDependencies: not needed
   useEffect(() => {
     if (isUsingKeyboard.current) listRef.current?.scrollToIndex({ index });
-    if (setting && ['theme', 'customTheme'].includes(setting.id))
-      previewTheme(items.options[index]?.value!.toString());
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    if (setting && ['theme', 'customTheme'].includes(setting.id) && items.options[index].value)
+      previewTheme(items.options[index].value.toString());
   }, [index]);
   useWindowEvent('keydown', (event) => {
-    setGlobalValues((draft) => void (draft.capsLock = event.getModifierState('CapsLock')));
+    setGlobalValues((draft) => {
+      draft.capsLock = event.getModifierState('CapsLock');
+    });
     if (event.key === (quickRestart !== 'esc' ? 'Escape' : 'Tab') && (!modalOpen || open))
       if (open) handler?.close();
       else handler?.open();
@@ -141,7 +147,7 @@ export default function CommandLine() {
 
   return (
     <Modal
-      className='w-[700px] flex flex-col overflow-hidden p-0'
+      className='flex w-[700px] flex-col overflow-hidden p-0'
       open={open}
       onClose={handler?.close}
       closeOnEscape={false}
@@ -154,7 +160,7 @@ export default function CommandLine() {
         {setting?.command ? (
           <Button
             asChild
-            className='px-2.5 py-1.5 text-xs font-semibold -ml-1'
+            className='-ml-1 px-2.5 py-1.5 font-semibold text-xs'
             variant='filled'
             active
             onClick={() => setSetting(undefined)}
@@ -167,7 +173,7 @@ export default function CommandLine() {
         {isThemeSetting && (setting.id === 'customTheme' || !!customThemes.length) && (
           <Button
             asChild
-            className='px-2.5 py-1.5 text-xs -ml-1'
+            className='-ml-1 px-2.5 py-1.5 text-xs'
             variant='filled'
             onClick={toggleThemeType}
           >
@@ -179,7 +185,7 @@ export default function CommandLine() {
         )}
         <m.input
           ref={focusLockRef}
-          className='flex-1 bg-transparent py-3.5 text-text caret-caret outline-0 border-0 transition-colors placeholder:text-sub'
+          className='flex-1 border-0 bg-transparent py-3.5 text-text caret-caret outline-0 transition-colors placeholder:text-sub'
           min={0}
           type={setting?.custom && typeof setting.options[0].value === 'number' ? 'number' : 'text'}
           placeholder={`type ${setting ? 'value' : 'command'}`}
@@ -192,7 +198,7 @@ export default function CommandLine() {
         {items.settings.length || items.options.length || setting?.custom ? (
           keyTips && (
             <m.div
-              className='flex cursor-default items-center gap-1 text-xs text-sub'
+              className='flex cursor-default items-center gap-1 text-sub text-xs'
               layout
               transition={{ duration: 0.15 }}
             >
@@ -216,7 +222,9 @@ export default function CommandLine() {
         className='overflow-x-hidden overflow-y-scroll'
         animate={{ height: itemCount * 36 }}
         transition={{ ease: 'easeOut', duration: 0.2 }}
-        onMouseMove={() => (isUsingKeyboard.current = false)}
+        onMouseMove={() => {
+          isUsingKeyboard.current = false;
+        }}
       >
         {setting ? (
           <ViewportList
@@ -225,6 +233,7 @@ export default function CommandLine() {
             items={items.options}
             initialIndex={selectedIndex}
           >
+            {/* biome-ignore lint/complexity/noExcessiveCognitiveComplexity: todo */}
             {({ alt, value }, i) => {
               const key = typeof value === 'string' ? value : alt ?? `${value}`;
               const active = index === i;
@@ -234,7 +243,7 @@ export default function CommandLine() {
                   key={key}
                   active={active}
                   label={(setting.id === 'caretStyle' ? value || alt : alt ?? value)?.toString()}
-                  selected={selected && (!isLoading || !active)}
+                  selected={selected && !(isLoading && active)}
                   layoutId={key}
                   style={{
                     fontFamily: setting.id === 'fontFamily' ? `var(${value})` : undefined,
@@ -280,7 +289,7 @@ export default function CommandLine() {
             layoutId='custom'
             active={index === items.options.length}
             label={`custom ${
-              customSelected && !input ? `(${settings[setting.id]!.toString()})` : ''
+              customSelected && !input ? `(${settings[setting.id]?.toString()})` : ''
             }`}
             selected={customSelected && !input}
             onClick={() => select()}

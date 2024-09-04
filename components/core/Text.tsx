@@ -1,5 +1,5 @@
 import { Slot } from '@radix-ui/react-slot';
-import { ComponentPropsWithoutRef, ElementRef, forwardRef } from 'react';
+import { type ComponentPropsWithoutRef, type ElementRef, forwardRef } from 'react';
 import { twMerge } from 'tailwind-merge';
 
 export interface TextProps extends ComponentPropsWithoutRef<'div'> {

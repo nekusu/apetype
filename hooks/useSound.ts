@@ -1,8 +1,8 @@
+import { getRandomNumber } from '@/utils/misc';
+import type { Sound } from '@/utils/settings';
 import { useDidUpdate } from '@mantine/hooks';
-import { Earwurm, ManagerConfig, StackState } from 'earwurm';
+import { Earwurm, type ManagerConfig, type StackState } from 'earwurm';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { getRandomNumber } from 'utils/misc';
-import { Sound } from 'utils/settings';
 
 const SOUNDS: Record<Sound, number> = {
   beep: 3,
@@ -13,15 +13,18 @@ const SOUNDS: Record<Sound, number> = {
   pop: 3,
   typewriter: 3,
 };
-const soundStacks = Object.entries(SOUNDS).reduce((stacks, [sound, count]) => {
-  stacks[sound as Sound] = Array(count)
-    .fill(0)
-    .map((_, index) => ({
-      id: index.toString(),
-      path: `/sound/${sound}/${index + 1}.webm`,
-    }));
-  return stacks;
-}, {} as Record<Sound, { id: string; path: string }[]>);
+const soundStacks = Object.entries(SOUNDS).reduce(
+  (stacks, [sound, count]) => {
+    stacks[sound as Sound] = Array(count)
+      .fill(0)
+      .map((_, index) => ({
+        id: index.toString(),
+        path: `/sound/${sound}/${index + 1}.webm`,
+      }));
+    return stacks;
+  },
+  {} as Record<Sound, { id: string; path: string }[]>,
+);
 
 export function useSound(sound?: false | Sound | `${string}.webm`, config: ManagerConfig = {}) {
   const manager = useRef<Earwurm>();
@@ -36,6 +39,7 @@ export function useSound(sound?: false | Sound | `${string}.webm`, config: Manag
     void stack?.prepare().then((sound) => sound?.play());
   }, []);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: not needed
   useEffect(() => {
     if (sound) {
       manager.current = new Earwurm({
@@ -46,7 +50,6 @@ export function useSound(sound?: false | Sound | `${string}.webm`, config: Manag
       else manager.current.add({ id: sound, path: `/sound/${sound}` });
     }
     return () => void manager.current?.teardown();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sound]);
   useDidUpdate(() => {
     if (manager.current && config.volume) manager.current.volume = config.volume;

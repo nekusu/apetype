@@ -1,8 +1,8 @@
 'use client';
 
-import { useAuth } from 'context/authContext';
+import { useAuth } from '@/context/authContext';
 import { redirect } from 'next/navigation';
-import { ReactNode } from 'react';
+import type { ReactNode } from 'react';
 
 export default function Layout({ children }: { children: ReactNode }) {
   const { signedIn } = useAuth();

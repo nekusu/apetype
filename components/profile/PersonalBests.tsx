@@ -1,8 +1,8 @@
-import { Text } from 'components/core';
+import { Text } from '@/components/core';
+import { type Settings, type Time, type Words, settingsList } from '@/utils/settings';
+import type { PersonalBest, User } from '@/utils/user';
 import dayjs from 'dayjs';
 import { twJoin } from 'tailwind-merge';
-import { Settings, Time, Words, settingsList } from 'utils/settings';
-import { PersonalBest, User } from 'utils/user';
 
 interface PersonalBestProps {
   mode: Settings['mode'];
@@ -18,7 +18,7 @@ function PersonalBest({ mode, amount, data }: PersonalBestProps) {
   );
 
   return (
-    <div className='group relative h-[116px] flex items-center justify-center'>
+    <div className='group relative flex h-[116px] items-center justify-center'>
       {data && (
         <div
           key='full'
@@ -39,7 +39,7 @@ function PersonalBest({ mode, amount, data }: PersonalBestProps) {
       <div
         className={twJoin(
           'absolute inset-0 flex flex-col items-center justify-center gap-1',
-          data && 'group-hover:opacity-0 transition',
+          data && 'transition group-hover:opacity-0',
         )}
       >
         {testType}
@@ -54,7 +54,7 @@ function PersonalBest({ mode, amount, data }: PersonalBestProps) {
 
 export default function PersonalBests({ data }: { data: User['personalBests'] }) {
   return (
-    <div className='grid grid-cols-2 cursor-default gap-6'>
+    <div className='grid cursor-default grid-cols-2 gap-6'>
       <div className='grid grid-cols-[repeat(4,1fr)] gap-4 rounded-xl bg-sub-alt p-4 transition-colors'>
         {settingsList.time.options.map(({ value }) => (
           <PersonalBest key={value} mode='time' amount={value} data={data?.time?.[value as Time]} />

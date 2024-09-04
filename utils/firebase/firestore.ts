@@ -1,12 +1,12 @@
 import {
-  CollectionReference,
-  DocumentData,
-  DocumentReference,
-  PartialWithFieldValue,
-  Query,
-  QueryConstraint,
-  SetOptions,
-  UpdateData,
+  type CollectionReference,
+  type DocumentData,
+  type DocumentReference,
+  type PartialWithFieldValue,
+  type Query,
+  type QueryConstraint,
+  type SetOptions,
+  type UpdateData,
   addDoc,
   and,
   arrayRemove,
@@ -71,9 +71,7 @@ async function deleteQueryBatch(q: Query, batchSize: number, resolve: (value?: u
   }
 
   const batch = writeBatch(db);
-  querySnapshot.forEach((doc) => {
-    batch.delete(doc.ref);
-  });
+  for (const doc of querySnapshot.docs) batch.delete(doc.ref);
   await batch.commit();
 
   if (querySnapshot.size < batchSize) {

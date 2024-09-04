@@ -1,18 +1,18 @@
 'use client';
 
+import { EmailToast } from '@/components/auth';
+import { Button, Input, Text, Transition } from '@/components/core';
+import { getFirebaseAuth } from '@/utils/firebase';
 import { valibotResolver } from '@hookform/resolvers/valibot';
 import { useFocusTrap } from '@mantine/hooks';
-import { EmailToast } from 'components/auth';
-import { Button, Input, Text, Transition } from 'components/core';
-import { FirebaseError } from 'firebase/app';
+import type { FirebaseError } from 'firebase/app';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { SubmitHandler, useForm } from 'react-hook-form';
+import { type SubmitHandler, useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
 import { RiLoaderLine, RiMailFill } from 'react-icons/ri';
 import { twJoin } from 'tailwind-merge';
-import { getFirebaseAuth } from 'utils/firebase';
-import { Input as ValiInput, email, minLength, object, string, toTrimmed } from 'valibot';
+import { type Input as ValiInput, email, minLength, object, string, toTrimmed } from 'valibot';
 
 const resetPasswordSchema = object({
   email: string([toTrimmed(), minLength(1, 'Email is required'), email('Invalid email')]),
@@ -46,7 +46,7 @@ export default function ResetPasswordPage() {
             emailDomain={email.split('@')[1]}
           />
         ),
-        { duration: Infinity },
+        { duration: Number.POSITIVE_INFINITY },
       );
       router.push('/login');
     } catch (e) {
@@ -63,7 +63,7 @@ export default function ResetPasswordPage() {
     <Transition
       ref={focusTrapRef}
       className={twJoin(
-        'max-w-xs min-w-xs flex flex-col gap-3.5 transition',
+        'flex min-w-xs max-w-xs flex-col gap-3.5 transition',
         isLoading && '!pointer-events-none !opacity-60',
       )}
     >

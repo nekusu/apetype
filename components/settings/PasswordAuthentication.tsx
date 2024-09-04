@@ -1,20 +1,28 @@
 'use client';
 
+import { PasswordInput, PasswordStrength, ReauthenticationModal } from '@/components/auth';
+import { Button, Modal, Text } from '@/components/core';
+import type { ModalProps } from '@/components/core/Modal';
+import { useAuth } from '@/context/authContext';
+import { getFirebaseAuth } from '@/utils/firebase';
 import { valibotResolver } from '@hookform/resolvers/valibot';
 import { useDisclosure } from '@mantine/hooks';
-import { ZxcvbnResult } from '@zxcvbn-ts/core';
-import { PasswordInput, PasswordStrength, ReauthenticationModal } from 'components/auth';
-import { Button, Modal, Text } from 'components/core';
-import { ModalProps } from 'components/core/Modal';
-import { useAuth } from 'context/authContext';
-import { FirebaseError } from 'firebase/app';
+import type { ZxcvbnResult } from '@zxcvbn-ts/core';
+import type { FirebaseError } from 'firebase/app';
 import { useCallback, useDeferredValue, useEffect, useState } from 'react';
-import { SubmitHandler, useForm } from 'react-hook-form';
+import { type SubmitHandler, useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
 import { RiLoaderLine } from 'react-icons/ri';
 import { twJoin } from 'tailwind-merge';
-import { getFirebaseAuth } from 'utils/firebase';
-import { Input as ValiInput, custom, forward, minLength, number, object, string } from 'valibot';
+import {
+  type Input as ValiInput,
+  custom,
+  forward,
+  minLength,
+  number,
+  object,
+  string,
+} from 'valibot';
 import Setting from './Setting';
 
 interface PasswordModalProps extends ModalProps {
@@ -93,7 +101,7 @@ function PasswordModal({ updatePassword, passwordAuthenticated, ...props }: Pass
       <Modal centered {...props}>
         <div
           className={twJoin(
-            'max-w-xs min-w-xs flex flex-col gap-3.5 transition',
+            'flex min-w-xs max-w-xs flex-col gap-3.5 transition',
             isLoading && 'pointer-events-none opacity-60',
           )}
         >

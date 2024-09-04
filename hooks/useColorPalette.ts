@@ -26,7 +26,9 @@ export function useColorPalette() {
             0, 56, 10, 5, 73, 18, 56, 0, 26, 51, 6, 15, 10, 26, 0, 9, 35, 8, 5, 51, 9, 0, 67, 16,
             73, 6, 35, 67, 0, 19, 18, 15, 8, 16, 19, 0,
           ],
+          // biome-ignore lint/style/useNamingConvention: api is not camelCase
           num_colors: colorCount ?? 6,
+          // biome-ignore lint/style/useNamingConvention: api is not camelCase
           num_results: 50,
         }),
       }).then((res) => res.json() as Promise<Data>),

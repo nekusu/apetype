@@ -1,9 +1,9 @@
 'use client';
 
-import { useGlobal } from 'context/globalContext';
-import { useSettings } from 'context/settingsContext';
+import { useGlobal } from '@/context/globalContext';
+import { useSettings } from '@/context/settingsContext';
 import { m } from 'framer-motion';
-import { CSSProperties } from 'react';
+import type { CSSProperties } from 'react';
 import { twJoin } from 'tailwind-merge';
 
 export interface CaretProps {
@@ -24,7 +24,7 @@ export default function Caret({ width = '.5em', x, y }: CaretProps) {
         left: x,
         top: y,
         transition: {
-          opacity: { repeat: Infinity, ease: 'easeInOut', duration: 1 },
+          opacity: { repeat: Number.POSITIVE_INFINITY, ease: 'easeInOut', duration: 1 },
           width: { ease: 'linear', duration: smoothCaret ? 0.1 : 0 },
           default: { ease: 'easeOut', duration: smoothCaret ? 0.08 : 0 },
         },

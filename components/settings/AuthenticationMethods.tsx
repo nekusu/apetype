@@ -1,15 +1,15 @@
 'use client';
 
-import { Button } from 'components/core';
-import { useAuth } from 'context/authContext';
-import { FirebaseError } from 'firebase/app';
-import { AuthProvider } from 'firebase/auth';
-import { useDidMount } from 'hooks/useDidMount';
+import { Button } from '@/components/core';
+import { useAuth } from '@/context/authContext';
+import { useDidMount } from '@/hooks/useDidMount';
+import { getFirebaseAuth } from '@/utils/firebase';
+import type { AuthenticationMethod } from '@/utils/firebase/auth';
+import type { FirebaseError } from 'firebase/app';
+import type { AuthProvider } from 'firebase/auth';
 import { useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { RiLoaderLine } from 'react-icons/ri';
-import { getFirebaseAuth } from 'utils/firebase';
-import { AuthenticationMethod } from 'utils/firebase/auth';
 import Setting from './Setting';
 
 export default function AuthenticationMethods() {

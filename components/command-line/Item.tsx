@@ -1,9 +1,9 @@
 'use client';
 
-import { Key, Tooltip } from 'components/core';
-import { useSettings } from 'context/settingsContext';
-import { HTMLMotionProps, m } from 'framer-motion';
-import { ReactNode } from 'react';
+import { Key, Tooltip } from '@/components/core';
+import { useSettings } from '@/context/settingsContext';
+import { type HTMLMotionProps, m } from 'framer-motion';
+import type { ReactNode } from 'react';
 import { RiCheckLine, RiQuestionLine } from 'react-icons/ri';
 import { twJoin, twMerge } from 'tailwind-merge';
 

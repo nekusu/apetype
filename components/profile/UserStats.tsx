@@ -1,10 +1,10 @@
 'use client';
 
+import type { TypingTest, User } from '@/utils/user';
 import { useIntersection, useIsomorphicEffect } from '@mantine/hooks';
 import { useGetDocs } from '@tatsuokaniwa/swr-firestore';
 import { useMemo, useRef, useState } from 'react';
 import { RiLoaderLine } from 'react-icons/ri';
-import { TypingTest, User } from 'utils/user';
 
 export type UserStatsProps =
   | { user: User; highest?: undefined; average?: undefined }
@@ -28,12 +28,11 @@ export default function UserStats({ user, ...props }: UserStatsProps) {
     if (!lastTests) return;
     const stats = { wpm: 0, raw: 0, accuracy: 0, consistency: 0 };
     type Key = keyof typeof stats;
-    lastTests.forEach((test) => {
+    for (const test of lastTests)
       for (const _key in stats) {
         const key = _key as Key;
         stats[key] += test.result[key];
       }
-    });
     for (const key in stats) stats[key as Key] /= lastTests.length;
     return stats;
   }, [lastTests]);
@@ -69,10 +68,7 @@ export default function UserStats({ user, ...props }: UserStatsProps) {
           const showPercentage = ['accuracy', 'consistency'].includes(label) && '%';
           return (
             <tr key={label} className='group text-center text-3xl text-text transition-colors'>
-              <td
-                className='w-0 py-4 pr-8 text-left text-2xl text-sub transition-colors'
-                scope='row'
-              >
+              <td className='w-0 py-4 pr-8 text-left text-2xl text-sub transition-colors'>
                 {label}
               </td>
               <td className='rounded-l-xl group-odd:bg-sub-alt'>

@@ -1,9 +1,9 @@
 'use client';
 
-import { Button, Key, Tooltip, Transition } from 'components/core';
-import { useGlobal } from 'context/globalContext';
-import { useSettings } from 'context/settingsContext';
-import { useTheme } from 'context/themeContext';
+import { Button, Key, Tooltip, Transition } from '@/components/core';
+import { useGlobal } from '@/context/globalContext';
+import { useSettings } from '@/context/settingsContext';
+import { useTheme } from '@/context/themeContext';
 import { useMemo } from 'react';
 import { RiGithubFill, RiLoaderLine, RiPaletteFill } from 'react-icons/ri';
 import Version from './Version';
@@ -50,10 +50,9 @@ export default function Footer() {
               className='p-0 text-sm'
               onClick={(e) => {
                 if (e.shiftKey)
-                  setSettings(
-                    (draft) =>
-                      void (draft.themeType = themeType === 'preset' ? 'custom' : 'preset'),
-                  );
+                  setSettings((draft) => {
+                    draft.themeType = themeType === 'preset' ? 'custom' : 'preset';
+                  });
                 else commandLine.handler?.open(themeType === 'preset' ? 'theme' : 'customTheme');
               }}
             >

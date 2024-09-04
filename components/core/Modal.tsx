@@ -1,10 +1,10 @@
 'use client';
 
+import { useGlobal } from '@/context/globalContext';
 import { FloatingPortal } from '@floating-ui/react';
 import { useFocusTrap, useHotkeys } from '@mantine/hooks';
-import { useGlobal } from 'context/globalContext';
-import { AnimatePresence, HTMLMotionProps } from 'framer-motion';
-import { MouseEvent, useEffect } from 'react';
+import { AnimatePresence, type HTMLMotionProps } from 'framer-motion';
+import { type MouseEvent, useEffect } from 'react';
 import { RemoveScroll } from 'react-remove-scroll';
 import { twMerge } from 'tailwind-merge';
 import Transition from './Transition';
@@ -49,7 +49,9 @@ export default function Modal({
   };
 
   useEffect(() => {
-    setGlobalValues((draft) => void (draft.modalOpen = open));
+    setGlobalValues((draft) => {
+      draft.modalOpen = open;
+    });
   }, [open, setGlobalValues]);
   useHotkeys([['Escape', handleEscapePress]], ['input']);
 
@@ -60,7 +62,7 @@ export default function Modal({
           <RemoveScroll enabled={lockScroll && open} forwardProps>
             <Transition
               className={twMerge(
-                'inset-0 z-50 flex h-full w-full justify-center bg-black/50 py-16 px-8 backdrop-blur-[2.5px]',
+                'inset-0 z-50 flex h-full w-full justify-center bg-black/50 px-8 py-16 backdrop-blur-[2.5px]',
                 centered ? 'items-center' : 'items-start',
                 overflow === 'outside' && 'overflow-y-auto',
                 target ? 'absolute' : 'fixed',
@@ -71,7 +73,7 @@ export default function Modal({
               <Transition
                 ref={focusTrapRef}
                 className={twMerge(
-                  'relative rounded-xl bg-bg p-6 shadow-2xl transition-colors cursor-default',
+                  'relative cursor-default rounded-xl bg-bg p-6 shadow-2xl transition-colors',
                   overflow === 'inside' && 'max-h-full overflow-y-auto',
                   className,
                 )}

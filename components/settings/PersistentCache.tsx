@@ -1,11 +1,11 @@
 'use client';
 
-import { Button, Tooltip } from 'components/core';
-import { useSettings } from 'context/settingsContext';
-import { useDidMount } from 'hooks/useDidMount';
+import { Button, Tooltip } from '@/components/core';
+import { useSettings } from '@/context/settingsContext';
+import { useDidMount } from '@/hooks/useDidMount';
+import { formatFileSize, getLocalStorageSize } from '@/utils/misc';
 import { useState } from 'react';
 import { RiQuestionLine } from 'react-icons/ri';
-import { formatFileSize, getLocalStorageSize } from 'utils/misc';
 import Setting from './Setting';
 
 export default function PersistentCache() {

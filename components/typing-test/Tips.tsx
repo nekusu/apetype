@@ -1,13 +1,13 @@
 'use client';
 
-import { Key, Text } from 'components/core';
-import { useSettings } from 'context/settingsContext';
+import { Key, Text } from '@/components/core';
+import { useSettings } from '@/context/settingsContext';
 
 export default function Tips() {
   const { mode, time, words, quickRestart } = useSettings();
 
   return (
-    <div className='flex flex-col select-none items-center gap-1.5'>
+    <div className='flex select-none flex-col items-center gap-1.5'>
       {((mode === 'time' && !time) || (mode === 'words' && !words)) && (
         <Text className='text-xs' dimmed>
           <Key>shift</Key> + <Key>enter</Key> - stop test

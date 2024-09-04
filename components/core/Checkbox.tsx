@@ -1,10 +1,10 @@
 'use client';
 
 import { useId, useUncontrolled } from '@mantine/hooks';
-import { ComponentPropsWithoutRef, ElementRef, ReactNode, forwardRef } from 'react';
+import { type ComponentPropsWithoutRef, type ElementRef, type ReactNode, forwardRef } from 'react';
 import { RiCheckLine } from 'react-icons/ri';
 import { twJoin, twMerge } from 'tailwind-merge';
-import Button, { ButtonProps } from './Button';
+import Button, { type ButtonProps } from './Button';
 
 export interface CheckboxProps extends ComponentPropsWithoutRef<'input'> {
   label?: ReactNode;
@@ -53,7 +53,7 @@ const Checkbox = forwardRef<ElementRef<'input'>, CheckboxProps>(function Checkbo
   return (
     <div
       className={twMerge(
-        'group relative flex transition items-center select-none',
+        'group relative flex select-none items-center transition',
         disabled && 'pointer-events-none opacity-60',
         wrapperClassName,
       )}
@@ -69,7 +69,7 @@ const Checkbox = forwardRef<ElementRef<'input'>, CheckboxProps>(function Checkbo
       </Button>
       <input
         ref={ref}
-        className='absolute opacity-0 -z-10'
+        className='-z-10 absolute opacity-0'
         disabled={disabled}
         id={uuid}
         type='checkbox'

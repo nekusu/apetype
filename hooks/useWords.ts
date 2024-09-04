@@ -1,7 +1,7 @@
-import { useSettings } from 'context/settingsContext';
-import { useTypingTest } from 'context/typingTestContext';
+import { useSettings } from '@/context/settingsContext';
+import { useTypingTest } from '@/context/typingTestContext';
+import { getRandomWords, parseWords } from '@/utils/typingTest';
 import { useCallback, useMemo } from 'react';
-import { getRandomWords, parseWords } from 'utils/typingTest';
 import { useLanguage } from './useLanguage';
 
 export function useWords() {
@@ -24,19 +24,21 @@ export function useWords() {
           const lastWord = words.at(-1)?.original;
           const randomWords = getRandomWords(count, language, lastWord);
           const newWords = parseWords(
-            lazyMode && !language?.noLazyMode
-              ? randomWords.map((word) => word.normalize('NFD').replace(/[\u0300-\u036f]/g, ''))
-              : randomWords
+            lazyMode && !language.noLazyMode
+              ? // biome-ignore lint/suspicious/noMisleadingCharacterClass: required to remove diacritic marks
+                randomWords.map((word) => word.normalize('NFD').replace(/[\u0300-\u036f]/g, ''))
+              : randomWords,
           );
           words.push(...newWords);
         });
       }
     },
-    [language, lazyMode, setValues]
+    [language, lazyMode, setValues],
   );
 
   const update = useCallback(
     (input: string) => {
+      // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: todo
       setValues((draft) => {
         const { words, currentStats, wordIndex } = draft;
         const word = words[wordIndex];
@@ -50,6 +52,7 @@ export function useWords() {
         const { letters } = word;
 
         // Process each input letter
+        // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: todo
         inputLetters.forEach((inputLetter, index) => {
           const letter = letters[index];
           if (!letter) {
@@ -83,7 +86,8 @@ export function useWords() {
             // Remove any extra letters
             letters.splice(i);
             break;
-          } else if (letter.typed) {
+          }
+          if (letter.typed) {
             // Reset the status of any letters that were deleted
             letter.typed = undefined;
             letter.status = undefined;
@@ -91,10 +95,11 @@ export function useWords() {
         }
 
         // Construct the typed word by joining the typed letters
-        word.typed = letters.reduce((string, { typed, status }) => {
-          if (typed && (stopOnError !== 'letter' || status === 'correct')) string += typed;
-          return string;
-        }, '');
+        word.typed = letters.reduce(
+          (string, { typed, status }) =>
+            typed && (stopOnError !== 'letter' || status === 'correct') ? string + typed : string,
+          '',
+        );
 
         word.isCorrect = word.original === word.typed;
         draft.inputValue = stopOnError === 'word' ? input : input.replace(/\S+/, word.typed);
@@ -118,14 +123,10 @@ export function useWords() {
 
           if (wordIndex > 0 && (!previousWord.isCorrect || freedomMode)) {
             // Reset the status of any letters that were not typed
-            previousWord.letters.forEach((letter) => {
-              if (!letter.typed) letter.status = undefined;
-            });
-
+            for (const letter of previousWord.letters) if (!letter.typed) letter.status = undefined;
             draft.inputValue = ` ${previousWord.typed ?? ''}`;
             draft.wordIndex--;
           }
-
           // Case 2: Input has more than one character and ends with a space - If the input string
           // has a trailing space, the next word will be selected
         } else if (input.length > 1 && input.endsWith(' ')) {
@@ -135,7 +136,6 @@ export function useWords() {
               // If the word has been partially typed, remove the last character from the
               // input value, otherwise reset it
               draft.inputValue = word.typed ? draft.inputValue.trimEnd() : ' ';
-
               currentStats.characters++;
               currentStats.errors++;
             }
@@ -144,17 +144,11 @@ export function useWords() {
             // If the input string has more than two characters (leading and trailing space,
             // and 1 or more letter between the spaces)
             if (input.length > 2) {
-              const nextWord = words[wordIndex + 1];
-
-              // Set the status of any missed letters in the current word
-              letters.forEach((letter) => {
-                if (!letter.typed) letter.status = 'missed';
-              });
-
+              const nextWord = words[wordIndex + 1]; // Set the status of any missed letters in the current word
+              for (const letter of letters) if (!letter.typed) letter.status = 'missed';
               // Update errors and characters stats accordingly
               if (letters.at(-1)?.status === 'missed') currentStats.errors++;
               if (nextWord) currentStats.characters++;
-
               draft.wordIndex++;
               draft.inputValue = ' ';
             }
@@ -162,7 +156,7 @@ export function useWords() {
         }
       });
     },
-    [freedomMode, mode, quickEnd, setValues, strictSpace, stopOnError]
+    [freedomMode, mode, quickEnd, setValues, strictSpace, stopOnError],
   );
 
   return useMemo(() => ({ add, update }), [add, update]);

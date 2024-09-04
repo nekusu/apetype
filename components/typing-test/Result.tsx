@@ -1,24 +1,24 @@
 'use client';
 
-import { Text, Tooltip } from 'components/core';
-import { useAuth } from 'context/authContext';
-import { useSettings } from 'context/settingsContext';
-import { useTypingTest } from 'context/typingTestContext';
-import { useUser } from 'context/userContext';
-import { useLanguage } from 'hooks/useLanguage';
+import { Text, Tooltip } from '@/components/core';
+import { useAuth } from '@/context/authContext';
+import { useSettings } from '@/context/settingsContext';
+import { useTypingTest } from '@/context/typingTestContext';
+import { useUser } from '@/context/userContext';
+import { useLanguage } from '@/hooks/useLanguage';
+import { type Letter as LetterType, accuracy as acc, consistency as con } from '@/utils/typingTest';
+import { type PersonalBest, getPersonalBest, isPersonalBest } from '@/utils/user';
 import {
   Fragment,
-  JSXElementConstructor,
-  ReactElement,
-  ReactNode,
+  type JSXElementConstructor,
+  type ReactElement,
+  type ReactNode,
   useEffect,
   useMemo,
   useState,
 } from 'react';
 import { RiVipCrown2Fill } from 'react-icons/ri';
 import { twJoin, twMerge } from 'tailwind-merge';
-import { Letter as LetterType, accuracy as acc, consistency as con } from 'utils/typingTest';
-import { PersonalBest, getPersonalBest, isPersonalBest } from 'utils/user';
 import { Chart, Letter } from '.';
 
 interface GroupProps {
@@ -36,7 +36,7 @@ function Group({ title, titleClassName, value, valueClassName }: GroupProps) {
       <Text
         asChild={typeof title === 'object'}
         className={twMerge(
-          'text-[1rem] !leading-none',
+          '!leading-none text-[1rem]',
           titleClassName,
           typeof title === 'object' && title.props.className,
         )}
@@ -46,12 +46,16 @@ function Group({ title, titleClassName, value, valueClassName }: GroupProps) {
       </Text>
       <div
         className={twJoin(
-          'flex leading-none text-main text-[2rem] transition-colors',
+          'flex text-[2rem] text-main leading-none transition-colors',
           valueClassName,
         )}
       >
-        {(value as ReactNode[]).map((value, index) =>
-          ['string', 'number'].includes(typeof value) ? <div key={index}>{value}</div> : value,
+        {(value as ReactNode[]).map((value) =>
+          typeof value === 'string' || typeof value === 'number' ? (
+            <div key={value}>{value}</div>
+          ) : (
+            value
+          ),
         )}
       </div>
     </div>
@@ -76,32 +80,34 @@ export default function Result() {
   const { language } = useLanguage(languageName);
   const accuracy = acc(characters, errors);
   const consistency = useMemo(() => con(stats.raw), [stats.raw]);
-  const characterStats = useMemo(() => {
-    return words.reduce(
-      (characters, word) => {
-        word.letters.forEach(({ status }) => {
-          if (!status) return;
-          if (status === 'correct') {
-            if (word.isCorrect) characters.correct++;
-          } else characters[status]++;
-        });
-        return characters;
-      },
-      { correct: 0, incorrect: 0, extra: 0, missed: 0 },
-    );
-  }, [words]);
+  const characterStats = useMemo(
+    () =>
+      words.reduce(
+        // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: not complex
+        (characters, { isCorrect, letters }) => {
+          for (const { status } of letters)
+            if (status === 'correct') {
+              if (isCorrect) characters.correct++;
+            } else if (status) characters[status]++;
+          return characters;
+        },
+        { correct: 0, incorrect: 0, extra: 0, missed: 0 },
+      ),
+    [words],
+  );
   const [newRecord, setNewRecord] = useState(0);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: not needed
   useEffect(() => {
     setPendingData((draft) => {
       const { typingStats, tests } = draft;
       const currentStats = { wpm, raw, accuracy, consistency };
       typingStats.completedTests += 1;
-      Object.entries(currentStats).forEach(([_key, value]) => {
+      for (const [_key, value] of Object.entries(currentStats)) {
         const key = _key as keyof typeof currentStats;
         if (value > typingStats.highest[key]) typingStats.highest[key] = value;
         typingStats.accumulated[key] += value;
-      });
+      }
       const newTest = {
         language: languageName,
         date: new Date(),
@@ -118,18 +124,17 @@ export default function Result() {
       newTest.isPb = user ? isPersonalBest(user, newTest, pendingData.tests) : false;
       tests.push(newTest);
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+  // biome-ignore lint/correctness/useExhaustiveDependencies: not needed
   useEffect(() => {
     let personalBest: PersonalBest | undefined;
     if (user) personalBest = getPersonalBest(user, mode, settings[mode], pendingData.tests);
     if (!personalBest || wpm > personalBest.wpm)
       setNewRecord(personalBest ? wpm - personalBest.wpm : wpm);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   return (
-    <div className='flex flex-col cursor-default gap-5'>
+    <div className='flex cursor-default flex-col gap-5'>
       <div className='grid grid-cols-[min-content_1fr] items-center gap-5'>
         <div className='flex flex-wrap gap-2'>
           <Group
