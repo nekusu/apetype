@@ -10,8 +10,7 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { type SubmitHandler, useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
-import { RiLoaderLine, RiMailFill } from 'react-icons/ri';
-import { twJoin } from 'tailwind-merge';
+import { RiMailFill } from 'react-icons/ri';
 import { type Input as ValiInput, email, minLength, object, string, toTrimmed } from 'valibot';
 
 const resetPasswordSchema = object({
@@ -60,17 +59,11 @@ export default function ResetPasswordPage() {
   };
 
   return (
-    <Transition
-      ref={focusTrapRef}
-      className={twJoin(
-        'flex min-w-xs max-w-xs flex-col gap-3.5 transition',
-        isLoading && '!pointer-events-none !opacity-60',
-      )}
-    >
+    <Transition ref={focusTrapRef} className='flex min-w-xs max-w-xs flex-col gap-3.5 transition'>
       <Text asChild className='text-2xl'>
         <h3>Reset password</h3>
       </Text>
-      <form className='flex flex-col gap-3.5' onSubmit={(e) => void handleSubmit(onSubmit)(e)}>
+      <form className='flex flex-col gap-3.5' onSubmit={handleSubmit(onSubmit)}>
         <div className='flex flex-col gap-2'>
           <Input
             placeholder='email'
@@ -81,8 +74,8 @@ export default function ResetPasswordPage() {
             {...register('email')}
           />
         </div>
-        <Button className='h-9 w-full' variant='filled' type='submit'>
-          {isLoading ? <RiLoaderLine className='animate-spin' /> : 'send email'}
+        <Button loading={isLoading} type='submit'>
+          send email
         </Button>
       </form>
     </Transition>

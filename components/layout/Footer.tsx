@@ -28,7 +28,7 @@ export default function Footer() {
     <Transition className='w-full'>
       <div className='flex items-center justify-between gap-2'>
         <div className='gap-6'>
-          <Button asChild className='p-0 text-sm'>
+          <Button asChild className='p-0 text-sm' variant='text'>
             <a href='https://github.com/nekusu' target='_blank' rel='noopener noreferrer'>
               <RiGithubFill />
               nekusu
@@ -53,8 +53,9 @@ export default function Footer() {
                   setSettings((draft) => {
                     draft.themeType = themeType === 'preset' ? 'custom' : 'preset';
                   });
-                else commandLine.handler?.open(themeType === 'preset' ? 'theme' : 'customTheme');
+                else commandLine.handler.open(themeType === 'preset' ? 'theme' : 'customTheme');
               }}
+              variant='text'
             >
               {isLoading ? <RiLoaderLine className='animate-spin' /> : <RiPaletteFill />}
               {themeType === 'custom' && customTheme ? `custom (${customTheme.name})` : theme}

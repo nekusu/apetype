@@ -1,7 +1,6 @@
 'use client';
 
-import { Button, Modal, Text, Tooltip } from '@/components/core';
-import type { ButtonProps } from '@/components/core/Button';
+import { Button, Grid, Modal, Text, Tooltip } from '@/components/core';
 import type { ModalProps } from '@/components/core/Modal';
 import { useSettings } from '@/context/settingsContext';
 import { formatFileSize } from '@/utils/misc';
@@ -25,8 +24,6 @@ interface WarningProps {
   properties?: { path: string[]; defaultValue?: unknown }[];
   type: string;
 }
-
-const COMMON_BUTTON_PROPS: Omit<ButtonProps, 'ref'> = { className: 'w-full', variant: 'filled' };
 
 function Warning({ icon: Icon, properties, type }: WarningProps) {
   return properties?.length ? (
@@ -73,7 +70,7 @@ function Warning({ icon: Icon, properties, type }: WarningProps) {
 }
 
 function ImportSettingsModal({ className, ...props }: ModalProps) {
-  const { open, onClose } = props;
+  const { opened, onClose } = props;
   const { setSettings, validate } = useSettings();
   const [file, setFile] = useState<File | undefined>();
   const [[settings, validation], setValidation] = useState<ReturnType<typeof validate> | []>([]);
@@ -94,7 +91,7 @@ function ImportSettingsModal({ className, ...props }: ModalProps) {
       setError('Invalid file type.');
       return;
     }
-    void file.text().then((text) => {
+    file.text().then((text) => {
       const settings = JSON.parse(text) as Settings;
       setValidation(validate(settings));
     });
@@ -103,10 +100,10 @@ function ImportSettingsModal({ className, ...props }: ModalProps) {
   useDidUpdate(() => {
     formRef.current?.reset();
     resetValues();
-  }, [open]);
+  }, [opened]);
 
   return (
-    <Modal className={twMerge('w-full max-w-sm', className)} centered {...props}>
+    <Modal className={twMerge('w-full max-w-sm', className)} {...props}>
       <form
         ref={formRef}
         className='flex flex-col gap-3.5'
@@ -118,8 +115,8 @@ function ImportSettingsModal({ className, ...props }: ModalProps) {
         <Text asChild className='text-2xl'>
           <h3>Import settings</h3>
         </Text>
-        <div className='grid grid-cols-[auto_1fr] items-center gap-x-2'>
-          <Button asChild className={twJoin('px-3', file && 'row-span-2')} variant='filled'>
+        <Grid className='grid-cols-[auto_1fr] items-center'>
+          <Button asChild className={twJoin(file && 'row-span-2')}>
             <label>
               select file
               <RiBracesLine />
@@ -134,7 +131,7 @@ function ImportSettingsModal({ className, ...props }: ModalProps) {
               {formatFileSize(file.size, true)}
             </Text>
           )}
-        </div>
+        </Grid>
         <div className='flex flex-col gap-2 empty:hidden'>
           {error && (
             <div className='flex items-center gap-1.5 text-error'>
@@ -146,12 +143,7 @@ function ImportSettingsModal({ className, ...props }: ModalProps) {
           <Warning icon={RiSpam2Line} properties={missing} type='missing' />
           <Warning icon={RiQuestionLine} properties={unknown} type='unknown' />
         </div>
-        <Button
-          disabled={!settings || !!error}
-          onClick={onClose}
-          type='submit'
-          {...COMMON_BUTTON_PROPS}
-        >
+        <Button disabled={!settings || !!error} onClick={onClose} type='submit'>
           apply
         </Button>
       </form>
@@ -161,7 +153,7 @@ function ImportSettingsModal({ className, ...props }: ModalProps) {
 
 export default function ImportExportSettings() {
   const settings = useSettings();
-  const [modalOpen, modalHandler] = useDisclosure(false);
+  const [modalOpened, modalHandler] = useDisclosure(false);
   const [settingsURL, setSettingsURL] = useState('');
 
   useEffect(() => {
@@ -172,10 +164,8 @@ export default function ImportExportSettings() {
   return (
     <>
       <Setting id='importExportSettings'>
-        <Button onClick={modalHandler.open} {...COMMON_BUTTON_PROPS}>
-          import
-        </Button>
-        <Button asChild {...COMMON_BUTTON_PROPS}>
+        <Button onClick={modalHandler.open}>import</Button>
+        <Button asChild>
           <a
             href={settingsURL}
             download='settings.json'
@@ -185,7 +175,7 @@ export default function ImportExportSettings() {
           </a>
         </Button>
       </Setting>
-      <ImportSettingsModal open={modalOpen} onClose={modalHandler.close} />
+      <ImportSettingsModal opened={modalOpened} onClose={modalHandler.close} />
     </>
   );
 }

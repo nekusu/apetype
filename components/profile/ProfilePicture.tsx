@@ -62,8 +62,8 @@ export default function ProfilePicture({
   wrapperClassName,
   ...props
 }: ProfilePictureProps) {
-  const [imageModalOpen, imageModalHandler] = useDisclosure(false);
-  const [changePictureModalOpen, changePictureModalHandler] = useDisclosure(false);
+  const [imageModalOpened, imageModalHandler] = useDisclosure(false);
+  const [changePictureModalOpened, changePictureModalHandler] = useDisclosure(false);
 
   return (
     <div className={twMerge('group relative', wrapperClassName)}>
@@ -71,7 +71,7 @@ export default function ProfilePicture({
         className={twMerge(
           'relative aspect-square w-48 overflow-hidden border-4 border-sub-alt bg-bg transition-all',
           src ? 'cursor-pointer active:scale-[.925]' : 'flex items-center justify-center',
-          shape === 'rect' ? 'rounded-xl' : 'rounded-full',
+          shape === 'rect' ? 'rounded-xl' : 'rounded-[50%]',
           className,
         )}
         onClick={() => expandable && src && imageModalHandler.open()}
@@ -89,14 +89,13 @@ export default function ProfilePicture({
                 'absolute px-2 opacity-0 shadow-md group-hover:opacity-100 group-has-focus-visible:opacity-100',
                 shape === 'rect' ? 'right-3 bottom-3' : 'right-4 bottom-4 rounded-full',
               )}
-              variant='filled'
               onClick={changePictureModalHandler.open}
             >
               <RiPencilFill />
             </Button>
           </Tooltip>
           <SetImageModal
-            open={changePictureModalOpen}
+            opened={changePictureModalOpened}
             onClose={changePictureModalHandler.close}
             title='Change profile picture'
             enableShapeSelection
@@ -111,9 +110,8 @@ export default function ProfilePicture({
       {expandable && (
         <Modal
           className='relative aspect-square w-xl select-none overflow-hidden bg-transparent p-0 shadow-none'
-          open={imageModalOpen}
+          opened={imageModalOpened}
           onClose={imageModalHandler.close}
-          centered
           trapFocus={false}
           overflow='outside'
         >

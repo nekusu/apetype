@@ -4,75 +4,17 @@ import { GlobalProvider } from '@/context/globalContext';
 import { SettingsProvider } from '@/context/settingsContext';
 import { ThemeProvider } from '@/context/themeContext';
 import { UserProvider } from '@/context/userContext';
+import { lexendDeca } from '@/utils/fonts';
 import { STATIC_URL } from '@/utils/monkeytype';
 import type { ThemeInfo } from '@/utils/theme';
 import type { KeymapLayout } from '@/utils/typingTest';
 import type { Metadata } from 'next';
 import dynamic from 'next/dynamic';
-import {
-  Fira_Code,
-  Inconsolata,
-  JetBrains_Mono,
-  Lato,
-  Lexend_Deca,
-  Montserrat,
-  Nunito,
-  Oxygen,
-  Roboto,
-  Roboto_Mono,
-  Source_Code_Pro,
-  Ubuntu,
-  Ubuntu_Mono,
-} from 'next/font/google';
 import type { ReactNode } from 'react';
-import { twJoin } from 'tailwind-merge';
 import './globals.css';
 
 const CommandLine = dynamic(() => import('@/components/command-line/CommandLine'));
 const ParallelRouteModal = dynamic(() => import('@/components/layout/ParallelRouteModal'));
-
-const firaCode = Fira_Code({ variable: '--font-fira-code', subsets: ['latin'] });
-const inconsolata = Inconsolata({ variable: '--font-inconsolata', subsets: ['latin'] });
-const jetBrainsMono = JetBrains_Mono({
-  variable: '--font-jetbrains-mono',
-  subsets: ['latin'],
-});
-const lato = Lato({ variable: '--font-lato', subsets: ['latin'], weight: '400' });
-const lexendDeca = Lexend_Deca({
-  variable: '--font-lexend-deca',
-  subsets: ['latin'],
-  weight: '400',
-});
-const montserrat = Montserrat({ variable: '--font-montserrat', subsets: ['latin'] });
-const nunito = Nunito({ variable: '--font-nunito', subsets: ['latin'] });
-const oxygen = Oxygen({ variable: '--font-oxygen', subsets: ['latin'], weight: '400' });
-const roboto = Roboto({ variable: '--font-roboto', subsets: ['latin'], weight: '400' });
-const robotoMono = Roboto_Mono({ variable: '--font-roboto-mono', subsets: ['latin'] });
-const sourceCodePro = Source_Code_Pro({
-  variable: '--font-source-code-pro',
-  subsets: ['latin'],
-});
-const ubuntu = Ubuntu({ variable: '--font-ubuntu', subsets: ['latin'], weight: '400' });
-const ubuntuMono = Ubuntu_Mono({
-  variable: '--font-ubuntu-mono',
-  subsets: ['latin'],
-  weight: '400',
-});
-const fonts = [
-  firaCode,
-  inconsolata,
-  jetBrainsMono,
-  lato,
-  lexendDeca,
-  montserrat,
-  nunito,
-  oxygen,
-  roboto,
-  robotoMono,
-  sourceCodePro,
-  ubuntu,
-  ubuntuMono,
-];
 
 export const metadata: Metadata = {
   title: 'Apetype',
@@ -99,12 +41,14 @@ async function getThemes() {
 }
 
 export default async function RootLayout(props: { children: ReactNode; auth: ReactNode }) {
-  const languages = await getLanguages();
-  const layouts = await getLayouts();
-  const themes = await getThemes();
+  const [languages, layouts, themes] = await Promise.all([
+    getLanguages(),
+    getLayouts(),
+    getThemes(),
+  ]);
 
   return (
-    <html lang='en' className={twJoin(fonts.map((font) => font.variable))}>
+    <html lang='en' className={lexendDeca.variable}>
       <body className='flex justify-center bg-bg font-default transition-colors'>
         <GlobalProvider languages={languages} layouts={layouts} themes={themes}>
           <SettingsProvider>

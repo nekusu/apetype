@@ -15,7 +15,7 @@ import { twJoin } from 'tailwind-merge';
 import { Caret, Word } from '.';
 
 export default function Words() {
-  const { isTestFinished, modalOpen, setGlobalValues } = useGlobal();
+  const { isTestFinished, modalOpened, setGlobalValues } = useGlobal();
   const {
     mode,
     time,
@@ -35,7 +35,7 @@ export default function Words() {
   const wrapperHeight = useMemo(() => fontSize * 26 * 3, [fontSize]);
   const { wordsetRef } = useLineScroll(wrapperHeight, wordRef.current);
   const [isFocused, setIsFocused] = useState(false);
-  const [isBlurred, setIsBlurred] = useState(modalOpen);
+  const [isBlurred, setIsBlurred] = useState(modalOpened);
   const { start: startBlur, clear: clearBlur } = useTimeout(() => setIsBlurred(true), 1000);
   const { start: startIdle, clear: clearIdle } = useTimeout(
     () =>
@@ -84,8 +84,8 @@ export default function Words() {
     wordsCollection.add(mode === 'words' && wordAmount ? wordAmount : 100);
   });
   useEffect(() => {
-    if (!modalOpen) focusWords();
-  }, [focusWords, modalOpen]);
+    if (!modalOpened) focusWords();
+  }, [focusWords, modalOpened]);
   useDidUpdate(() => {
     if (wordIndex > highestWordIndex.current) {
       if (mode === 'time' || words.length < (wordAmount || Number.POSITIVE_INFINITY))
@@ -94,7 +94,7 @@ export default function Words() {
     }
   }, [wordIndex]);
   useWindowEvent('keyup', (event) => {
-    if (!(modalOpen || isFocused || ['Tab', 'Escape'].includes(event.key))) {
+    if (!(modalOpened || isFocused || ['Tab', 'Escape'].includes(event.key))) {
       event.preventDefault();
       focusWords();
     }

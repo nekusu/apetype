@@ -127,7 +127,7 @@ export default function TestHistory() {
     { revalidateIfStale: false },
   );
   const [chartTest, setChartTest] = useState<ChartProps>();
-  const [chartModalOpen, chartModalHandler] = useDisclosure(false);
+  const [chartModalOpened, chartModalHandler] = useDisclosure(false);
 
   useIsomorphicEffect(() => {
     if (entry?.isIntersecting) setOnScreen(true);
@@ -215,6 +215,7 @@ export default function TestHistory() {
                             setChartTest({ stats, elapsedTime: duration });
                             chartModalHandler.open();
                           }}
+                          variant='text'
                         >
                           <RiLineChartFill />
                         </Button>
@@ -232,9 +233,8 @@ export default function TestHistory() {
       </table>
       {user && tests && tests.length < user.typingStats.completedTests && (
         <Button
-          className='min-w-[25%] px-3'
-          disabled={isLoading}
-          variant='filled'
+          className='min-w-[25%]'
+          loading={isLoading}
           onClick={() => setLimit((value) => value + 10)}
         >
           load more
@@ -243,9 +243,8 @@ export default function TestHistory() {
       <Modal
         backdropClassName='overflow-hidden'
         className='w-3xl'
-        open={chartModalOpen}
+        opened={chartModalOpened}
         onClose={chartModalHandler.close}
-        centered
         overflow='outside'
         trapFocus={false}
       >

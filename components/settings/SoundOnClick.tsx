@@ -7,7 +7,7 @@ import type { Settings } from '@/utils/settings';
 import { RiLoaderLine, RiPlayFill, RiVolumeUpFill } from 'react-icons/ri';
 import Setting from './Setting';
 
-export interface SoundButtonProps {
+interface SoundButtonProps {
   alt?: string;
   value: Settings['soundOnClick'];
 }
@@ -20,7 +20,6 @@ export function SoundButton({ alt, value }: SoundButtonProps) {
     <Button
       active={soundOnClick === value}
       className='group grid w-full grid-cols-[1fr_auto_1fr] justify-items-end'
-      variant='filled'
       onClick={() => {
         setSettings((draft) => {
           draft.soundOnClick = value;
@@ -48,9 +47,7 @@ export default function SoundOnClick() {
   return (
     <Setting
       id='soundOnClick'
-      customButtons={({ alt, value }) => (
-        <SoundButton key={value?.toString()} alt={alt} value={value as Settings['soundOnClick']} />
-      )}
+      customButtons={({ alt, value }) => <SoundButton key={alt} alt={alt} value={value} />}
       columns={4}
       fullWidth
     />

@@ -24,10 +24,9 @@ const ThemeButton = forwardRef<HTMLButtonElement, ThemeButtonProps>(function The
       ref={ref}
       className={twMerge(
         'group hover:-translate-y-0.5 grid w-full grid-cols-[1fr_auto_1fr] justify-items-end text-sm hover:shadow-lg active:translate-y-0.5 active:transform-none',
-        selected && 'outline-solid',
+        selected && 'outline-2',
         className,
       )}
-      variant='filled'
       style={{ background: bg, color: text, outlineColor: text, ...style }}
       {...props}
     >

@@ -42,7 +42,7 @@ export default function PersistentCache() {
         </>
       )}
     >
-      <Button className='col-span-full w-full' onClick={() => void deleteCache()} variant='danger'>
+      <Button className='col-span-full' onClick={deleteCache} variant='danger'>
         clear cache
       </Button>
     </Setting>

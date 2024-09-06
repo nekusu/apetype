@@ -12,10 +12,10 @@ export default function Sound() {
   const { errors } = currentStats;
   const lastErrorCount = useRef(0);
   const { play: playClick } = useSound(soundOnClick, { volume });
-  const { play: playError } = useSound(!blindMode && soundOnError && 'error.webm', { volume });
+  const { play: playError } = useSound(soundOnError && 'error.webm', { volume });
 
   useDidUpdate(() => {
-    if (errors > lastErrorCount.current) {
+    if (!blindMode && errors > lastErrorCount.current) {
       playError();
       lastErrorCount.current = errors;
     } else playClick();

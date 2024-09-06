@@ -16,7 +16,7 @@ export interface ModalProps extends HTMLMotionProps<'div'> {
   closeOnEscape?: boolean;
   id?: string;
   lockScroll?: boolean;
-  open: boolean;
+  opened: boolean;
   onClose?: () => void;
   overflow?: 'inside' | 'outside';
   target?: HTMLElement | null;
@@ -25,13 +25,13 @@ export interface ModalProps extends HTMLMotionProps<'div'> {
 
 export default function Modal({
   backdropClassName,
-  centered = false,
+  centered = true,
   className,
   closeOnClickOutside = true,
   closeOnEscape = true,
   id,
   lockScroll = true,
-  open,
+  opened,
   onClose,
   overflow = 'inside',
   target,
@@ -39,10 +39,10 @@ export default function Modal({
   ...props
 }: ModalProps) {
   const { setGlobalValues } = useGlobal();
-  const focusTrapRef = useFocusTrap(trapFocus && open);
+  const focusTrapRef = useFocusTrap(trapFocus && opened);
 
   const handleEscapePress = () => {
-    if (closeOnEscape && open) onClose?.();
+    if (closeOnEscape && opened) onClose?.();
   };
   const handleOutsideClick = (event: MouseEvent) => {
     if (closeOnClickOutside && event.target === event.currentTarget) onClose?.();
@@ -50,16 +50,16 @@ export default function Modal({
 
   useEffect(() => {
     setGlobalValues((draft) => {
-      draft.modalOpen = open;
+      draft.modalOpened = opened;
     });
-  }, [open, setGlobalValues]);
+  }, [opened, setGlobalValues]);
   useHotkeys([['Escape', handleEscapePress]], ['input']);
 
   return (
     <FloatingPortal id={id} root={target}>
       <AnimatePresence>
-        {open && (
-          <RemoveScroll enabled={lockScroll && open} forwardProps>
+        {opened && (
+          <RemoveScroll enabled={lockScroll && opened} forwardProps>
             <Transition
               className={twMerge(
                 'inset-0 z-50 flex h-full w-full justify-center bg-black/50 px-8 py-16 backdrop-blur-[2.5px]',

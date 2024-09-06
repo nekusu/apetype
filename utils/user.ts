@@ -1,8 +1,8 @@
-import type { Paths } from '@tatsuokaniwa/swr-firestore/dist/util/type';
+import type { TypingTestValues } from '@/context/typingTestContext';
+import type { KeyParams } from '@tatsuokaniwa/swr-firestore';
 import { Timestamp } from 'firebase/firestore';
 import { type Settings, type Time, type Words, settingsList } from './settings';
 import type { Social } from './socials';
-import type { TypingTestValues } from './typingTest';
 
 export interface TypingTest extends Pick<TypingTestValues, 'words' | 'stats'> {
   id: string;
@@ -74,7 +74,11 @@ export const defaultUserDetails: Partial<User> = {
   },
 };
 
-export const parseDates: Paths<User>[] = ['joinedAt', 'nameLastChangedAt', 'testsLastUpdatedAt'];
+export const parseDates: KeyParams<User>['parseDates'] = [
+  'joinedAt',
+  'nameLastChangedAt',
+  'testsLastUpdatedAt',
+];
 
 export function getPersonalBest(
   user: User,

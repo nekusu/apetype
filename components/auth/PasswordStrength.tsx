@@ -25,7 +25,7 @@ function PasswordStrength({
   const [result, setResult] = useState<ZxcvbnResult | null>(null);
 
   useEffect(() => {
-    void (async () => {
+    (async () => {
       const { zxcvbnAsync, zxcvbnOptions } = await import('@zxcvbn-ts/core');
       const zxcvbnCommonPackage = await import('@zxcvbn-ts/language-common');
       const zxcvbnEnPackage = await import('@zxcvbn-ts/language-en');

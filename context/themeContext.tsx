@@ -8,7 +8,6 @@ import {
   type ThemeColors,
   type ThemeInfo,
   extractThemeColors,
-  removeThemeColors,
   setThemeColors,
 } from '@/utils/theme';
 import { useDidUpdate, useIsomorphicEffect, useTimeout } from '@mantine/hooks';
@@ -128,12 +127,9 @@ export function ThemeProvider({ children, previewDelay, themes }: ThemeProviderP
     setPresetName(replaceSpaces(theme));
   }, [theme]);
   useIsomorphicEffect(() => {
-    if (presetColors) setThemeColors(presetColors, document.documentElement);
-  }, [presetColors]);
-  useIsomorphicEffect(() => {
     if (themeType === 'custom' && customTheme) setThemeColors(customTheme.colors);
-    else removeThemeColors();
-  }, [customThemeId, customThemes, previewThemeId, themeType]);
+    else if (presetColors) setThemeColors(presetColors);
+  }, [customThemeId, customThemes, presetColors, previewThemeId, themeType]);
   useIsomorphicEffect(() => {
     if (randomizeTheme) {
       if (themeType === 'preset') {

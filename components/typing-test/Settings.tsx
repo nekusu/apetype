@@ -31,7 +31,7 @@ export default function Settings() {
   const { settingsList } = useGlobal();
   const settings = useSettings();
   const { mode, setSettings } = settings;
-  const [modalOpen, modalHandler] = useDisclosure(false);
+  const [modalOpened, modalHandler] = useDisclosure(false);
   const [customAmount, setCustomAmount] = useState(settings[mode]);
   const customActive = !settingsList[mode].options
     .map(({ value }) => value)
@@ -42,8 +42,8 @@ export default function Settings() {
     setCustomAmount(settings[mode]);
   }, [mode, settings]);
   useDidUpdate(() => {
-    if (modalOpen) setCustomAmount(settings[mode]);
-  }, [modalOpen, mode, settings]);
+    if (modalOpened) setCustomAmount(settings[mode]);
+  }, [modalOpened, mode, settings]);
 
   return (
     <Transition className='flex self-start justify-self-center rounded-lg bg-sub-alt px-2 transition hover:shadow-lg'>
@@ -60,6 +60,7 @@ export default function Settings() {
                 draft.mode = value;
               })
             }
+            variant='text'
           >
             <Icon size={DEFAULT_ICON_SIZE} />
             {value}
@@ -77,17 +78,23 @@ export default function Settings() {
               draft[mode] = value;
             })
           }
+          variant='text'
         >
           {value}
         </Button>
       ))}
       {settingsList[mode].custom && (
-        <Button active={customActive} className='px-2 py-3 text-xs' onClick={modalHandler.open}>
+        <Button
+          active={customActive}
+          className='px-2 py-3 text-xs'
+          onClick={modalHandler.open}
+          variant='text'
+        >
           <RiToolsFill size={DEFAULT_ICON_SIZE} />
           {customActive && (customAmount || 'Infinite')}
         </Button>
       )}
-      <Modal className='w-full max-w-sm' open={modalOpen} onClose={modalHandler.close} centered>
+      <Modal className='w-full max-w-sm' opened={modalOpened} onClose={modalHandler.close}>
         <form
           className='flex flex-col gap-3.5'
           onSubmit={(event) => {
@@ -117,9 +124,7 @@ export default function Settings() {
             You can start an infinite test by inputting 0. To stop the test, use <Key>shift</Key> +{' '}
             <Key>enter</Key>
           </Text>
-          <Button className='w-full' type='submit' variant='filled'>
-            ok
-          </Button>
+          <Button type='submit'>save</Button>
         </form>
       </Modal>
     </Transition>

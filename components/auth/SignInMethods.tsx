@@ -1,6 +1,6 @@
 'use client';
 
-import { Button } from '@/components/core';
+import { Button, Group } from '@/components/core';
 import { useDidMount } from '@/hooks/useDidMount';
 import { getFirebaseAuth, getFirebaseFirestore } from '@/utils/firebase';
 import type { AuthenticationMethod } from '@/utils/firebase/auth';
@@ -11,6 +11,7 @@ import { useCallback, useState } from 'react';
 import { toast } from 'react-hot-toast';
 
 export interface SignInMethodsProps {
+  disabled?: boolean;
   onFinish?: () => void;
   onError?: (error: FirebaseError) => void;
   onSignIn?: (result: UserCredential) => void;
@@ -18,6 +19,7 @@ export interface SignInMethodsProps {
 }
 
 export default function SignInMethods({
+  disabled,
   onFinish,
   onError,
   onSignIn,
@@ -66,25 +68,20 @@ export default function SignInMethods({
   );
 
   useDidMount(() => {
-    void (async () => {
+    (async () => {
       const { authenticationMethods } = await getFirebaseAuth();
       setAuthMethods(authenticationMethods);
     })();
   });
 
   return (
-    <div className='flex gap-2'>
-      {authMethods?.map(({ name, provider, Icon }) => (
-        <Button
-          key={name}
-          className='w-full'
-          variant='filled'
-          onClick={() => void signIn(provider)}
-        >
+    <Group>
+      {authMethods?.map(({ name, provider, icon: Icon }) => (
+        <Button key={name} disabled={disabled} onClick={() => signIn(provider)}>
           <Icon />
           {name}
         </Button>
       ))}
-    </div>
+    </Group>
   );
 }

@@ -12,16 +12,16 @@ function ThemeBubbles({ className, colors, style, withBackground, ...props }: Th
   return (
     <div
       className={twMerge(
-        'flex gap-1.5 rounded-full',
+        'flex gap-1.5 rounded-full [&>*]:h-3 [&>*]:w-3 [&>*]:rounded-full',
         withBackground && 'rounded-full p-1',
         className,
       )}
       style={{ background: withBackground ? bg : undefined, ...style }}
       {...props}
     >
-      <div className='h-3 w-3 rounded-full' style={{ background: main }} />
-      <div className='h-3 w-3 rounded-full' style={{ background: sub }} />
-      <div className='h-3 w-3 rounded-full' style={{ background: text }} />
+      <div style={{ background: main }} />
+      <div style={{ background: sub }} />
+      <div style={{ background: text }} />
     </div>
   );
 }

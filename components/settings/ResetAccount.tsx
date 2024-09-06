@@ -1,7 +1,7 @@
 'use client';
 
 import { ReauthenticationModal } from '@/components/auth';
-import { Button, Modal, Text } from '@/components/core';
+import { Button, Group, Modal, Text } from '@/components/core';
 import { useUser } from '@/context/userContext';
 import { getFirebaseAuth, getFirebaseFirestore } from '@/utils/firebase';
 import { defaultUserDetails } from '@/utils/user';
@@ -9,13 +9,12 @@ import { useDisclosure } from '@mantine/hooks';
 import type { FirebaseError } from 'firebase/app';
 import { useState } from 'react';
 import { toast } from 'react-hot-toast';
-import { RiLoaderLine } from 'react-icons/ri';
 import Setting from './Setting';
 
 export default function ResetAccount() {
   const { updateUser, deleteCachedUserData } = useUser();
-  const [confirmationModalOpen, confirmationModalHandler] = useDisclosure(false);
-  const [reauthModalOpen, reauthModalHandler] = useDisclosure(false);
+  const [confirmationModalOpened, confirmationModalHandler] = useDisclosure(false);
+  const [reauthModalOpened, reauthModalHandler] = useDisclosure(false);
   const [isLoading, setIsLoading] = useState(false);
 
   const resetAccount = async () => {
@@ -47,15 +46,14 @@ export default function ResetAccount() {
   return (
     <>
       <Setting id='resetAccount'>
-        <Button className='w-full' onClick={confirmationModalHandler.open} variant='danger'>
+        <Button onClick={confirmationModalHandler.open} variant='danger'>
           reset account
         </Button>
       </Setting>
       <Modal
         className='w-full max-w-sm'
-        open={confirmationModalOpen}
+        opened={confirmationModalOpened}
         onClose={confirmationModalHandler.close}
-        centered
       >
         <div className='flex flex-col gap-3.5'>
           <Text asChild className='text-2xl'>
@@ -66,25 +64,18 @@ export default function ResetAccount() {
             <br />
             <span className='text-error'>After pressing the button everything will be gone.</span>
           </Text>
-          <div className='flex gap-2'>
-            <Button className='w-full' onClick={confirmationModalHandler.close} variant='filled'>
-              cancel
+          <Group>
+            <Button onClick={confirmationModalHandler.close}>cancel</Button>
+            <Button loading={isLoading} onClick={reauthModalHandler.open} variant='danger'>
+              reset
             </Button>
-            <Button
-              className='w-full'
-              disabled={isLoading}
-              onClick={() => reauthModalHandler.open()}
-              variant='danger'
-            >
-              {isLoading ? <RiLoaderLine className='animate-spin' /> : 'reset'}
-            </Button>
-          </div>
+          </Group>
         </div>
       </Modal>
       <ReauthenticationModal
-        open={reauthModalOpen}
+        opened={reauthModalOpened}
         onClose={reauthModalHandler.close}
-        onReauthenticate={() => void resetAccount()}
+        onReauthenticate={resetAccount}
       />
     </>
   );

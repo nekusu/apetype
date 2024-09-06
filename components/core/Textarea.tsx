@@ -26,7 +26,7 @@ const Textarea = forwardRef<ElementRef<'textarea'>, TextareaProps>(function Text
     <div
       className={twMerge(
         'flex flex-col gap-1 text-sub transition focus-within:text-text',
-        disabled && 'pointer-events-none opacity-60',
+        disabled && 'pointer-events-none opacity-50',
         wrapperClassName,
       )}
     >

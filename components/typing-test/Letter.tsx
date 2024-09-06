@@ -3,7 +3,7 @@
 import type { Settings } from '@/utils/settings';
 import type { Letter as LetterType } from '@/utils/typingTest';
 import { forwardRef, memo, useCallback } from 'react';
-import { twJoin } from 'tailwind-merge';
+import { twMerge } from 'tailwind-merge';
 
 type LetterProps = LetterType &
   Partial<
@@ -47,7 +47,7 @@ const Letter = forwardRef<HTMLSpanElement, LetterProps>(function Letter(
 
   return (
     <span
-      className={twJoin(
+      className={twMerge(
         'relative inline-block',
         (blindMode || hideExtraLetters) && status === 'extra' && 'hidden',
         blindMode && !!status ? color('correct') : color(status),

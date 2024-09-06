@@ -1,6 +1,6 @@
 'use client';
 
-import { Text, Tooltip } from '@/components/core';
+import { Grid, Text, Tooltip } from '@/components/core';
 import { useAuth } from '@/context/authContext';
 import { useSettings } from '@/context/settingsContext';
 import { useTypingTest } from '@/context/typingTestContext';
@@ -18,38 +18,29 @@ import {
   useState,
 } from 'react';
 import { RiVipCrown2Fill } from 'react-icons/ri';
-import { twJoin, twMerge } from 'tailwind-merge';
+import { twJoin } from 'tailwind-merge';
 import { Chart, Letter } from '.';
 
-interface GroupProps {
+interface StatProps {
   title: string | number | ReactElement<HTMLElement, string | JSXElementConstructor<HTMLElement>>;
   titleClassName?: string;
   value: ReactNode | ReactNode[];
   valueClassName?: string;
 }
 
-function Group({ title, titleClassName, value, valueClassName }: GroupProps) {
+function Stat({ title, titleClassName, value, valueClassName }: StatProps) {
   if (!Array.isArray(value)) value = [value];
 
   return (
     <div className='flex flex-col gap-1'>
       <Text
         asChild={typeof title === 'object'}
-        className={twMerge(
-          '!leading-none text-[1rem]',
-          titleClassName,
-          typeof title === 'object' && title.props.className,
-        )}
+        className={twJoin('!leading-none', titleClassName)}
         dimmed
       >
         {title}
       </Text>
-      <div
-        className={twJoin(
-          'flex text-[2rem] text-main leading-none transition-colors',
-          valueClassName,
-        )}
-      >
+      <div className={twJoin('flex text-[2rem]/none text-main transition-colors', valueClassName)}>
         {(value as ReactNode[]).map((value) =>
           typeof value === 'string' || typeof value === 'number' ? (
             <div key={value}>{value}</div>
@@ -135,9 +126,9 @@ export default function Result() {
 
   return (
     <div className='flex cursor-default flex-col gap-5'>
-      <div className='grid grid-cols-[min-content_1fr] items-center gap-5'>
+      <Grid className='grid-cols-[min-content_1fr] items-center gap-5'>
         <div className='flex flex-wrap gap-2'>
-          <Group
+          <Stat
             title={
               <div className='flex items-center gap-3 text-[2rem]'>
                 wpm
@@ -153,7 +144,7 @@ export default function Result() {
             value={showDecimalPlaces ? wpm.toFixed(2) : Math.floor(wpm)}
             valueClassName='text-[4rem]'
           />
-          <Group
+          <Stat
             title='acc'
             titleClassName='text-[2rem]'
             value={`${showDecimalPlaces ? accuracy.toFixed(2) : Math.floor(accuracy)}%`}
@@ -161,9 +152,9 @@ export default function Result() {
           />
         </div>
         <Chart stats={stats} elapsedTime={elapsedTime} />
-      </div>
+      </Grid>
       <div className='flex justify-between gap-5'>
-        <Group
+        <Stat
           title='test type'
           value={[
             `${mode} ${mode === 'time' ? time : mode === 'words' ? wordAmount : ''}`,
@@ -172,10 +163,10 @@ export default function Result() {
             stopOnError && `stop on ${stopOnError}`,
             lazyMode && !language?.noLazyMode && 'lazy',
           ]}
-          valueClassName='text-base flex-col'
+          valueClassName='text-[1rem] flex-col'
         />
-        <Group title='raw' value={showDecimalPlaces ? raw.toFixed(2) : Math.floor(raw)} />
-        <Group
+        <Stat title='raw' value={showDecimalPlaces ? raw.toFixed(2) : Math.floor(raw)} />
+        <Stat
           title='characters'
           value={Object.entries(characterStats).map(([status, count]) => (
             <Fragment key={status}>
@@ -186,11 +177,11 @@ export default function Result() {
             </Fragment>
           ))}
         />
-        <Group
+        <Stat
           title='consistency'
           value={`${showDecimalPlaces ? consistency.toFixed(2) : Math.floor(consistency)}%`}
         />
-        <Group title='time' value={`${elapsedTime}s`} />
+        <Stat title='time' value={`${elapsedTime}s`} />
       </div>
     </div>
   );

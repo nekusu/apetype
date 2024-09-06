@@ -80,7 +80,7 @@ async function deleteQueryBatch(q: Query, batchSize: number, resolve: (value?: u
   }
 
   setTimeout(() => {
-    void deleteQueryBatch(q, batchSize, resolve);
+    deleteQueryBatch(q, batchSize, resolve);
   }, 0);
 }
 export async function deleteCollection(path: string, batchSize: number) {
@@ -88,7 +88,7 @@ export async function deleteCollection(path: string, batchSize: number) {
   const q = query(collectionRef, limit(batchSize));
 
   return new Promise((resolve) => {
-    void deleteQueryBatch(q, batchSize, resolve);
+    deleteQueryBatch(q, batchSize, resolve);
   });
 }
 

@@ -6,20 +6,26 @@ import { useGlobal } from '@/context/globalContext';
 import { useSettings } from '@/context/settingsContext';
 import { useTheme } from '@/context/themeContext';
 import { useFocusLock } from '@/hooks/useFocusLock';
+import fonts from '@/utils/fonts';
 import uFuzzy from '@leeoniya/ufuzzy';
 import { useInputState, useIsomorphicEffect, useWindowEvent } from '@mantine/hooks';
 import { m } from 'framer-motion';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { type FormEvent, type KeyboardEvent, useEffect, useMemo, useRef, useState } from 'react';
 import { RiArrowDownLine, RiArrowUpLine, RiLoaderLine, RiTerminalLine } from 'react-icons/ri';
 import { ViewportList, type ViewportListRef } from 'react-viewport-list';
+import { twJoin } from 'tailwind-merge';
 import Item from './Item';
 
 const uf = new uFuzzy({ intraIns: 1, interChars: '.' });
 
 // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: todo
 export default function CommandLine() {
-  const { modalOpen, settingsList, commandLine, setGlobalValues } = useGlobal();
-  const { open, initialSetting, handler } = commandLine;
+  const { modalOpened, settingsList, commandLine, setGlobalValues } = useGlobal();
+  const {
+    opened,
+    initialSetting,
+    handler: { open, close },
+  } = commandLine;
   const settingsListValues = useMemo(
     () =>
       Object.values(settingsList).filter(
@@ -64,7 +70,7 @@ export default function CommandLine() {
     : items.settings.length;
 
   const hoverItem = (index: number) => !isUsingKeyboard.current && setIndex(index);
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLElement>) => {
+  const handleKeyDown = (e: KeyboardEvent<HTMLElement>) => {
     if ((quickRestart !== 'esc' && e.key === 'Tab') || e.key === 'ArrowDown') {
       e.preventDefault();
       setIndex((index) => (index + 1) % itemCount);
@@ -89,7 +95,7 @@ export default function CommandLine() {
     });
     setInput('');
   };
-  const select = (e?: React.FormEvent<HTMLFormElement>) => {
+  const select = (e?: FormEvent<HTMLFormElement>) => {
     e?.preventDefault();
     if (setting) {
       if (setting.custom && index === items.options.length)
@@ -114,12 +120,12 @@ export default function CommandLine() {
   };
 
   useIsomorphicEffect(() => {
-    if (open) setSetting(initialSetting ? settingsList[initialSetting] : null);
+    if (opened) setSetting(initialSetting ? settingsList[initialSetting] : null);
     else {
       clearPreview();
       setInput('');
     }
-  }, [open]);
+  }, [opened]);
   useIsomorphicEffect(() => {
     isUsingKeyboard.current = true;
     clearPreview();
@@ -132,24 +138,28 @@ export default function CommandLine() {
   // biome-ignore lint/correctness/useExhaustiveDependencies: not needed
   useEffect(() => {
     if (isUsingKeyboard.current) listRef.current?.scrollToIndex({ index });
-    if (setting && ['theme', 'customTheme'].includes(setting.id) && items.options[index].value)
-      previewTheme(items.options[index].value.toString());
+    if (
+      (setting?.id === 'theme' || setting?.id === 'customTheme') &&
+      typeof items.options[index].value === 'string'
+    )
+      previewTheme(items.options[index].value);
   }, [index]);
   useWindowEvent('keydown', (event) => {
     setGlobalValues((draft) => {
       draft.capsLock = event.getModifierState('CapsLock');
     });
-    if (event.key === (quickRestart !== 'esc' ? 'Escape' : 'Tab') && (!modalOpen || open))
-      if (open) handler?.close();
-      else handler?.open();
+    if (event.key === (quickRestart !== 'esc' ? 'Escape' : 'Tab') && (!modalOpened || opened))
+      if (opened) close();
+      else open();
     if (event.key === 'Control' && isThemeSetting) toggleThemeType();
   });
 
   return (
     <Modal
       className='flex w-[700px] flex-col overflow-hidden p-0'
-      open={open}
-      onClose={handler?.close}
+      opened={opened}
+      onClose={close}
+      centered={false}
       closeOnEscape={false}
     >
       <form
@@ -161,7 +171,6 @@ export default function CommandLine() {
           <Button
             asChild
             className='-ml-1 px-2.5 py-1.5 font-semibold text-xs'
-            variant='filled'
             active
             onClick={() => setSetting(undefined)}
           >
@@ -171,12 +180,7 @@ export default function CommandLine() {
           <RiTerminalLine className='text-main' />
         )}
         {isThemeSetting && (setting.id === 'customTheme' || !!customThemes.length) && (
-          <Button
-            asChild
-            className='-ml-1 px-2.5 py-1.5 text-xs'
-            variant='filled'
-            onClick={toggleThemeType}
-          >
+          <Button asChild className='-ml-1 px-2.5 py-1.5 text-xs' onClick={toggleThemeType}>
             <Transition>
               {themeType}
               {keyTips && <Key>ctrl</Key>}
@@ -242,12 +246,12 @@ export default function CommandLine() {
                 <Item
                   key={key}
                   active={active}
+                  className={twJoin(
+                    setting.id === 'fontFamily' && fonts[value as string].className,
+                  )}
                   label={(setting.id === 'caretStyle' ? value || alt : alt ?? value)?.toString()}
                   selected={selected && !(isLoading && active)}
-                  layoutId={key}
-                  style={{
-                    fontFamily: setting.id === 'fontFamily' ? `var(${value})` : undefined,
-                  }}
+                  layoutId={`cli-${key}`}
                   onClick={() => select()}
                   onMouseMove={() => hoverItem(i)}
                 >

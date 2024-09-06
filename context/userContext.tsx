@@ -147,7 +147,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
       user &&
       (!testsLastUpdatedAt || dayjs(user.testsLastUpdatedAt).isAfter(testsLastUpdatedAt))
     ) {
-      void deleteCachedUserData('tests');
+      deleteCachedUserData('tests');
       if (user.testsLastUpdatedAt) setTestsLastUpdatedAt(user.testsLastUpdatedAt);
     }
   }, [deleteCachedUserData, setTestsLastUpdatedAt, testsLastUpdatedAt, user]);

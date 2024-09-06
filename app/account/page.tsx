@@ -1,6 +1,7 @@
 'use client';
 
-import { Button, Tooltip, Transition } from '@/components/core';
+import Loading from '@/app/loading';
+import { Button, Group, Tooltip, Transition } from '@/components/core';
 import {
   PersonalBests,
   ProfileEditModal,
@@ -11,7 +12,6 @@ import {
 import { useAuth } from '@/context/authContext';
 import { useUser } from '@/context/userContext';
 import { useDisclosure } from '@mantine/hooks';
-import Loading from '@/app/loading';
 import { redirect } from 'next/navigation';
 import { useEffect } from 'react';
 import toast from 'react-hot-toast';
@@ -21,16 +21,16 @@ export default function AccountPage() {
   const { signedIn } = useAuth();
   const { user, savePendingData } = useUser();
   const { completedTests = 0 } = user?.typingStats ?? {};
-  const [profileEditModalOpen, profileEditModalHandler] = useDisclosure(false);
+  const [profileEditModalOpened, profileEditModalHandler] = useDisclosure(false);
 
   const copyProfileURL = () => {
-    void navigator.clipboard
+    navigator.clipboard
       .writeText(`${window.location.origin}/user/${user?.name}`)
       .then(() => toast.success('URL copied to clipboard!'));
   };
 
   useEffect(() => {
-    if (user) void savePendingData();
+    if (user) savePendingData();
   }, [savePendingData, user]);
 
   if (!signedIn) redirect('/');
@@ -40,20 +40,20 @@ export default function AccountPage() {
       <UserDetails
         user={user}
         actions={
-          <div className='flex gap-2'>
+          <Group grow={false}>
             <Tooltip className='bg-bg' label='Copy profile URL'>
-              <Button className='bg-bg px-2.5' variant='filled' onClick={copyProfileURL}>
+              <Button className='bg-bg px-2.5' onClick={copyProfileURL}>
                 <RiLinksLine />
               </Button>
             </Tooltip>
-            <Button className='px-3' active variant='filled' onClick={profileEditModalHandler.open}>
+            <Button active onClick={profileEditModalHandler.open}>
               edit profile
             </Button>
-          </div>
+          </Group>
         }
         editable
       />
-      <ProfileEditModal open={profileEditModalOpen} onClose={profileEditModalHandler.close} />
+      <ProfileEditModal opened={profileEditModalOpened} onClose={profileEditModalHandler.close} />
       <PersonalBests data={user.personalBests} />
       {completedTests > 1 && <UserStats user={user} />}
       {completedTests > 0 && <TestHistory />}

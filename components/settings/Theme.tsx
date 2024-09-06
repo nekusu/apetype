@@ -1,6 +1,6 @@
 'use client';
 
-import { Button, Text } from '@/components/core';
+import { Button, Grid, Group, Text } from '@/components/core';
 import { useGlobal } from '@/context/globalContext';
 import { useSettings } from '@/context/settingsContext';
 import { useTheme } from '@/context/themeContext';
@@ -27,16 +27,14 @@ export default function Theme() {
   }, [settingsList.theme, themes]);
 
   return (
-    <div className='grid auto-rows-auto grid-cols-[2fr_1.2fr] gap-x-5 gap-y-4'>
+    <Grid className='grid-cols-[2fr_1.2fr] gap-x-5 gap-y-4'>
       <Text asChild className='text-lg'>
         <h3>{settingsList.theme.command}</h3>
       </Text>
-      <div className='flex items-center gap-2'>
+      <Group>
         {THEME_TYPES.map((type) => (
           <Button
             key={type}
-            className='w-full'
-            variant='filled'
             active={themeType === type}
             onClick={() =>
               setSettings((draft) => {
@@ -47,9 +45,9 @@ export default function Theme() {
             {type}
           </Button>
         ))}
-      </div>
+      </Group>
       {themeType === 'preset' ? (
-        <div className='col-span-full grid grid-cols-[repeat(4,1fr)] items-center gap-2'>
+        <Grid className='col-span-full grid-cols-[repeat(4,1fr)] items-center'>
           {sortedOptions.map(({ value }) => {
             const selectedTheme = themes[value];
             const selected = theme === value;
@@ -68,10 +66,10 @@ export default function Theme() {
               />
             );
           })}
-        </div>
+        </Grid>
       ) : (
         <CustomTheme className='col-span-full' />
       )}
-    </div>
+    </Grid>
   );
 }

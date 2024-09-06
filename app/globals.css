@@ -11,9 +11,10 @@
   --color-error-extra: var(--error-extra-color);
   --color-colorful-error: var(--colorful-error-color);
   --color-colorful-error-extra: var(--colorful-error-extra-color);
-  --font-family-default: var(--font);
+  --font-family-default: var(--custom-font, var(--font));
   --animate-caret-blink: caret-blink 1s steps(2, jump-none) infinite;
   --animate-fade-in: fade-in 1s linear 1;
+  --animate-pulse-alt: pulse-alt 1s ease-in-out infinite;
 
   @keyframes caret-blink {
     from {
@@ -32,6 +33,20 @@
 
     to {
       opacity: 1;
+    }
+  }
+
+  @keyframes pulse-alt {
+    from {
+      transform: scale3d(1, 1, 1);
+    }
+
+    50% {
+      transform: scale3d(1.05, 1.05, 1.05);
+    }
+
+    to {
+      transform: scale3d(1, 1, 1);
     }
   }
 }
@@ -59,8 +74,4 @@
   ::selection {
     @apply bg-main text-sub-alt;
   }
-}
-
-:root {
-  --font: var(--font-lexend-deca);
 }

@@ -1,13 +1,11 @@
 import { Button, Modal, Text } from '@/components/core';
+import type { ModalProps } from '@/components/core/Modal';
 
-interface ModalProps {
-  open: boolean;
-  onClose: () => void;
-}
+export default function ReadabilityModal(props: ModalProps) {
+  const { onClose } = props;
 
-export default function ReadabilityModal({ open, onClose }: ModalProps) {
   return (
-    <Modal centered open={open} onClose={onClose}>
+    <Modal {...props}>
       <div className='flex max-w-sm flex-col gap-3.5 text-sm'>
         <Text asChild className='text-2xl'>
           <h3>Readability</h3>
@@ -30,9 +28,7 @@ export default function ReadabilityModal({ open, onClose }: ModalProps) {
           , which require a minimum of 4.5:1 for normal text and 3:1 for large text. To ensure
           maximum legibility, consider using a higher contrast ratio.
         </Text>
-        <Button className='w-full' variant='filled' onClick={onClose}>
-          ok
-        </Button>
+        <Button onClick={onClose}>ok</Button>
       </div>
     </Modal>
   );

@@ -2,6 +2,7 @@
 
 import { useCacheProvider } from '@/hooks/useCacheProvider';
 import { useDidMount } from '@/hooks/useDidMount';
+import fonts from '@/utils/fonts';
 import { type Settings, defaultSettings, validateSettings } from '@/utils/settings';
 import { useIsomorphicEffect, useLocalStorage } from '@mantine/hooks';
 import { freeze, produce } from 'immer';
@@ -66,11 +67,11 @@ export function SettingsProvider({ children }: SettingsProviderProps) {
     });
   }, [setGlobalValues, settings.customThemes]);
   useIsomorphicEffect(() => {
-    const fontFamily = settings.fontFamily;
-    document.documentElement.style.setProperty(
-      '--font',
-      fontFamily.startsWith('--') ? `var(${fontFamily})` : fontFamily,
-    );
+    const font = fonts[settings.fontFamily];
+    if (font) {
+      document.documentElement.className = font.variable;
+      document.documentElement.style.removeProperty('--custom-font');
+    } else document.documentElement.style.setProperty('--custom-font', settings.fontFamily);
   }, [settings.fontFamily]);
 
   return (

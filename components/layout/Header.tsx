@@ -1,10 +1,11 @@
 'use client';
 
-import { Button, Text, Tooltip, Transition } from '@/components/core';
+import { Button, Grid, Text, Tooltip, Transition } from '@/components/core';
 import { ProfilePicture } from '@/components/profile';
 import { useGlobal } from '@/context/globalContext';
 import { useUser } from '@/context/userContext';
 import { getFirebaseAuth } from '@/utils/firebase';
+import { lexendDeca } from '@/utils/fonts';
 import type { FirebaseError } from 'firebase-admin';
 import { AnimatePresence, useAnimation } from 'framer-motion';
 import Link from 'next/link';
@@ -61,16 +62,19 @@ export default function Header() {
   // biome-ignore lint/correctness/useExhaustiveDependencies: this is intentional
   useEffect(() => {
     if (!isUserTyping)
-      void animationControls.start({
+      animationControls.start({
         pathOffset: [0, 1, 2],
         transition: { duration: 1 },
       });
   }, [isUserTyping, animationControls, testId]);
 
   return (
-    <div className='relative z-10 grid w-full select-none grid-cols-[auto_1fr_auto] gap-3'>
+    <Grid className='relative z-10 w-full select-none grid-cols-[auto_1fr_auto] gap-3'>
       <div
-        className='flex items-center gap-2 font-[var(--font-lexend-deca)] transition-transform active:translate-y-0.5'
+        className={twJoin(
+          'flex cursor-pointer items-center gap-2 transition-transform active:translate-y-0.5',
+          lexendDeca.className,
+        )}
         onClick={() => {
           if (pathname === '/') restartTest();
           else router.push('/');
@@ -118,7 +122,7 @@ export default function Header() {
             <Transition className='flex items-center gap-1.5' variants={VARIANTS}>
               {BUTTONS.map(({ label, href, icon }) => (
                 <Tooltip key={label} label={label}>
-                  <Button asChild className='text-xl'>
+                  <Button asChild className='px-2 text-xl' variant='text'>
                     <Link href={href}>{icon}</Link>
                   </Button>
                 </Tooltip>
@@ -126,7 +130,7 @@ export default function Header() {
             </Transition>
             <Transition className='flex items-center gap-1.5' variants={VARIANTS}>
               {user && pathname !== '/account' && (
-                <Button asChild className='text-sm'>
+                <Button asChild className='px-2 text-sm' variant='text'>
                   <Link href='/account'>
                     <ProfilePicture
                       className='w-5 border-0 bg-sub-alt'
@@ -144,12 +148,12 @@ export default function Header() {
                       <RiLoaderLine className='animate-spin text-main' />
                     </div>
                   ) : (
-                    <Button className='text-xl' onClick={() => void logout()}>
+                    <Button className='px-2 text-xl' onClick={logout} variant='text'>
                       <RiLogoutCircleRFill />
                     </Button>
                   )
                 ) : (
-                  <Button asChild className='text-xl'>
+                  <Button asChild className='px-2 text-xl' variant='text'>
                     <Link href='/login'>
                       <RiLoginCircleFill />
                     </Link>
@@ -160,6 +164,6 @@ export default function Header() {
           </Fragment>
         )}
       </AnimatePresence>
-    </div>
+    </Grid>
   );
 }

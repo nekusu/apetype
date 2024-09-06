@@ -20,7 +20,7 @@ export default function Loading({
   const animationControls = useAnimation();
 
   useEffect(() => {
-    void animationControls.start({
+    animationControls.start({
       pathOffset: [0, 1, 2],
       transition: { repeat: Number.POSITIVE_INFINITY, duration: 1 },
     });
@@ -33,7 +33,7 @@ export default function Loading({
       {...props}
     >
       <LogoIcon
-        className={twMerge('animate-pulse stroke-sub', logoIconClassName)}
+        className={twMerge('animate-pulse-alt stroke-sub', logoIconClassName)}
         width='70'
         controls={animationControls}
         {...logoIconProps}

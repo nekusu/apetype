@@ -32,7 +32,7 @@ export default function Test() {
     isUserTyping,
     isTestFinished,
     setGlobalValues,
-    modalOpen,
+    modalOpened,
     commandLine,
     restartTest,
   } = useGlobal();
@@ -59,7 +59,7 @@ export default function Test() {
     setShowResultDate(true);
     setTimeout(() => {
       if (!resultRef.current) return;
-      void toPng(resultRef.current, {
+      toPng(resultRef.current, {
         backgroundColor: themeType === 'custom' ? colors.custom?.bg : colors.preset?.bg,
         height: resultRef.current.clientHeight + 80,
         width: resultRef.current.clientWidth + 80,
@@ -95,7 +95,7 @@ export default function Test() {
     else document.exitPointerLock();
   }, [isUserTyping]);
   useWindowEvent('keydown', (event) => {
-    if (!modalOpen && quickRestart && event.key === (quickRestart === 'tab' ? 'Tab' : 'Escape')) {
+    if (!modalOpened && quickRestart && event.key === (quickRestart === 'tab' ? 'Tab' : 'Escape')) {
       event.preventDefault();
       restartTest();
     }
@@ -126,18 +126,18 @@ export default function Test() {
                 )}
               </div>
               {!signedIn && (
-                <Button asChild className='self-center p-0'>
+                <Button asChild className='self-center p-0' variant='text'>
                   <Link href='/login'>sign in to save this test</Link>
                 </Button>
               )}
               <div className='flex w-full justify-center gap-4'>
                 <Tooltip label='Next test' offset={8}>
-                  <Button className='px-8 py-4 text-xl' variant='subtle' onClick={restartTest}>
+                  <Button className='px-8 py-4 text-xl' onClick={restartTest} variant='subtle'>
                     <RiArrowRightLine />
                   </Button>
                 </Tooltip>
                 <Tooltip label='Save screenshot' offset={8}>
-                  <Button className='px-8 py-4 text-xl' variant='subtle' onClick={saveScreenshot}>
+                  <Button className='px-8 py-4 text-xl' onClick={saveScreenshot} variant='subtle'>
                     <RiImageFill />
                   </Button>
                 </Tooltip>
@@ -152,14 +152,19 @@ export default function Test() {
               <AnimatePresence>
                 {!isUserTyping && (
                   <Transition className='absolute top-0 flex w-full justify-center gap-6'>
-                    <Button className='p-0' onClick={() => commandLine.handler?.open('language')}>
+                    <Button
+                      className='p-0'
+                      onClick={() => commandLine.handler.open('language')}
+                      variant='text'
+                    >
                       <RiEarthFill />
                       {languageName}
                     </Button>
                     {blindMode && (
                       <Button
                         className='p-0'
-                        onClick={() => commandLine.handler?.open('blindMode')}
+                        onClick={() => commandLine.handler.open('blindMode')}
+                        variant='text'
                       >
                         <RiEyeOffFill />
                         blind
@@ -168,14 +173,19 @@ export default function Test() {
                     {stopOnError && (
                       <Button
                         className='p-0'
-                        onClick={() => commandLine.handler?.open('stopOnError')}
+                        onClick={() => commandLine.handler.open('stopOnError')}
+                        variant='text'
                       >
                         <RiPauseCircleFill />
                         stop on {stopOnError}
                       </Button>
                     )}
                     {lazyMode && !language?.noLazyMode && (
-                      <Button className='p-0' onClick={() => commandLine.handler?.open('lazyMode')}>
+                      <Button
+                        className='p-0'
+                        onClick={() => commandLine.handler.open('lazyMode')}
+                        variant='text'
+                      >
                         <RiZzzLine />
                         lazy
                       </Button>
@@ -186,9 +196,8 @@ export default function Test() {
               {capsLockWarning && capsLock && (
                 <Button
                   active
-                  className='-top-16 absolute inset-x-0 mx-auto px-3.5 py-3'
-                  variant='filled'
-                  onClick={() => commandLine.handler?.open('capsLockWarning')}
+                  className='-top-16 absolute inset-x-0 mx-auto w-fit px-3.5 py-3'
+                  onClick={() => commandLine.handler.open('capsLockWarning')}
                 >
                   <RiLockFill />
                   Caps Lock

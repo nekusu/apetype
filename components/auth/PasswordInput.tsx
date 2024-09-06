@@ -48,7 +48,12 @@ const PasswordInput = forwardRef<ElementRef<'input'>, PasswordInputProps>(functi
         <>
           {rightNode}
           <Tooltip label={`${_visible ? 'Hide' : 'Show'} password`}>
-            <Button className='p-0' tabIndex={-1} onClick={() => handleVisible(!_visible)}>
+            <Button
+              className='p-0'
+              tabIndex={-1}
+              onClick={() => handleVisible(!_visible)}
+              variant='text'
+            >
               {_visible ? <RiEyeLine /> : <RiEyeOffLine />}
             </Button>
           </Tooltip>

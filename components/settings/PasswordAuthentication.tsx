@@ -12,8 +12,6 @@ import type { FirebaseError } from 'firebase/app';
 import { useCallback, useDeferredValue, useEffect, useState } from 'react';
 import { type SubmitHandler, useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
-import { RiLoaderLine } from 'react-icons/ri';
-import { twJoin } from 'tailwind-merge';
 import {
   type Input as ValiInput,
   custom,
@@ -67,7 +65,7 @@ function PasswordModal({ updatePassword, passwordAuthenticated, ...props }: Pass
     defaultValues: { password: '', confirmPassword: '' },
     resolver: valibotResolver(passwordSchema),
   });
-  const [reauthModalOpen, reauthModalHandler] = useDisclosure(false);
+  const [reauthModalOpened, reauthModalHandler] = useDisclosure(false);
   const [visiblePassword, setVisiblePassword] = useState(false);
   const password = watch('password');
   const [userInputs, setUserInputs] = useState(['', '']);
@@ -98,17 +96,12 @@ function PasswordModal({ updatePassword, passwordAuthenticated, ...props }: Pass
 
   return (
     <>
-      <Modal centered {...props}>
-        <div
-          className={twJoin(
-            'flex min-w-xs max-w-xs flex-col gap-3.5 transition',
-            isLoading && 'pointer-events-none opacity-60',
-          )}
-        >
+      <Modal {...props}>
+        <div className='flex min-w-xs max-w-xs flex-col gap-3.5 transition'>
           <Text asChild className='text-2xl'>
             <h3>{passwordAuthenticated ? 'Change' : 'Add'} password</h3>
           </Text>
-          <form className='flex flex-col gap-3.5' onSubmit={(e) => void handleSubmit(onSubmit)(e)}>
+          <form className='flex flex-col gap-3.5' onSubmit={handleSubmit(onSubmit)}>
             <div className='flex flex-col gap-2'>
               <PasswordInput
                 error={errors.password?.message}
@@ -130,16 +123,16 @@ function PasswordModal({ updatePassword, passwordAuthenticated, ...props }: Pass
               userInputs={userInputs}
               onResult={handleResult}
             />
-            <Button className='h-9 w-full' variant='filled' type='submit'>
-              {isLoading ? <RiLoaderLine className='animate-spin' /> : 'save'}
+            <Button loading={isLoading} type='submit'>
+              save
             </Button>
           </form>
         </div>
       </Modal>
       <ReauthenticationModal
-        open={reauthModalOpen}
+        opened={reauthModalOpened}
         onClose={reauthModalHandler.close}
-        onReauthenticate={() => void handlePassword(password)}
+        onReauthenticate={() => handlePassword(password)}
       />
     </>
   );
@@ -147,7 +140,7 @@ function PasswordModal({ updatePassword, passwordAuthenticated, ...props }: Pass
 
 export default function PasswordAuthentication() {
   const { currentUser } = useAuth();
-  const [passwordModalOpen, passwordModalHandler] = useDisclosure(false);
+  const [passwordModalOpened, passwordModalHandler] = useDisclosure(false);
   const [passwordAuthenticated, setPasswordAuthenticated] = useState(false);
 
   const updatePassword = async (password: string) => {
@@ -176,7 +169,6 @@ export default function PasswordAuthentication() {
         }
       >
         <Button
-          className='w-full'
           onClick={passwordModalHandler.open}
           variant={passwordAuthenticated ? 'danger' : 'filled'}
         >
@@ -184,7 +176,7 @@ export default function PasswordAuthentication() {
         </Button>
       </Setting>
       <PasswordModal
-        open={passwordModalOpen}
+        opened={passwordModalOpened}
         onClose={passwordModalHandler.close}
         updatePassword={updatePassword}
         passwordAuthenticated={passwordAuthenticated}

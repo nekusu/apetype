@@ -9,7 +9,6 @@ import type { FirebaseError } from 'firebase/app';
 import type { AuthProvider } from 'firebase/auth';
 import { useState } from 'react';
 import { toast } from 'react-hot-toast';
-import { RiLoaderLine } from 'react-icons/ri';
 import Setting from './Setting';
 
 export default function AuthenticationMethods() {
@@ -39,7 +38,7 @@ export default function AuthenticationMethods() {
   };
 
   useDidMount(() => {
-    void (async () => {
+    (async () => {
       const { authenticationMethods } = await getFirebaseAuth();
       setAuthMethods(authenticationMethods);
     })();
@@ -54,18 +53,12 @@ export default function AuthenticationMethods() {
         return (
           <Button
             key={name}
-            className='w-full'
             disabled={!!providerLoading}
+            loading={providerLoading === name}
+            onClick={() => handleMethod(name, provider, isProviderLinked ? 'unlink' : 'link')}
             variant={isProviderLinked ? 'danger' : 'filled'}
-            onClick={() => void handleMethod(name, provider, isProviderLinked ? 'unlink' : 'link')}
           >
-            {providerLoading === name ? (
-              <RiLoaderLine className='animate-spin' />
-            ) : (
-              <>
-                {isProviderLinked && 'un'}link {name.toLowerCase()}
-              </>
-            )}
+            {isProviderLinked && 'un'}link {name.toLowerCase()}
           </Button>
         );
       })}

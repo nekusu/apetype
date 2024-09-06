@@ -1,4 +1,4 @@
-import { Text } from '@/components/core';
+import { Group, Text } from '@/components/core';
 import { type Settings, type Time, type Words, settingsList } from '@/utils/settings';
 import type { PersonalBest, User } from '@/utils/user';
 import dayjs from 'dayjs';
@@ -25,11 +25,11 @@ function PersonalBest({ mode, amount, data }: PersonalBestProps) {
           className='absolute inset-0 flex flex-col items-center justify-center gap-0.5 opacity-0 transition group-hover:opacity-100'
         >
           {testType}
-          <div className='flex flex-col items-center gap-0.5'>
-            <Text className='text-center text-xs'>{data.wpm.toFixed(2)} wpm</Text>
-            <Text className='text-center text-xs'>{data.raw.toFixed(2)} raw</Text>
-            <Text className='text-center text-xs'>{data.accuracy.toFixed(2)} acc</Text>
-            <Text className='text-center text-xs'>{data.consistency.toFixed(2)} con</Text>
+          <div className='flex flex-col items-center gap-0.5 [&>*]:text-center [&>*]:text-xs'>
+            <Text>{data.wpm.toFixed(2)} wpm</Text>
+            <Text>{data.raw.toFixed(2)} raw</Text>
+            <Text>{data.accuracy.toFixed(2)} acc</Text>
+            <Text>{data.consistency.toFixed(2)} con</Text>
           </div>
           <Text className='text-center text-sm' dimmed>
             {dayjs.unix(data.date.seconds).format('DD MMM YYYY')}
@@ -44,7 +44,7 @@ function PersonalBest({ mode, amount, data }: PersonalBestProps) {
       >
         {testType}
         <Text className='text-4xl leading-tight'>{data?.wpm ? Math.floor(data.wpm) : '-'}</Text>
-        <Text className='text-2xl leading-tight opacity-60'>
+        <Text className='text-2xl leading-tight opacity-50'>
           {data?.accuracy ? `${Math.floor(data.accuracy)}%` : '-'}
         </Text>
       </div>
@@ -54,13 +54,13 @@ function PersonalBest({ mode, amount, data }: PersonalBestProps) {
 
 export default function PersonalBests({ data }: { data: User['personalBests'] }) {
   return (
-    <div className='grid cursor-default grid-cols-2 gap-6'>
-      <div className='grid grid-cols-[repeat(4,1fr)] gap-4 rounded-xl bg-sub-alt p-4 transition-colors'>
+    <Group className='cursor-default gap-6'>
+      <Group className='gap-4 rounded-xl bg-sub-alt p-4 transition-colors'>
         {settingsList.time.options.map(({ value }) => (
           <PersonalBest key={value} mode='time' amount={value} data={data?.time?.[value as Time]} />
         ))}
-      </div>
-      <div className='grid grid-cols-[repeat(4,1fr)] gap-4 rounded-xl bg-sub-alt p-4 transition-colors'>
+      </Group>
+      <Group className='gap-4 rounded-xl bg-sub-alt p-4 transition-colors'>
         {settingsList.words.options.map(({ value }) => (
           <PersonalBest
             key={value}
@@ -69,7 +69,7 @@ export default function PersonalBests({ data }: { data: User['personalBests'] })
             data={data?.words?.[value as Words]}
           />
         ))}
-      </div>
-    </div>
+      </Group>
+    </Group>
   );
 }

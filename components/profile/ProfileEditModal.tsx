@@ -1,6 +1,7 @@
 'use client';
 
-import { Button, Input, Modal, Text, Textarea, Tooltip } from '@/components/core';
+import { Button, Group, Input, Modal, Text, Textarea, Tooltip } from '@/components/core';
+import type { ModalProps } from '@/components/core/Modal';
 import { useUser } from '@/context/userContext';
 import { getFirebaseFirestore } from '@/utils/firebase';
 import { capitalize } from '@/utils/misc';
@@ -13,8 +14,7 @@ import type { FirebaseError } from 'firebase/app';
 import { useEffect, useState } from 'react';
 import { type SubmitHandler, useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
-import { RiExternalLinkLine, RiGlobalFill, RiLoaderLine } from 'react-icons/ri';
-import { twJoin } from 'tailwind-merge';
+import { RiExternalLinkLine, RiGlobalFill } from 'react-icons/ri';
 import {
   type OptionalSchema,
   type StringSchema,
@@ -30,15 +30,10 @@ import {
 
 dayjs.extend(relativeTime);
 
-interface ModalProps {
-  open: boolean;
-  onClose: () => void;
-}
-
 function SocialLink({ url }: { url: string }) {
   return (
     <Tooltip label='Open link'>
-      <Button asChild className='p-0' tabIndex={-1}>
+      <Button asChild className='p-0' tabIndex={-1} variant='text'>
         <a href={`https://${url}`} target='_blank' rel='noopener noreferrer'>
           <RiExternalLinkLine />
         </a>
@@ -78,7 +73,8 @@ const profileSchema = object({
 });
 type ProfileForm = ValiInput<typeof profileSchema>;
 
-export default function ProfileEditModal({ open, onClose }: ModalProps) {
+export default function ProfileEditModal(props: ModalProps) {
+  const { opened, onClose } = props;
   const { user, updateUser } = useUser();
   const {
     formState: { errors, isDirty },
@@ -126,7 +122,7 @@ export default function ProfileEditModal({ open, onClose }: ModalProps) {
         'socials.website': website,
         ...socials,
       });
-      onClose();
+      onClose?.();
     } catch (e) {
       toast.error(`Something went wrong! ${(e as FirebaseError).message}`);
     } finally {
@@ -135,7 +131,7 @@ export default function ProfileEditModal({ open, onClose }: ModalProps) {
   };
 
   useEffect(() => {
-    if (open && user)
+    if (opened && user)
       reset({
         username: user.name,
         bio: user.bio,
@@ -145,16 +141,13 @@ export default function ProfileEditModal({ open, onClose }: ModalProps) {
           ...user.socials,
         },
       });
-  }, [open, reset, user]);
+  }, [opened, reset, user]);
 
   return (
-    <Modal centered open={open} onClose={onClose}>
+    <Modal {...props}>
       <form
-        className={twJoin(
-          'flex min-w-sm max-w-sm flex-col gap-3.5 transition',
-          isLoading && '!pointer-events-none !opacity-60',
-        )}
-        onSubmit={(e) => void handleSubmit(onSubmit)(e)}
+        className='flex min-w-sm max-w-sm flex-col gap-3.5 transition'
+        onSubmit={handleSubmit(onSubmit)}
       >
         <Text asChild className='text-2xl'>
           <h3>Edit profile</h3>
@@ -215,14 +208,14 @@ export default function ProfileEditModal({ open, onClose }: ModalProps) {
             />
           </div>
         </div>
-        <div className='flex gap-2'>
-          <Button className='w-full' variant='filled' onClick={onClose}>
+        <Group>
+          <Button disabled={isLoading} onClick={onClose}>
             cancel
           </Button>
-          <Button active disabled={!isDirty} className='w-full' variant='filled' type='submit'>
-            {isLoading ? <RiLoaderLine className='animate-spin' /> : 'save'}
+          <Button active disabled={!isDirty} loading={isLoading} type='submit'>
+            save
           </Button>
-        </div>
+        </Group>
       </form>
     </Modal>
   );

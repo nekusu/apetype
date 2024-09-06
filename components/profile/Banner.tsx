@@ -49,11 +49,15 @@ export default function Banner({
   imageProps: { alt = 'Banner', src, ...imageProps },
   ...props
 }: BannerProps) {
-  const [changeBannerModalOpen, changeBannerModalHandler] = useDisclosure(false);
+  const [changeBannerModalOpened, changeBannerModalHandler] = useDisclosure(false);
 
   return (
     <div
-      className={twMerge('group relative w-full', src ? 'aspect-[4/1]' : 'h-[156px]', className)}
+      className={twMerge(
+        'group relative w-full',
+        src ? 'aspect-[4/1]' : 'h-[156px] bg-black/10',
+        className,
+      )}
       {...props}
     >
       <LazyImage src={src} alt={alt} fill priority {...imageProps} />
@@ -63,14 +67,13 @@ export default function Banner({
             <Button
               active
               className='absolute right-6 bottom-4 px-2 opacity-0 shadow-md group-hover:opacity-100 group-has-focus-visible:opacity-100'
-              variant='filled'
               onClick={changeBannerModalHandler.open}
             >
               <RiPencilFill />
             </Button>
           </Tooltip>
           <SetImageModal
-            open={changeBannerModalOpen}
+            opened={changeBannerModalOpened}
             onClose={changeBannerModalHandler.close}
             title='Change banner'
             aspect={4}

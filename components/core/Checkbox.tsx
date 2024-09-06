@@ -54,7 +54,7 @@ const Checkbox = forwardRef<ElementRef<'input'>, CheckboxProps>(function Checkbo
     <div
       className={twMerge(
         'group relative flex select-none items-center transition',
-        disabled && 'pointer-events-none opacity-60',
+        disabled && 'pointer-events-none opacity-50',
         wrapperClassName,
       )}
     >

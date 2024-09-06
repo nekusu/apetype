@@ -1,7 +1,18 @@
 'use client';
 
 import Loading from '@/app/loading';
-import { Button, Divider, Input, Modal, Text, Tooltip, Transition } from '@/components/core';
+import {
+  Button,
+  Divider,
+  Grid,
+  Group,
+  Input,
+  Modal,
+  Text,
+  Tooltip,
+  Transition,
+} from '@/components/core';
+import type { ModalProps } from '@/components/core/Modal';
 import { valibotResolver } from '@hookform/resolvers/valibot';
 import { useDidUpdate } from '@mantine/hooks';
 import dynamic from 'next/dynamic';
@@ -16,7 +27,6 @@ import {
   RiLoaderLine,
   RiUpload2Fill,
 } from 'react-icons/ri';
-import { twJoin } from 'tailwind-merge';
 import { url, type Input as ValiInput, object, optional, string, toTrimmed } from 'valibot';
 
 const Cropper = dynamic(() => import('react-easy-crop'), {
@@ -24,9 +34,7 @@ const Cropper = dynamic(() => import('react-easy-crop'), {
   ssr: false,
 });
 
-interface ModalProps {
-  open: boolean;
-  onClose: () => void;
+export interface SetImageModalProps extends ModalProps {
   title: string;
   aspect?: number;
   enableShapeSelection?: boolean;
@@ -121,10 +129,7 @@ async function getCroppedImage(
 const imageSchema = object({ imageURL: optional(string([toTrimmed(), url()])) });
 type ImageForm = ValiInput<typeof imageSchema>;
 
-// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: todo
 export default function SetImageModal({
-  open,
-  onClose,
   title,
   aspect = 1,
   enableShapeSelection,
@@ -133,7 +138,9 @@ export default function SetImageModal({
   targetHeight,
   onDelete,
   onSave,
-}: ModalProps) {
+  ...props
+}: SetImageModalProps) {
+  const { opened, onClose } = props;
   const {
     formState: { isValid, errors },
     register,
@@ -189,7 +196,7 @@ export default function SetImageModal({
   };
   const deleteImage = async () => {
     try {
-      onClose();
+      onClose?.();
       await onDelete?.();
     } catch (e) {
       toast.error((e as Error).message);
@@ -203,7 +210,7 @@ export default function SetImageModal({
           ? await getCroppedImage(imageURL, croppedAreaPixels, targetWidth, targetHeight)
           : null;
       await onSave?.(croppedImage, enableShapeSelection ? shape : undefined);
-      onClose();
+      onClose?.();
     } catch (e) {
       toast.error((e as Error).message);
     } finally {
@@ -212,14 +219,14 @@ export default function SetImageModal({
   };
 
   useDidUpdate(() => {
-    if (open) reset();
-  }, [open]);
+    if (opened) reset();
+  }, [opened]);
   useDidUpdate(() => {
     setShape(initialShape);
   }, [initialShape]);
   useDidUpdate(() => {
     if (imageURLValue && isValid) {
-      void (async () => {
+      (async () => {
         try {
           setIsValidatingImage(true);
           await createImage(imageURLValue);
@@ -238,20 +245,13 @@ export default function SetImageModal({
 
   return (
     <Modal
-      open={open}
-      onClose={onClose}
-      centered
       layout
       transition={{ type: 'spring', bounce: 0.6, layout: { type: 'spring', duration: 0.25 } }}
       style={{ borderRadius: 12 }}
       onAnimationComplete={(definition) => definition === 'hidden' && setImageURL(null)}
+      {...props}
     >
-      <div
-        className={twJoin(
-          'flex min-w-[300px] flex-col gap-3.5 transition',
-          isLoading && '!pointer-events-none !opacity-60',
-        )}
-      >
+      <div className='flex min-w-[300px] flex-col gap-3.5 transition'>
         <Text asChild className='text-2xl'>
           <h3>{title}</h3>
         </Text>
@@ -301,7 +301,7 @@ export default function SetImageModal({
                   <RiLoaderLine className='animate-spin' />
                 ) : (
                   <Tooltip label={imageURLValue ? 'Clear' : 'Paste from clipboard'}>
-                    <Button className='p-0' onMouseDown={() => pasteFromClipboard()}>
+                    <Button className='p-0' onClick={pasteFromClipboard} variant='text'>
                       {imageURLValue ? <RiCloseLine /> : <RiClipboardLine />}
                     </Button>
                   </Tooltip>
@@ -311,7 +311,7 @@ export default function SetImageModal({
               {...register('imageURL')}
             />
             <Divider label='or' />
-            <Button asChild className='w-full' variant='filled'>
+            <Button asChild>
               <label>
                 upload image
                 <RiUpload2Fill />
@@ -328,28 +328,20 @@ export default function SetImageModal({
         {(enableShapeSelection || imageURL || onDelete) && (
           <>
             {enableShapeSelection && (
-              <div className='grid grid-cols-2 grid-rows-[repeat(3,auto)] gap-x-2 gap-y-1'>
+              <Grid className='gap-y-1'>
                 <Text className='col-span-full' dimmed>
                   image shape
                 </Text>
                 {(['rect', 'round'] as const).map((s) => (
-                  <Button
-                    key={s}
-                    active={s === shape}
-                    className='w-full'
-                    variant='filled'
-                    onClick={() => setShape(s)}
-                  >
+                  <Button key={s} active={s === shape} onClick={() => setShape(s)}>
                     {s === 'rect' ? 'square' : s}
                   </Button>
                 ))}
-              </div>
+              </Grid>
             )}
-            <div className='flex gap-2'>
+            <Group>
               {imageURL ? (
                 <Button
-                  className='w-full'
-                  variant='filled'
                   onClick={() => {
                     reset();
                     setImageURL(null);
@@ -359,7 +351,7 @@ export default function SetImageModal({
                 </Button>
               ) : (
                 onDelete && (
-                  <Button className='w-full' variant='danger' onClick={() => void deleteImage()}>
+                  <Button disabled={isLoading} onClick={deleteImage} variant='danger'>
                     delete
                   </Button>
                 )
@@ -367,13 +359,12 @@ export default function SetImageModal({
               <Button
                 active
                 disabled={shape === initialShape && !imageURL}
-                className='h-9 w-full'
-                variant='filled'
-                onClick={() => void saveImage()}
+                loading={isLoading}
+                onClick={saveImage}
               >
-                {isLoading ? <RiLoaderLine className='animate-spin' /> : 'save'}
+                save
               </Button>
-            </div>
+            </Group>
           </>
         )}
       </div>

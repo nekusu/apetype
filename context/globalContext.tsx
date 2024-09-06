@@ -14,22 +14,24 @@ export interface GlobalValues {
   capsLock: boolean;
   isUserTyping: boolean;
   isTestFinished: boolean;
-  modalOpen: boolean;
+  modalOpened: boolean;
   keymapLayouts: Record<string, KeymapLayout>;
   settingsList: typeof settingsList;
   commandLine: {
-    open: boolean;
+    opened: boolean;
     initialSetting?: keyof typeof settingsList;
-    handler?: {
-      open: (initialSetting?: keyof typeof settingsList) => void;
-      close: () => void;
-    };
   };
 }
 
 export interface GlobalContext extends GlobalValues {
   setGlobalValues: Updater<GlobalValues>;
   restartTest: () => void;
+  commandLine: GlobalValues['commandLine'] & {
+    handler: {
+      open: (initialSetting?: keyof typeof settingsList) => void;
+      close: () => void;
+    };
+  };
 }
 
 interface GlobalProviderProps {
@@ -46,7 +48,7 @@ export function GlobalProvider({ children, languages, layouts, themes }: GlobalP
     capsLock: false,
     isUserTyping: false,
     isTestFinished: false,
-    modalOpen: false,
+    modalOpened: false,
     keymapLayouts: layouts,
     settingsList: {
       ...settingsList,
@@ -60,20 +62,20 @@ export function GlobalProvider({ children, languages, layouts, themes }: GlobalP
       },
       theme: { ...settingsList.theme, options: themes.map(({ name }) => ({ value: name })) },
     },
-    commandLine: { open: false },
+    commandLine: { opened: false },
   });
   const handler: GlobalContext['commandLine']['handler'] = useMemo(
     () => ({
       open: (initialSetting) =>
         setGlobalValues((draft) => {
-          draft.modalOpen = true;
-          draft.commandLine.open = true;
+          draft.modalOpened = true;
+          draft.commandLine.opened = true;
           draft.commandLine.initialSetting = initialSetting;
         }),
       close: () =>
         setGlobalValues((draft) => {
-          draft.modalOpen = false;
-          draft.commandLine.open = false;
+          draft.modalOpened = false;
+          draft.commandLine.opened = false;
           draft.commandLine.initialSetting = undefined;
         }),
     }),

@@ -1,58 +1,69 @@
 import { Slot } from '@radix-ui/react-slot';
+import { type VariantProps, cva } from 'cva';
 import { type ComponentPropsWithoutRef, type ElementRef, forwardRef } from 'react';
+import type { IconBaseProps } from 'react-icons';
+import { RiLoaderLine } from 'react-icons/ri';
 import { twMerge } from 'tailwind-merge';
 
-export interface ButtonProps extends ComponentPropsWithoutRef<'button'> {
+const button = cva({
+  base: '-outline-offset-2 flex cursor-pointer select-none items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-center leading-tight outline-text transition',
+  variants: {
+    variant: {
+      danger:
+        'bg-sub-alt text-text outline-2 outline-error hover:bg-error hover:text-bg focus-visible:bg-error focus-visible:text-bg active:scale-[.925]',
+      filled:
+        'bg-sub-alt text-text hover:bg-text hover:text-bg focus-visible:outline-2 active:scale-[.925] data-[active]:bg-main data-[active]:text-bg data-[active]:hover:bg-text data-[active]:hover:text-bg',
+      subtle:
+        'bg-transparent text-sub hover:text-text focus-visible:bg-text focus-visible:text-bg active:scale-[.925] active:bg-text active:text-bg',
+      text: 'bg-transparent text-sub hover:text-text focus-visible:text-text focus-visible:outline-0 active:translate-y-0.5 data-[active]:text-main data-[active]:hover:text-text',
+    },
+  },
+});
+
+export interface ButtonProps
+  extends ComponentPropsWithoutRef<'button'>,
+    VariantProps<typeof button> {
   asChild?: boolean;
   active?: boolean;
-  variant?: 'danger' | 'filled' | 'subtle' | 'text';
-}
-
-function getVariantStyles(variant: NonNullable<ButtonProps['variant']>) {
-  const className = ['danger', 'filled'].includes(variant)
-    ? 'bg-sub-alt text-text -outline-offset-2 active:scale-[.925]'
-    : 'text-sub hover:text-text bg-transparent';
-  switch (variant) {
-    case 'danger':
-      return twMerge(
-        className,
-        'outline-2 outline-error hover:bg-error hover:text-bg focus-visible:bg-error focus-visible:text-bg',
-      );
-    case 'filled':
-      return twMerge(className, 'hover:bg-text hover:text-bg focus-visible:outline-2');
-    case 'subtle':
-      return twMerge(
-        className,
-        'focus-visible:bg-text focus-visible:text-bg active:bg-text active:text-bg active:scale-[.925]',
-      );
-    case 'text':
-      return twMerge(
-        className,
-        'focus-visible:text-text focus-visible:outline-0 active:translate-y-0.5',
-      );
-  }
+  loaderProps?: IconBaseProps;
+  loading?: boolean;
 }
 
 const Button = forwardRef<ElementRef<'button'>, ButtonProps>(function Button(
-  { asChild, active = false, className, disabled, type = 'button', variant = 'text', ...props },
+  {
+    asChild,
+    active = false,
+    children,
+    className,
+    disabled,
+    loaderProps: { className: loaderClassName, ...loaderProps } = {},
+    loading,
+    type = 'button',
+    variant = 'filled',
+    ...props
+  },
   ref,
 ) {
   const Component = asChild ? Slot : 'button';
   return (
     <Component
       ref={ref}
+      data-active={active || undefined}
       className={twMerge(
-        'flex w-max cursor-pointer select-none items-center justify-center gap-1.5 rounded-lg p-2 text-center text-base leading-tight outline-text transition',
-        getVariantStyles(variant),
-        variant === 'filled' && active && 'bg-main text-bg',
-        variant === 'text' && active && 'text-main',
-        disabled && 'pointer-events-none opacity-60',
+        button({ variant }),
+        disabled && 'pointer-events-none opacity-50',
         className,
       )}
-      disabled={disabled}
+      disabled={disabled || loading}
       type={type}
       {...props}
-    />
+    >
+      {loading ? (
+        <RiLoaderLine className={twMerge('m-0.5 animate-spin', loaderClassName)} {...loaderProps} />
+      ) : (
+        children
+      )}
+    </Component>
   );
 });
 

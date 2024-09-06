@@ -1,6 +1,6 @@
 'use client';
 
-import { Button, Modal, Text } from '@/components/core';
+import { Button, Group, Modal, Text } from '@/components/core';
 import { useSettings } from '@/context/settingsContext';
 import { defaultSettings } from '@/utils/settings';
 import { useDisclosure } from '@mantine/hooks';
@@ -8,16 +8,16 @@ import Setting from './Setting';
 
 export default function ResetSettings() {
   const { setSettings } = useSettings();
-  const [modalOpen, modalHandler] = useDisclosure(false);
+  const [modalOpened, modalHandler] = useDisclosure(false);
 
   return (
     <>
       <Setting id='resetSettings'>
-        <Button className='w-full' onClick={modalHandler.open} variant='danger'>
+        <Button onClick={modalHandler.open} variant='danger'>
           reset settings
         </Button>
       </Setting>
-      <Modal className='w-full max-w-sm' open={modalOpen} onClose={modalHandler.close} centered>
+      <Modal className='w-full max-w-sm' opened={modalOpened} onClose={modalHandler.close}>
         <div className='flex flex-col gap-3.5'>
           <Text asChild className='text-2xl'>
             <h3>Reset settings</h3>
@@ -25,12 +25,9 @@ export default function ResetSettings() {
           <Text className='text-sm' dimmed>
             Are you sure you want to reset all your settings?
           </Text>
-          <div className='flex gap-2'>
-            <Button className='w-full' onClick={modalHandler.close} variant='filled'>
-              cancel
-            </Button>
+          <Group>
+            <Button onClick={modalHandler.close}>cancel</Button>
             <Button
-              className='w-full'
               onClick={() => {
                 setSettings(defaultSettings);
                 modalHandler.close();
@@ -39,7 +36,7 @@ export default function ResetSettings() {
             >
               reset
             </Button>
-          </div>
+          </Group>
         </div>
       </Modal>
     </>

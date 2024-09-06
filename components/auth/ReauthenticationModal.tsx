@@ -1,6 +1,6 @@
 'use client';
 
-import { Button, Divider, Modal, Text } from '@/components/core';
+import { Button, Divider, Group, Modal, Text } from '@/components/core';
 import type { ModalProps } from '@/components/core/Modal';
 import { useAuth } from '@/context/authContext';
 import { useDidMount } from '@/hooks/useDidMount';
@@ -13,8 +13,6 @@ import type { AuthCredential, AuthProvider } from 'firebase/auth';
 import { useCallback, useState } from 'react';
 import { type SubmitHandler, useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
-import { RiLoaderLine } from 'react-icons/ri';
-import { twJoin } from 'tailwind-merge';
 import { type Input as ValiInput, minLength, object, string } from 'valibot';
 import { PasswordInput } from '.';
 
@@ -31,10 +29,10 @@ const passwordSchema = object({
 type PasswordForm = ValiInput<typeof passwordSchema>;
 
 export default function ReauthenticationModal({
-  onClose,
   onReauthenticate,
   ...props
 }: ReauthenticationModalProps) {
+  const { onClose } = props;
   const { currentUser } = useAuth();
   const {
     formState: { errors },
@@ -45,7 +43,7 @@ export default function ReauthenticationModal({
     defaultValues: { password: '' },
     resolver: valibotResolver(passwordSchema),
   });
-  const [popupOpen, popupHandler] = useDisclosure(false);
+  const [popupOpened, popupHandler] = useDisclosure(false);
   const [isLoading, setIsLoading] = useState(false);
   const [authMethods, setAuthMethods] = useState<AuthenticationMethod[]>();
 
@@ -96,58 +94,49 @@ export default function ReauthenticationModal({
   };
 
   useDidMount(() => {
-    void (async () => {
+    (async () => {
       const { authenticationMethods } = await getFirebaseAuth();
       setAuthMethods(authenticationMethods);
     })();
   });
 
   return (
-    <Modal onClose={onClose} centered {...props}>
-      <div
-        className={twJoin(
-          'flex min-w-xs max-w-xs flex-col gap-3.5 transition',
-          (popupOpen || isLoading) && '!pointer-events-none !opacity-60',
-        )}
-      >
+    <Modal {...props}>
+      <div className='flex min-w-xs max-w-xs flex-col gap-3.5 transition'>
         <Text asChild className='text-2xl'>
           <h3>Reauthenticate</h3>
         </Text>
         <Text className='text-sm' dimmed>
           Select method to reauthenticate:
         </Text>
-        <div className='flex gap-2'>
-          {authMethods?.map(({ name, provider, Icon, credentialFromResult }) => (
+        <Group>
+          {authMethods?.map(({ name, provider, icon: Icon, credentialFromResult }) => (
             <Button
               key={name}
-              className='w-full'
               disabled={
+                isLoading ||
                 !currentUser?.providerData.some(
                   ({ providerId }) => providerId === provider.providerId,
                 )
               }
-              variant='filled'
-              onClick={() => void reauthenticateWithProvider(provider, credentialFromResult)}
+              onClick={() => reauthenticateWithProvider(provider, credentialFromResult)}
             >
               <Icon />
               {name}
             </Button>
           ))}
-        </div>
+        </Group>
         {currentUser?.providerData.some(({ providerId }) => providerId === 'password') && (
           <>
             <Divider label='or enter your password' />
-            <form
-              className='flex flex-col gap-3.5'
-              onSubmit={(e) => void handleSubmit(onSubmit)(e)}
-            >
+            <form className='flex flex-col gap-3.5' onSubmit={handleSubmit(onSubmit)}>
               <PasswordInput
                 error={errors.password?.message}
                 data-autofocus
                 {...register('password')}
               />
-              <Button className='h-9 w-full' variant='filled' type='submit'>
-                {isLoading ? <RiLoaderLine className='animate-spin' /> : 'reauthenticate'}
+              <Button disabled={popupOpened} loading={isLoading} type='submit'>
+                reauthenticate
               </Button>
             </form>
           </>

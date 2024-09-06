@@ -31,7 +31,7 @@ export default async function UserPage({ params }: { params: { id: string } }) {
         404
       </Text>
       <Text className='text-center'>User not found.</Text>
-      <Button asChild className='gap-2.5 px-4 py-3' variant='filled'>
+      <Button asChild className='gap-2.5 px-4 py-3'>
         <Link href='/'>
           <RiKeyboardBoxFill />
           Go Home

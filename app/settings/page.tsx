@@ -79,14 +79,13 @@ export default function SettingsPage() {
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
-        for (const { isIntersecting, target } of entries) {
+        for (const { isIntersecting, target } of entries)
           if (isIntersecting) {
             setCurrentCategory(target.id.replace(/_/g, ' ') as Category);
             break;
           }
-        }
       },
-      { root: listRef.current, rootMargin: '-10% 0px -90%' },
+      { root: listRef.current, rootMargin: '-180px 0px -90%' },
     );
     if (listRef.current) for (const child of listRef.current.children) observer.observe(child);
     return () => observer.disconnect();
@@ -94,27 +93,28 @@ export default function SettingsPage() {
 
   return (
     <Transition className='relative cursor-default'>
-      <div className='absolute inset-0 flex h-full gap-x-5'>
-        <nav className='relative flex shrink-0 flex-col gap-3 overflow-y-auto overflow-x-hidden py-1 pr-2.5'>
+      <div className='absolute inset-0 flex h-full'>
+        <nav className='flex min-w-40 shrink-0 flex-col items-start gap-2 overflow-y-auto overflow-x-hidden py-0.5'>
           {categories.map((category) => (
             <Button
               key={category}
               className={twJoin(
-                'group -my-0.5 relative px-0 py-1.5 transition-all',
+                'group relative px-0 py-1.5 transition-all',
                 category === 'danger zone' && 'hover:text-error',
                 currentCategory === category &&
-                  'ml-2.5 text-bg hover:text-bg focus-visible:text-bg',
+                  'px-2.5 text-bg hover:text-bg focus-visible:text-bg',
               )}
               onClick={() =>
                 document
                   .getElementById(replaceSpaces(category))
                   ?.scrollIntoView({ behavior: 'smooth' })
               }
+              variant='text'
             >
               {currentCategory === category && (
                 <m.div
                   className={twJoin(
-                    '-z-10 absolute box-content h-full w-full px-2.5 transition-colors group-hover:bg-text group-focus-visible:bg-text',
+                    '-z-10 absolute inset-0 transition-colors group-hover:bg-text group-focus-visible:bg-text',
                     currentCategory === 'danger zone' ? 'bg-error' : 'bg-main',
                   )}
                   layoutId='navigation-box'

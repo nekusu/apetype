@@ -1,7 +1,6 @@
 'use client';
 
-import { Button, Input, Text, Tooltip, Transition } from '@/components/core';
-import type { ButtonProps } from '@/components/core/Button';
+import { Button, Grid, Group, Input, Text, Tooltip, Transition } from '@/components/core';
 import { ThemeButton } from '@/components/settings';
 import { useSettings } from '@/context/settingsContext';
 import { useTheme } from '@/context/themeContext';
@@ -32,7 +31,6 @@ import ReadabilityModal from './ReadabilityModal';
 
 extend([a11yPlugin]);
 
-const COMMON_BUTTON_PROPS: Omit<ButtonProps, 'ref'> = { className: 'w-full', variant: 'filled' };
 const color = (color: string) =>
   string([
     toTrimmed(),
@@ -77,8 +75,8 @@ export default function CustomTheme({ className, ...props }: HTMLMotionProps<'di
     resolver: valibotResolver(customThemeSchema),
   });
   const colors = watch('colors');
-  const [themeModalOpen, themeModalHandler] = useDisclosure(false);
-  const [readabilityModalOpen, readabilityModalHandler] = useDisclosure(false);
+  const [themeModalOpened, themeModalHandler] = useDisclosure(false);
+  const [readabilityModalOpened, readabilityModalHandler] = useDisclosure(false);
   const themeButtonRef = useRef<HTMLButtonElement>(null);
   const customTheme = customThemes.find(({ id }) => id === customThemeId);
 
@@ -105,15 +103,15 @@ export default function CustomTheme({ className, ...props }: HTMLMotionProps<'di
     toast(
       (t) => (
         <div className='flex flex-col gap-2'>
-          <Text className='leading-tight'>Custom theme &apos;{theme.name}&apos; deleted!</Text>
-          <div className='flex gap-2'>
-            <Button className='w-full' variant='subtle' onClick={() => toast.dismiss(t.id)}>
+          <Text className='leading-tight'>Custom theme '{theme.name}' deleted!</Text>
+          <Group>
+            <Button variant='subtle' onClick={() => toast.dismiss(t.id)}>
               dismiss
             </Button>
-            <Button active className='w-full' variant='filled' onClick={() => addTheme(theme)}>
+            <Button active onClick={() => addTheme(theme)}>
               restore theme
             </Button>
-          </div>
+          </Group>
         </div>
       ),
       { duration: 8000 },
@@ -126,7 +124,7 @@ export default function CustomTheme({ className, ...props }: HTMLMotionProps<'di
   };
   const shareTheme = () => {
     const encodedTheme = Buffer.from(JSON.stringify(customTheme)).toString('base64');
-    void navigator.clipboard
+    navigator.clipboard
       .writeText(`${window.location.origin}?customTheme=${encodedTheme}`)
       .then(() => toast.success('URL copied to clipboard!'));
   };
@@ -143,10 +141,9 @@ export default function CustomTheme({ className, ...props }: HTMLMotionProps<'di
   };
 
   const CreateThemeButton = () => (
-    <div className='flex gap-2'>
+    <Group grow={false}>
       <Button
-        className='col-span-full w-full px-3'
-        variant='filled'
+        className='grow-1'
         onClick={() => {
           if (themeCreation === 'AI') themeModalHandler.open();
           else if (themeColors.preset) addTheme({ name: theme, colors: themeColors.preset });
@@ -155,11 +152,11 @@ export default function CustomTheme({ className, ...props }: HTMLMotionProps<'di
         create theme
       </Button>
       <Tooltip label={themeCreation === 'AI' ? 'Generate with AI' : 'Load from preset'}>
-        <Button active className='px-2.5' variant='filled' onClick={() => toggleThemeCreation()}>
+        <Button active className='px-2.5' onClick={() => toggleThemeCreation()}>
           {themeCreation === 'AI' ? <RiSparklingFill /> : <RiPaintBrushFill />}
         </Button>
       </Tooltip>
-    </div>
+    </Group>
   );
 
   useDidUpdate(() => {
@@ -218,91 +215,84 @@ export default function CustomTheme({ className, ...props }: HTMLMotionProps<'di
               </div>
             </div>
           </div>
-          <form
-            className='grid grid-cols-4 gap-x-2 gap-y-3'
-            onSubmit={(e) => void handleSubmit(onSubmit)(e)}
-          >
-            <Input
-              error={errors.name?.message}
-              wrapperClassName='col-span-2'
-              label='name'
-              {...register('name')}
-            />
-            {Object.entries(colors).map(([k, value]) => {
-              const key = k as keyof typeof colors;
-              const { color, isValid } = validateColor(value, colors);
-              return (
-                <ColorInput
-                  key={key}
-                  colorKey={key}
-                  computedValue={color}
-                  error={errors.colors?.[key]?.message}
-                  setValue={(value) => setValue(`colors.${key}`, value)}
-                  rightNode={
-                    ['main', 'sub', 'text'].includes(key) &&
-                    isValid &&
-                    colord(color).contrast(colors.bg) < 2 && (
-                      <Tooltip label='Poor contrast ratio' offset={14}>
-                        <Button
-                          className='ml-1.5 p-0 text-main'
-                          tabIndex={-1}
-                          onClick={readabilityModalHandler.open}
-                        >
-                          <RiAlertLine />
-                        </Button>
-                      </Tooltip>
-                    )
-                  }
-                  {...register(`colors.${key}`)}
-                />
-              );
-            })}
-            <Text className='col-span-full text-sm' dimmed>
-              tip: you can use css variables to reference other colors (e.g.{' '}
-              <code className='rounded bg-sub-alt px-1 py-0.5 font-default transition-colors'>
-                var(--bg-color)
-              </code>
-              )
-            </Text>
-            <div className='col-span-full mt-2 flex gap-2'>
-              <Button
-                className='w-full'
-                variant='danger'
-                onClick={() => {
-                  if (customTheme) {
-                    showRestoreThemeToast(customTheme);
-                    deleteTheme(customTheme.id);
-                  }
-                }}
-              >
-                delete
-              </Button>
-              <Button onClick={duplicateTheme} {...COMMON_BUTTON_PROPS}>
-                duplicate
-              </Button>
-              <Button onClick={shareTheme} {...COMMON_BUTTON_PROPS}>
-                share
-              </Button>
-              <Button type='submit' {...COMMON_BUTTON_PROPS}>
-                save
-              </Button>
-            </div>
-          </form>
+          <Grid asChild className='grid-cols-4 gap-y-3'>
+            <form onSubmit={handleSubmit(onSubmit)}>
+              <Input
+                error={errors.name?.message}
+                wrapperClassName='col-span-2'
+                label='name'
+                {...register('name')}
+              />
+              {Object.entries(colors).map(([k, value]) => {
+                const key = k as keyof typeof colors;
+                const { color, isValid } = validateColor(value, colors);
+                return (
+                  <ColorInput
+                    key={key}
+                    colorKey={key}
+                    computedValue={color}
+                    error={errors.colors?.[key]?.message}
+                    setValue={(value) => setValue(`colors.${key}`, value)}
+                    rightNode={
+                      ['main', 'sub', 'text'].includes(key) &&
+                      isValid &&
+                      colord(color).contrast(colors.bg) < 2 && (
+                        <Tooltip label='Poor contrast ratio' offset={14}>
+                          <Button
+                            className='ml-1.5 p-0 text-main'
+                            tabIndex={-1}
+                            onClick={readabilityModalHandler.open}
+                            variant='text'
+                          >
+                            <RiAlertLine />
+                          </Button>
+                        </Tooltip>
+                      )
+                    }
+                    {...register(`colors.${key}`)}
+                  />
+                );
+              })}
+              <Text className='col-span-full text-sm' dimmed>
+                tip: you can use css variables to reference other colors (e.g.{' '}
+                <code className='rounded bg-sub-alt px-1 py-0.5 font-default transition-colors'>
+                  var(--bg-color)
+                </code>
+                )
+              </Text>
+              <Group className='col-span-full mt-2'>
+                <Button
+                  variant='danger'
+                  onClick={() => {
+                    if (customTheme) {
+                      showRestoreThemeToast(customTheme);
+                      deleteTheme(customTheme.id);
+                    }
+                  }}
+                >
+                  delete
+                </Button>
+                <Button onClick={duplicateTheme}>duplicate</Button>
+                <Button onClick={shareTheme}>share</Button>
+                <Button type='submit'>save</Button>
+              </Group>
+            </form>
+          </Grid>
         </>
       ) : (
         <>
           <Text className='text-center' dimmed>
-            Looks like you don&apos;t have any custom theme yet.
+            Looks like you don't have any custom theme yet.
           </Text>
           <CreateThemeButton />
         </>
       )}
       <AIThemeGenerationModal
-        open={themeModalOpen}
+        opened={themeModalOpened}
         onClose={themeModalHandler.close}
         addTheme={addTheme}
       />
-      <ReadabilityModal open={readabilityModalOpen} onClose={readabilityModalHandler.close} />
+      <ReadabilityModal opened={readabilityModalOpened} onClose={readabilityModalHandler.close} />
     </Transition>
   );
 }

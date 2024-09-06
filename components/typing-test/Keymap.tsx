@@ -32,47 +32,46 @@ const Key = memo(
     ref,
   ) {
     const keyRef = useRef<HTMLDivElement>(null);
-    const bumpRef = useRef<HTMLSpanElement>(null);
     const mergedRef = useMergedRef(ref, keyRef);
-
-    // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: todo
-    const setActive = (active: boolean) => {
-      if (!keyRef.current) return;
-      const getColor = (color: string) =>
-        !blindMode && status === 'error' ? 'var(--error-color)' : `var(--${color}-color)`;
-      const { style } = keyRef.current;
-      style.transitionDuration = active ? '0s' : keymap === 'react' ? '300ms' : '150ms';
-      style.borderColor = active ? getColor('main') : 'var(--sub-color)';
-      style.backgroundColor = active ? getColor('main') : 'transparent';
-      style.color = active ? getColor('bg') : 'var(--sub-color)';
-      style.transform = active && keymap === 'react' ? 'scale(.925)' : 'none';
-      if (!bumpRef.current) return;
-      bumpRef.current.style.backgroundColor = `var(--${active ? 'bg' : 'sub'}-color)`;
+    const setStatus = (status?: boolean | 'error') => {
+      if (keyRef.current) {
+        if (status) keyRef.current.dataset.status = status.toString();
+        else delete keyRef.current.dataset.status;
+      }
     };
-    const { start, clear } = useTimeout(() => setActive(false), 50);
+    const { start, clear } = useTimeout(() => setStatus(), 50);
 
     useDidUpdate(() => {
       if (keymap === 'react') {
         if (status) {
           clear();
-          setActive(true);
-          start();
+          setStatus(status);
         }
-      } else setActive(!!status);
+        start();
+      } else setStatus(status);
     }, [status]);
 
     return (
       <div
         ref={mergedRef}
         className={twMerge(
-          'relative flex h-8 w-8 items-center justify-center rounded-lg border border-sub text-sub transition',
+          'group relative flex h-8 w-8 items-center justify-center rounded-lg border border-sub text-sub transition data-[status]:border-main data-[status]:bg-main data-[status]:text-bg data-[status]:duration-0',
+          keymap === 'react' ? 'duration-300 data-[status]:scale-[.925]' : 'duration-150',
+          !blindMode && 'data-[status=error]:!border-error data-[status=error]:!bg-error',
           className,
         )}
         style={{ order, ...style }}
         {...props}
       >
         {children}
-        {bump && <span ref={bumpRef} className='bump absolute bottom-[0.2rem] h-px w-2' />}
+        {bump && (
+          <span
+            className={twJoin(
+              'absolute bottom-[0.2rem] h-px w-2 bg-sub transition group-data-[status]:bg-bg group-data-[status]:duration-0',
+              keymap === 'react' ? 'duration-300' : 'duration-150',
+            )}
+          />
+        )}
       </div>
     );
   }),
@@ -101,22 +100,19 @@ export default function Keymap() {
     if (pressed?.key && key.includes(pressed.key)) return pressed.error ? 'error' : true;
     return false;
   };
-  // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: todo
   const getLegend = (rowIndex: number, keyIndex: number) => {
     const key = Object.values(layout.keys)[rowIndex][keyIndex];
     if (!key) return null;
-    const isLetter = key.match(/\p{L}/gu);
+    const isLetter = !!key.match(/\p{L}/gu);
     switch (keymapLegendStyle) {
       case 'lowercase':
         return key[0];
       case 'uppercase':
-        return key[isLetter ? 1 : 0];
+        return key[+isLetter];
       case 'dynamic':
-        if (isLetter) return key[(capsLock ? !shift : shift) ? 1 : 0];
-        return key[shift ? 1 : 0];
-      default:
-        return null;
+        return isLetter ? key[+(capsLock ? !shift : shift)] : key[+shift];
     }
+    return null;
   };
 
   useDidUpdate(() => {
@@ -169,7 +165,7 @@ export default function Keymap() {
                       )}
                       blindMode={blindMode}
                       keymap={keymap}
-                      onClick={() => commandLine.handler?.open('keymapLayout')}
+                      onClick={() => commandLine.handler.open('keymapLayout')}
                       status={getStatus(key)}
                     >
                       {!isUserTyping && (

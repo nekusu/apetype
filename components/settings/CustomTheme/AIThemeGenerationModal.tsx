@@ -1,7 +1,8 @@
 'use client';
 
 import Loading from '@/app/loading';
-import { Button, Input, Modal, Text, Tooltip, Transition } from '@/components/core';
+import { Button, Grid, Group, Input, Modal, Text, Tooltip, Transition } from '@/components/core';
+import type { ModalProps } from '@/components/core/Modal';
 import { useColorPalette } from '@/hooks/useColorPalette';
 import type { CustomTheme, ThemeColors } from '@/utils/theme';
 import { valibotResolver } from '@hookform/resolvers/valibot';
@@ -11,12 +12,10 @@ import { AnimatePresence } from 'framer-motion';
 import { useMemo, useState } from 'react';
 import { type SubmitHandler, useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
-import { RiLoaderLine, RiLockFill, RiLockUnlockFill, RiQuestionLine } from 'react-icons/ri';
+import { RiLockFill, RiLockUnlockFill, RiQuestionLine } from 'react-icons/ri';
 import { type Input as ValiInput, maxLength, minLength, object, string, toTrimmed } from 'valibot';
 
-interface ModalProps {
-  open: boolean;
-  onClose: () => void;
+export interface AIThemeGenerationModalProps extends ModalProps {
   addTheme: (theme: Optional<CustomTheme, 'id'>) => void;
 }
 type Model = 'transformer' | 'diffusion' | 'random';
@@ -58,7 +57,11 @@ const themeSchema = object({
 });
 type ThemeForm = ValiInput<typeof themeSchema>;
 
-export default function AIThemeGenerationModal({ open, onClose, addTheme }: ModalProps) {
+export default function AIThemeGenerationModal({
+  addTheme,
+  ...props
+}: AIThemeGenerationModalProps) {
+  const { opened } = props;
   const {
     formState: { errors },
     handleSubmit,
@@ -99,41 +102,33 @@ export default function AIThemeGenerationModal({ open, onClose, addTheme }: Moda
   };
 
   useDidUpdate(() => {
-    if (open && !palettes.length) void generate({ model, creativity, palette: lockedColors });
-  }, [open]);
+    if (opened && !palettes.length) generate({ model, creativity, palette: lockedColors });
+  }, [opened]);
 
   return (
-    <Modal centered open={open} onClose={onClose}>
-      <form
-        className='flex max-w-sm flex-col gap-3.5 text-sm'
-        onSubmit={(e) => void handleSubmit(onSubmit)(e)}
-      >
+    <Modal {...props}>
+      <form className='flex max-w-sm flex-col gap-3.5' onSubmit={handleSubmit(onSubmit)}>
         <Text asChild className='text-2xl'>
           <h3>AI Theme Generation</h3>
         </Text>
-        <Text className='text-[length:inherit]' dimmed>
+        <Text className='text-sm' dimmed>
           Use machine learning to create unique color schemes!
         </Text>
         <div className='flex flex-col gap-3'>
           <Input error={errors.name?.message} label='name' data-autofocus {...register('name')} />
-          <div className='grid grid-cols-3 gap-2'>
+          <Grid className='grid-cols-3'>
             <div className='-mb-1 col-span-full flex gap-1 text-sm text-sub leading-none'>
               model
             </div>
             {(Object.keys(MODELS) as Model[]).map((m) => (
               <Tooltip key={m} className='max-w-xs text-xs' label={MODELS[m]}>
-                <Button
-                  active={model === m}
-                  className='w-full'
-                  variant='filled'
-                  onClick={() => setModel(m)}
-                >
+                <Button active={model === m} onClick={() => setModel(m)}>
                   {m}
                 </Button>
               </Tooltip>
             ))}
-          </div>
-          <div className='grid grid-cols-3 gap-2'>
+          </Grid>
+          <Grid className='grid-cols-3'>
             <div className='-mb-1 col-span-full flex gap-1 text-sm text-sub leading-none'>
               creativity
               <Tooltip
@@ -141,7 +136,7 @@ export default function AIThemeGenerationModal({ open, onClose, addTheme }: Moda
                 label={
                   <>
                     Higher creativity will result in more random and potentially creative results.
-                    Low creativity will result in more &quot;average&quot; or typical colors.
+                    Low creativity will result in more "average" or typical colors.
                   </>
                 }
               >
@@ -154,14 +149,12 @@ export default function AIThemeGenerationModal({ open, onClose, addTheme }: Moda
               <Button
                 key={c}
                 active={creativity === CREATIVITY[c]}
-                className='w-full'
-                variant='filled'
                 onClick={() => setCreativity(CREATIVITY[c])}
               >
                 {c}
               </Button>
             ))}
-          </div>
+          </Grid>
         </div>
         <AnimatePresence mode='wait'>
           {palettes.length ? (
@@ -175,13 +168,12 @@ export default function AIThemeGenerationModal({ open, onClose, addTheme }: Moda
                 const isColorLocked = lockedColors.includes(color);
 
                 return (
-                  <div key={LABELS[i]} className='flex gap-2'>
+                  <Group key={LABELS[i]} grow={false}>
                     <Button
-                      className='group hover:-translate-y-0.5 w-full justify-start px-3 text-sm hover:shadow-lg active:translate-y-0.5 active:transform-none'
+                      className='group hover:-translate-y-0.5 w-full justify-start text-sm hover:shadow-lg active:translate-y-0.5 active:transform-none'
                       style={{ backgroundColor: color, color: highestContrastColor }}
-                      variant='filled'
                       onClick={() =>
-                        void navigator.clipboard
+                        navigator.clipboard
                           .writeText(color)
                           .then(() => toast.success('Color copied to clipboard!'))
                       }
@@ -193,7 +185,6 @@ export default function AIThemeGenerationModal({ open, onClose, addTheme }: Moda
                       <Button
                         active={isColorLocked}
                         className='px-2.5'
-                        variant='filled'
                         onClick={() => {
                           if (isColorLocked) lockedColorsHandler.setItem(i, '-');
                           else lockedColorsHandler.setItem(i, color);
@@ -202,7 +193,7 @@ export default function AIThemeGenerationModal({ open, onClose, addTheme }: Moda
                         {isColorLocked ? <RiLockFill /> : <RiLockUnlockFill />}
                       </Button>
                     </Tooltip>
-                  </div>
+                  </Group>
                 );
               })}
             </Transition>
@@ -214,39 +205,27 @@ export default function AIThemeGenerationModal({ open, onClose, addTheme }: Moda
             />
           )}
         </AnimatePresence>
-        <div className='flex gap-2'>
-          <Button
-            className='w-full'
-            disabled={activePalette <= 0}
-            variant='filled'
-            onClick={() => setActivePalette((i) => i - 1)}
-          >
+        <Group>
+          <Button disabled={activePalette <= 0} onClick={() => setActivePalette((i) => i - 1)}>
             previous
           </Button>
           <Button
-            className='w-full'
-            disabled={!palettes.length || isLoading}
-            variant='filled'
+            disabled={!palettes.length}
+            loading={!!palettes.length && isLoading}
             onClick={() => {
               const options = { model, creativity, palette: lockedColors };
               if (shouldRegenerate) {
-                void generate(options);
+                generate(options);
                 setActivePalette(0);
               } else if (activePalette >= palettes.length - 1)
-                void generate(options).then(() => setActivePalette((i) => i + 1));
+                generate(options).then(() => setActivePalette((i) => i + 1));
               else setActivePalette((i) => i + 1);
             }}
           >
-            {!!palettes.length && isLoading ? (
-              <RiLoaderLine className='animate-spin' />
-            ) : shouldRegenerate ? (
-              'generate'
-            ) : (
-              'next'
-            )}
+            {shouldRegenerate ? 'generate' : 'next'}
           </Button>
-        </div>
-        <Text className='text-[length:inherit]' dimmed>
+        </Group>
+        <Text className='text-sm' dimmed>
           Powered by{' '}
           <a
             className='text-main hover:underline'
@@ -258,11 +237,9 @@ export default function AIThemeGenerationModal({ open, onClose, addTheme }: Moda
           </a>
           .
         </Text>
-        <div className='flex gap-2'>
-          <Button className='w-full' disabled={!palettes.length} variant='filled' type='submit'>
-            save
-          </Button>
-        </div>
+        <Button disabled={!palettes.length} type='submit'>
+          save
+        </Button>
       </form>
     </Modal>
   );

@@ -2,6 +2,8 @@ import { shallowEqual, useListState } from '@mantine/hooks';
 import useSWRMutation from 'swr/mutation';
 import { useStatefulRef } from './useStatefulRef';
 
+const HUEMINT_API_URL = 'https://api.huemint.com/color';
+
 export function useColorPalette() {
   type Data = { results: { palette: string[] }[] };
   type GenerateOptions = {
@@ -12,7 +14,7 @@ export function useColorPalette() {
   };
 
   const { trigger, isMutating } = useSWRMutation(
-    'https://api.huemint.com/color',
+    HUEMINT_API_URL,
     (url, { arg: { model, creativity, palette, colorCount } }: { arg: GenerateOptions }) =>
       fetch(url, {
         method: 'POST',

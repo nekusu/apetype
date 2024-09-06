@@ -40,6 +40,18 @@ export const themeColorVariables: Record<keyof ThemeColors, string> = {
   colorfulError: '--colorful-error-color',
   colorfulErrorExtra: '--colorful-error-extra-color',
 };
+export const themeColorLabels: Record<keyof ThemeColors, string> = {
+  bg: 'background',
+  main: 'main',
+  caret: 'caret',
+  sub: 'sub',
+  subAlt: 'sub alt',
+  text: 'text',
+  error: 'error',
+  errorExtra: 'error extra',
+  colorfulError: 'colorful error',
+  colorfulErrorExtra: 'colorful error extra',
+};
 
 export function extractThemeColors(string: string) {
   const regex = /(?<!\/\*.*)(--.+):\s*(.+);/g;
@@ -67,14 +79,9 @@ export function getThemeColors() {
   );
 }
 
-export function setThemeColors(colors: ThemeColors, element = document.body) {
+export function setThemeColors(colors: ThemeColors, element = document.documentElement) {
   for (const [key, value] of Object.entries(colors))
     element.style.setProperty(themeColorVariables[key as keyof typeof themeColorVariables], value);
-}
-
-export function removeThemeColors() {
-  for (const [, value] of Object.entries(themeColorVariables))
-    document.body.style.removeProperty(value);
 }
 
 export function validateColor(value = '', colors?: ThemeColors) {

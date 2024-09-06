@@ -17,7 +17,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let unsuscribe: Unsubscribe | null = null;
-    void (async () => {
+    (async () => {
       const { auth, onAuthStateChanged } = await getFirebaseAuth();
       unsuscribe = onAuthStateChanged(auth, (user) => {
         setSignedIn(!!user);

@@ -78,36 +78,29 @@ export interface Settings {
   persistentCache: boolean;
 }
 
+type Option<T extends keyof Settings> = { alt?: string; value: Settings[T] };
 export interface SettingParams<T extends keyof Settings> {
   command: string;
   category?: (typeof categories)[number];
   description?: ReactNode;
-  options: { alt?: string; value: Settings[T] }[];
+  options?: (Option<T> | Settings[T])[];
   custom?: boolean;
   hidden?: boolean;
 }
 
-const OFF_ON_OPTIONS = [
-  { alt: 'off', value: false },
-  { alt: 'on', value: true },
-];
-const HIDE_SHOW_OPTIONS = [
-  { alt: 'hide', value: false },
-  { alt: 'show', value: true },
-];
+const OFF_OPTION = { alt: 'off', value: false } as const;
+const ON_OPTION = { alt: 'on', value: true } as const;
+const OFF_ON_OPTIONS = [OFF_OPTION, ON_OPTION];
+const HIDE_OPTION = { alt: 'hide', value: false } as const;
+const SHOW_OPTION = { alt: 'show', value: true } as const;
+const HIDE_SHOW_OPTIONS = [SHOW_OPTION, HIDE_OPTION];
 
-function create<T extends keyof Settings = 'mode'>({
-  options,
-  ...params
-}: Omit<SettingParams<T>, 'options'> & {
-  options?: (SettingParams<T>['options'][number] | Settings[T])[];
-}) {
+function create<T extends keyof Settings = 'mode'>({ options, ...params }: SettingParams<T>) {
   return {
     id: toCamelCase(params.command) as keyof Settings,
     options:
-      (options?.map((option) =>
-        typeof option !== 'object' ? { value: option } : option,
-      ) as SettingParams<T>['options']) ?? [],
+      (options?.map((value) => (typeof value !== 'object' ? { value } : value)) as Option<T>[]) ??
+      [],
     ...params,
   } as const;
 }
@@ -122,7 +115,7 @@ export const categories = [
   'hide elements',
   'danger zone',
 ] as const;
-const warningMessage = <span className='text-error'>You can&apos;t undo this action!</span>;
+const warningMessage = <span className='text-error'>You can't undo this action!</span>;
 
 export const settingsList = {
   mode: create<'mode'>({
@@ -146,10 +139,10 @@ export const settingsList = {
       <>
         Press <Key>tab</Key> or <Key>esc</Key> to quickly restart the test, or to quickly jump to
         the test page. Both options disable tab navigation on most parts of the website. Using the
-        &quot;esc&quot; option will move opening the command line to the <Key>tab</Key> key.
+        "esc" option will move opening the command line to the <Key>tab</Key> key.
       </>
     ),
-    options: [{ alt: 'off', value: false }, 'tab', 'esc'],
+    options: [OFF_OPTION, 'tab', 'esc'],
   }),
   blindMode: create<'blindMode'>({
     command: 'blind mode',
@@ -193,7 +186,7 @@ export const settingsList = {
         you to continue to the next word until you correct all mistakes.
       </>
     ),
-    options: [{ alt: 'off', value: false }, 'letter', 'word'],
+    options: [OFF_OPTION, 'letter', 'word'],
   }),
   quickEnd: create<'quickEnd'>({
     command: 'quick end',
@@ -201,8 +194,8 @@ export const settingsList = {
     description: (
       <>
         This only applies to the words mode - when enabled, the test will end as soon as the last
-        word has been typed, even if it&apos;s incorrect. When disabled, you need to manually
-        confirm the last incorrect entry with a space.
+        word has been typed, even if it's incorrect. When disabled, you need to manually confirm the
+        last incorrect entry with a space.
       </>
     ),
     options: OFF_ON_OPTIONS,
@@ -212,11 +205,11 @@ export const settingsList = {
     category: 'input',
     description: (
       <>
-        Shows typos that you&apos;ve made. Below shows what you typed below the letters and replace
-        will replace the letters with the ones you typed.
+        Shows typos that you've made. Below shows what you typed below the letters and replace will
+        replace the letters with the ones you typed.
       </>
     ),
-    options: [{ alt: 'off', value: false }, 'below', 'replace'],
+    options: [OFF_OPTION, 'below', 'replace'],
   }),
   hideExtraLetters: create<'hideExtraLetters'>({
     command: 'hide extra letters',
@@ -252,7 +245,7 @@ export const settingsList = {
     category: 'sound',
     description: <>Plays a short sound when you press a key.</>,
     options: [
-      { alt: 'off', value: false },
+      OFF_OPTION,
       'beep',
       'click',
       'hitmarker',
@@ -279,7 +272,7 @@ export const settingsList = {
     category: 'caret',
     description: <>Change the style of the caret during the test.</>,
     options: [
-      { alt: 'off', value: false },
+      OFF_OPTION,
       { alt: '|', value: 'default' },
       { alt: '▮', value: 'block' },
       { alt: '▯', value: 'outline' },
@@ -331,19 +324,19 @@ export const settingsList = {
     command: 'font family',
     category: 'appearance',
     options: [
-      { alt: 'Fira Code', value: '--font-fira-code' },
-      { alt: 'Inconsolata', value: '--font-inconsolata' },
-      { alt: 'JetBrains Mono', value: '--font-jetbrains-mono' },
-      { alt: 'Lato', value: '--font-lato' },
-      { alt: 'Lexend Deca', value: '--font-lexend-deca' },
-      { alt: 'Montserrat', value: '--font-montserrat' },
-      { alt: 'Nunito', value: '--font-nunito' },
-      { alt: 'Oxygen', value: '--font-oxygen' },
-      { alt: 'Roboto', value: '--font-roboto' },
-      { alt: 'Roboto Mono', value: '--font-roboto-mono' },
-      { alt: 'Source Code Pro', value: '--font-source-code-pro' },
-      { alt: 'Ubuntu', value: '--font-ubuntu' },
-      { alt: 'Ubuntu Mono', value: '--font-ubuntu-mono' },
+      'Fira Code',
+      'Inconsolata',
+      'JetBrains Mono',
+      'Lato',
+      'Lexend Deca',
+      'Montserrat',
+      'Nunito',
+      'Oxygen',
+      'Roboto',
+      'Roboto Mono',
+      'Source Code Pro',
+      'Ubuntu',
+      'Ubuntu Mono',
     ],
     custom: true,
   }),
@@ -363,7 +356,7 @@ export const settingsList = {
     command: 'keymap',
     category: 'appearance',
     description: <>Controls which layout is displayed on the keymap.</>,
-    options: [{ alt: 'off', value: false }, 'static', 'react', 'next'],
+    options: [OFF_OPTION, 'static', 'react', 'next'],
   }),
   keymapLayout: create<'keymapLayout'>({
     command: 'keymap layout',
@@ -411,9 +404,8 @@ export const settingsList = {
     category: 'theme',
     description: (
       <>
-        After completing a test, the theme will be set to a random one. If set to &apos;light&apos;
-        or &apos;dark&apos;, only presets with light or dark background colors will be randomized,
-        respectively.
+        After completing a test, the theme will be set to a random one. If set to 'light' or 'dark',
+        only presets with light or dark background colors will be randomized, respectively.
       </>
     ),
     options: [...OFF_ON_OPTIONS, 'light', 'dark'],
@@ -456,8 +448,8 @@ export const settingsList = {
     category: 'hide elements',
     description: (
       <>
-        Shows an out of focus reminder after 1 second of being &apos;out of focus&apos; (not being
-        able to type).
+        Shows an out of focus reminder after 1 second of being 'out of focus' (not being able to
+        type).
       </>
     ),
     options: HIDE_SHOW_OPTIONS,
@@ -489,9 +481,9 @@ export const settingsList = {
     category: 'danger zone',
     description: (
       <>
-        When enabled, certain data will be saved to the browser&apos;s local storage. This avoids
+        When enabled, certain data will be saved to the browser's local storage. This avoids
         repeated requests to the server, improving load times and reducing bandwidth usage. Large
-        cache may slow down site&apos;s initial load.
+        cache may slow down site's initial load.
       </>
     ),
     options: OFF_ON_OPTIONS,
@@ -510,7 +502,7 @@ export const settingsList = {
     category: 'danger zone',
     description: (
       <>
-        Resets all your personal bests (but doesn&apos;t delete any tests from your history).
+        Resets all your personal bests (but doesn't delete any tests from your history).
         <br />
         {warningMessage}
       </>
@@ -566,7 +558,7 @@ export const defaultSettings: Settings = {
   smoothLineScroll: true,
   showDecimalPlaces: false,
   fontSize: 1.5,
-  fontFamily: '--font-lexend-deca',
+  fontFamily: 'Lexend Deca',
   pageWidth: '1250px',
   keymap: false,
   keymapLayout: 'qwerty',
@@ -694,7 +686,7 @@ export function validateSettings(
 
   if (!result.success)
     for (const { path, validation } of result.issues) {
-      if (!path) return;
+      if (!path) continue;
       const pathKeys = path.map(({ key }) => key) as [keyof Settings];
       const lastKey = pathKeys.at(-1);
       let current: Partial<Settings> | Settings[keyof Settings] = newSettings;
@@ -705,7 +697,7 @@ export function validateSettings(
           if (validation === 'never') {
             unknown.push(issue);
             delete current[key];
-            return;
+            continue;
           }
           issue.defaultValue = pathOr(
             defaultSettings,

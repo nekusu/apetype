@@ -1,20 +1,18 @@
 'use client';
 
 import { Button, Input, Modal, Text } from '@/components/core';
-import type { ButtonProps } from '@/components/core/Button';
 import { useGlobal } from '@/context/globalContext';
 import { useSettings } from '@/context/settingsContext';
+import fonts from '@/utils/fonts';
 import { useDisclosure, useInputState } from '@mantine/hooks';
 import { RiFontSize } from 'react-icons/ri';
 import Setting from './Setting';
-
-const COMMON_BUTTON_PROPS: Omit<ButtonProps, 'ref'> = { className: 'w-full', variant: 'filled' };
 
 export default function FontFamily() {
   const { settingsList } = useGlobal();
   const { options } = settingsList.fontFamily;
   const { fontFamily, setSettings } = useSettings();
-  const [modalOpen, modalHandler] = useDisclosure(false);
+  const [modalOpened, modalHandler] = useDisclosure(false);
   const [customFont, setCustomFont] = useInputState('');
   const isCustomFont = !options.map(({ value }) => value).includes(fontFamily);
 
@@ -22,14 +20,14 @@ export default function FontFamily() {
     <>
       <Setting
         id='fontFamily'
-        buttonProps={({ value }) => ({ style: { fontFamily: `var(${value?.toString()})` } })}
+        buttonProps={({ value }) => ({ className: fonts[value].className })}
         columns={4}
       >
-        <Button active={isCustomFont} onClick={modalHandler.open} {...COMMON_BUTTON_PROPS}>
+        <Button active={isCustomFont} onClick={modalHandler.open}>
           custom {isCustomFont && `(${fontFamily})`}
         </Button>
       </Setting>
-      <Modal className='w-full max-w-sm' open={modalOpen} onClose={modalHandler.close} centered>
+      <Modal className='w-full max-w-sm' opened={modalOpened} onClose={modalHandler.close}>
         <form
           className='flex flex-col gap-3.5'
           onSubmit={(event) => {
@@ -52,7 +50,7 @@ export default function FontFamily() {
           <Text className='text-sm' dimmed>
             Make sure you have the font installed on your device before applying.
           </Text>
-          <Button type='submit' disabled={!customFont.length} {...COMMON_BUTTON_PROPS}>
+          <Button type='submit' disabled={!customFont.length}>
             apply
           </Button>
         </form>

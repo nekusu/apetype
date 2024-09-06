@@ -8,8 +8,8 @@ export default function NotFound() {
       <Text className='font-bold text-9xl leading-none' dimmed>
         404
       </Text>
-      <Text className='text-center'>Looks like you found a page that doesn&apos;t exist.</Text>
-      <Button asChild className='gap-2.5 px-4 py-3' variant='filled'>
+      <Text className='text-center'>Looks like you found a page that doesn't exist.</Text>
+      <Button asChild className='gap-2.5 px-4 py-3'>
         <Link href='/'>
           <RiKeyboardBoxFill />
           Go Home

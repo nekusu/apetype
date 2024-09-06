@@ -1,28 +1,15 @@
+'use client';
+
 import { Button, ColorPicker, Input, Key, Text, Tooltip } from '@/components/core';
 import type { InputProps } from '@/components/core/Input';
-import type { ThemeColors } from '@/utils/theme';
+import { type ThemeColors, themeColorLabels } from '@/utils/theme';
 import { useEyeDropper, useFocusWithin, useMergedRef } from '@mantine/hooks';
 import { type ElementRef, forwardRef, useRef } from 'react';
 import { toast } from 'react-hot-toast';
 import { RiForbidFill, RiSipLine } from 'react-icons/ri';
 
-const LABELS: ThemeColors = {
-  bg: 'background',
-  main: 'main',
-  caret: 'caret',
-  sub: 'sub',
-  subAlt: 'sub alt',
-  text: 'text',
-  error: 'error',
-  errorExtra: 'error extra',
-  colorfulError: 'colorful error',
-  colorfulErrorExtra: 'colorful error extra',
-};
-
-type Color = keyof ThemeColors;
-
 export interface ColorInputProps extends InputProps {
-  colorKey: Color;
+  colorKey: keyof ThemeColors;
   value?: string;
   computedValue?: string;
   setValue?: (value: string) => void;
@@ -35,7 +22,7 @@ const ColorInput = forwardRef<ElementRef<'input'>, ColorInputProps>(function Col
   const { supported, open } = useEyeDropper();
   const { ref: focusRef, focused } = useFocusWithin();
   const inputRef = useRef<HTMLInputElement>(null);
-  const mergedRef = useMergedRef(ref, focusRef, inputRef);
+  const mergedRef = useMergedRef(ref, inputRef);
 
   const pickColor = async () => {
     const toastId = toast(
@@ -63,7 +50,8 @@ const ColorInput = forwardRef<ElementRef<'input'>, ColorInputProps>(function Col
   return (
     <Input
       ref={mergedRef}
-      label={LABELS[colorKey]}
+      wrapperRef={focusRef}
+      label={themeColorLabels[colorKey]}
       leftNode={
         <ColorPicker color={computedValue ?? value ?? ''} onChange={(color) => setValue?.(color)} />
       }
@@ -71,7 +59,13 @@ const ColorInput = forwardRef<ElementRef<'input'>, ColorInputProps>(function Col
         <>
           {supported && focused && (
             <Tooltip label='Pick color'>
-              <Button className='p-0' tabIndex={-1} onMouseDown={() => void pickColor()}>
+              <Button
+                className='p-0'
+                tabIndex={-1}
+                onKeyDown={() => inputRef.current?.focus()}
+                onClick={pickColor}
+                variant='text'
+              >
                 <RiSipLine />
               </Button>
             </Tooltip>

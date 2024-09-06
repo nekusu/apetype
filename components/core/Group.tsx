@@ -2,23 +2,23 @@ import { Slot } from '@radix-ui/react-slot';
 import { type ComponentPropsWithoutRef, type ElementRef, forwardRef } from 'react';
 import { twMerge } from 'tailwind-merge';
 
-export interface TextProps extends ComponentPropsWithoutRef<'div'> {
+export interface GroupProps extends ComponentPropsWithoutRef<'div'> {
   asChild?: boolean;
-  dimmed?: boolean;
+  grow?: boolean;
 }
 
-const Text = forwardRef<ElementRef<'div'>, TextProps>(function Text(
-  { asChild, className, dimmed = false, ...props },
+const Group = forwardRef<ElementRef<'div'>, GroupProps>(function Group(
+  { asChild, className, grow = true, ...props },
   ref,
 ) {
   const Component = asChild ? Slot : 'div';
   return (
     <Component
       ref={ref}
-      className={twMerge('text-left transition', dimmed ? 'text-sub' : 'text-text', className)}
+      className={twMerge('flex gap-2', grow && '[&>*]:flex-1', className)}
       {...props}
     />
   );
 });
 
-export default Text;
+export default Group;

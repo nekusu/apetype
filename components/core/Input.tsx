@@ -1,7 +1,13 @@
 'use client';
 
 import { useFocusWithin, useId, useMergedRef } from '@mantine/hooks';
-import { type ComponentPropsWithoutRef, type ElementRef, type ReactNode, forwardRef } from 'react';
+import {
+  type ComponentPropsWithoutRef,
+  type ElementRef,
+  type ReactNode,
+  type RefObject,
+  forwardRef,
+} from 'react';
 import { RiErrorWarningLine } from 'react-icons/ri';
 import { twMerge } from 'tailwind-merge';
 import Tooltip from './Tooltip';
@@ -13,6 +19,7 @@ export interface InputProps extends ComponentPropsWithoutRef<'input'> {
   leftNode?: ReactNode;
   rightNode?: ReactNode;
   wrapperClassName?: string;
+  wrapperRef?: RefObject<HTMLDivElement>;
 }
 
 const Input = forwardRef<ElementRef<'input'>, InputProps>(function Input(
@@ -27,6 +34,7 @@ const Input = forwardRef<ElementRef<'input'>, InputProps>(function Input(
     rightNode,
     type = 'text',
     wrapperClassName,
+    wrapperRef,
     ...props
   },
   ref,
@@ -38,9 +46,10 @@ const Input = forwardRef<ElementRef<'input'>, InputProps>(function Input(
 
   return (
     <div
+      ref={wrapperRef}
       className={twMerge(
         'flex flex-col gap-1 text-sub transition focus-within:text-text',
-        disabled && 'pointer-events-none opacity-60',
+        disabled && 'pointer-events-none opacity-50',
         wrapperClassName,
       )}
     >
@@ -67,8 +76,8 @@ const Input = forwardRef<ElementRef<'input'>, InputProps>(function Input(
             className={twMerge(
               'h-full w-full border-0 bg-transparent outline-0 placeholder:text-sub',
               error && 'text-error',
-              leftNode && 'pl-2',
-              (rightNode || isErrorVisible) && 'pr-2',
+              !!leftNode && 'pl-2',
+              (!!rightNode || isErrorVisible) && 'pr-2',
               inputClassName,
             )}
             disabled={disabled}

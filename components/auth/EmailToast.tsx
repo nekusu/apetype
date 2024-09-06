@@ -1,6 +1,6 @@
 'use client';
 
-import { Button, Text } from '@/components/core';
+import { Button, Group, Text } from '@/components/core';
 import { type Toast, resolveValue, toast } from 'react-hot-toast';
 import { RiInformationFill } from 'react-icons/ri';
 
@@ -19,16 +19,16 @@ export default function EmailToast({ emailDomain, ...t }: EmailToastProps) {
         </span>
         <Text className='leading-tight'>{resolvedValue}</Text>
       </div>
-      <div className='flex gap-2'>
-        <Button className='w-full' variant='subtle' onClick={() => toast.dismiss(t.id)}>
+      <Group>
+        <Button onClick={() => toast.dismiss(t.id)} variant='subtle'>
           dismiss
         </Button>
-        <Button asChild active className='w-full' variant='filled'>
+        <Button asChild active>
           <a href={`https://${emailDomain}`} target='_blank' rel='noopener noreferrer'>
             open email
           </a>
         </Button>
-      </div>
+      </Group>
     </div>
   );
 }

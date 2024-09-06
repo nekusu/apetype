@@ -10,8 +10,7 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { Controller, type SubmitHandler, useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
-import { RiLoaderLine, RiMailFill } from 'react-icons/ri';
-import { twJoin } from 'tailwind-merge';
+import { RiMailFill } from 'react-icons/ri';
 import {
   type Input as ValiInput,
   boolean,
@@ -45,7 +44,7 @@ export default function LoginPage() {
     resolver: valibotResolver(loginSchema),
   });
   const focusTrapRef = useFocusTrap();
-  const [popupOpen, popupHandler] = useDisclosure(false);
+  const [popupOpened, popupHandler] = useDisclosure(false);
   const [isLoading, setIsLoading] = useState(false);
 
   const onSubmit: SubmitHandler<LoginForm> = async ({ email, password, remember }) => {
@@ -74,22 +73,20 @@ export default function LoginPage() {
   };
 
   return (
-    <Transition
-      ref={focusTrapRef}
-      className={twJoin(
-        'flex min-w-xs max-w-xs flex-col gap-3.5 transition',
-        (popupOpen || isLoading) && '!pointer-events-none !opacity-60',
-      )}
-    >
+    <Transition ref={focusTrapRef} className='flex min-w-xs max-w-xs flex-col gap-3.5 transition'>
       <Text asChild className='text-2xl'>
         <h3>Login</h3>
       </Text>
       <Text className='text-sm' dimmed>
         Select method to log in:
       </Text>
-      <SignInMethods onStart={popupHandler.open} onFinish={popupHandler.close} />
+      <SignInMethods
+        disabled={isLoading}
+        onStart={popupHandler.open}
+        onFinish={popupHandler.close}
+      />
       <Divider label='or continue with email' />
-      <form className='flex flex-col gap-3.5' onSubmit={(e) => void handleSubmit(onSubmit)(e)}>
+      <form className='flex flex-col gap-3.5' onSubmit={handleSubmit(onSubmit)}>
         <div className='flex flex-col gap-2'>
           <Input
             placeholder='email'
@@ -115,19 +112,24 @@ export default function LoginPage() {
               />
             )}
           />
-          <Button asChild className='p-0 text-text text-xs hover:text-main focus-visible:text-main'>
+          <Button
+            asChild
+            className='p-0 text-text text-xs hover:text-main focus-visible:text-main'
+            variant='text'
+          >
             <Link href='/reset-password'>Forgot password?</Link>
           </Button>
         </div>
-        <Button className='h-9 w-full' variant='filled' type='submit'>
-          {isLoading ? <RiLoaderLine className='animate-spin' /> : 'sign in'}
+        <Button disabled={popupOpened} loading={isLoading} type='submit'>
+          sign in
         </Button>
       </form>
       <Text className='text-center text-xs' dimmed>
-        Don&apos;t have an account?{' '}
+        Don't have an account?{' '}
         <Button
           asChild
           className='inline-flex p-0 text-text text-xs hover:text-main focus-visible:text-main'
+          variant='text'
         >
           <Link href='/signup'>Sign up</Link>
         </Button>

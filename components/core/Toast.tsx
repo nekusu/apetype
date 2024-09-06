@@ -34,7 +34,7 @@ export default function Toast({
         duration.current -= elapsedTime;
       }
     } else if (duration.current) {
-      void animationControls.start({
+      animationControls.start({
         width: 0,
         transition: { ease: 'linear', duration: duration.current },
       });

@@ -40,7 +40,13 @@
         "useNamingConvention": {
           "level": "error",
           "options": {
-            "strictCase": false
+            "strictCase": false,
+            "conventions": [
+              {
+                "selector": { "kind": "objectLiteralProperty" },
+                "formats": ["PascalCase", "camelCase"]
+              }
+            ]
           }
         },
         "useForOf": "error",
@@ -62,7 +68,7 @@
           "fix": "unsafe",
           "options": {
             "attributes": ["classNames"],
-            "functions": ["clsx"]
+            "functions": ["cva", "twJoin", "twMerge"]
           }
         }
       },

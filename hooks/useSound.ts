@@ -36,7 +36,7 @@ export function useSound(sound?: false | Sound | `${string}.webm`, config: Manag
     const index = keysLength > 1 ? getRandomNumber(keysLength - 1) : 0;
     const stack = manager.current.get(manager.current.keys[index]);
     stack?.on('statechange', setState);
-    void stack?.prepare().then((sound) => sound?.play());
+    stack?.prepare().then((sound) => sound?.play());
   }, []);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: not needed

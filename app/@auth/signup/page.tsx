@@ -12,8 +12,7 @@ import Link from 'next/link';
 import { useCallback, useDeferredValue, useMemo, useState } from 'react';
 import { type SubmitHandler, useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
-import { RiLoaderLine, RiMailFill, RiUser4Fill } from 'react-icons/ri';
-import { twJoin } from 'tailwind-merge';
+import { RiMailFill, RiUser4Fill } from 'react-icons/ri';
 import {
   type Input as ValiInput,
   custom,
@@ -78,7 +77,7 @@ export default function SignupPage() {
   const userInputs = useMemo(() => [username, email], [username, email]);
   const deferredPassword = useDeferredValue(password);
   const deferredUserInputs = useDeferredValue(userInputs);
-  const [popupOpen, popupHandler] = useDisclosure(false);
+  const [popupOpened, popupHandler] = useDisclosure(false);
   const [isLoading, setIsLoading] = useState(false);
   const handleResult = useCallback(
     (result: ZxcvbnResult | null) => setValue('passwordStrength', result ? result.score : 0),
@@ -129,22 +128,20 @@ export default function SignupPage() {
   };
 
   return (
-    <Transition
-      ref={focusTrapRef}
-      className={twJoin(
-        'flex min-w-xs max-w-xs flex-col gap-3.5 transition',
-        (popupOpen || isLoading) && '!pointer-events-none !opacity-60',
-      )}
-    >
+    <Transition ref={focusTrapRef} className='flex min-w-xs max-w-xs flex-col gap-3.5 transition'>
       <Text asChild className='text-2xl'>
         <h3>Create account</h3>
       </Text>
       <Text className='text-sm' dimmed>
         Select method to sign up:
       </Text>
-      <SignInMethods onStart={popupHandler.open} onFinish={popupHandler.close} />
+      <SignInMethods
+        disabled={isLoading}
+        onStart={popupHandler.open}
+        onFinish={popupHandler.close}
+      />
       <Divider label='or continue with email' />
-      <form className='flex flex-col gap-3.5' onSubmit={(e) => void handleSubmit(onSubmit)(e)}>
+      <form className='flex flex-col gap-3.5' onSubmit={handleSubmit(onSubmit)}>
         <div className='flex flex-col gap-2'>
           <Input
             placeholder='username'
@@ -179,8 +176,8 @@ export default function SignupPage() {
           userInputs={deferredUserInputs}
           onResult={handleResult}
         />
-        <Button className='h-9 w-full' variant='filled' type='submit'>
-          {isLoading ? <RiLoaderLine className='animate-spin' /> : 'sign up'}
+        <Button disabled={popupOpened} loading={isLoading} type='submit'>
+          sign up
         </Button>
       </form>
       <Text className='text-center text-xs' dimmed>
@@ -188,6 +185,7 @@ export default function SignupPage() {
         <Button
           asChild
           className='inline-flex p-0 text-text text-xs hover:text-main focus-visible:text-main'
+          variant='text'
         >
           <Link href='/login'>Sign in</Link>
         </Button>

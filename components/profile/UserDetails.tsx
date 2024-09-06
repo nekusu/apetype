@@ -1,6 +1,6 @@
 'use client';
 
-import { Button, Divider, Text, Tooltip, Transition } from '@/components/core';
+import { Button, Divider, Grid, Group, Text, Tooltip, Transition } from '@/components/core';
 import { socialIcons, socialNames, socialURLs } from '@/utils/socials';
 import type { User } from '@/utils/user';
 import { useDidUpdate } from '@mantine/hooks';
@@ -30,7 +30,11 @@ interface SocialButtonProps {
 function SocialButton({ url, value, icon }: SocialButtonProps) {
   return (
     <Tooltip className='bg-bg' label={value ?? url}>
-      <Button asChild className='p-0 text-2xl text-text hover:text-main focus-visible:text-main'>
+      <Button
+        asChild
+        className='p-0 text-2xl text-text hover:text-main focus-visible:text-main'
+        variant='text'
+      >
         <a href={`https://${url}`} target='_blank' rel='noopener noreferrer'>
           {icon}
         </a>
@@ -101,8 +105,8 @@ export default function UserDetails({
                 imageProps={{ src: profilePicture?.url }}
                 shape={profilePicture?.shape}
                 wrapperClassName={twJoin(
-                  'absolute bottom-0 left-0 transition duration-300 origin-bottom-left',
-                  smallProfilePicture && 'scale-[0.4375] translate-y-12 delay-500',
+                  'absolute bottom-0 left-0 origin-bottom-left transition duration-300',
+                  smallProfilePicture && 'translate-y-12 scale-[0.4375] delay-500',
                 )}
                 className={twJoin(smallProfilePicture && 'border-0 delay-500')}
               />
@@ -128,7 +132,7 @@ export default function UserDetails({
                 <Text className='text-center text-lg'>
                   {completedTests}{' '}
                   {startedTests > 0 && (
-                    <span className='opacity-60'>
+                    <span className='opacity-50'>
                       {`(${Math.round((completedTests / startedTests) * 100)}%)`}
                     </span>
                   )}
@@ -145,7 +149,7 @@ export default function UserDetails({
               </Text>
             </div>
           </div>
-          <div className='grid grid-cols-[1.5fr_1fr] gap-6'>
+          <Grid className='grid-cols-[1.5fr_1fr] gap-6'>
             <div className='flex flex-col gap-4'>
               <div className='flex flex-col gap-3'>
                 <Text
@@ -188,7 +192,7 @@ export default function UserDetails({
                   <Text asChild className='text-sm' dimmed>
                     <h5>socials</h5>
                   </Text>
-                  <div className='flex gap-2'>
+                  <Group grow={false}>
                     {socialNames.map(
                       (name) =>
                         socials[name] && (
@@ -203,11 +207,11 @@ export default function UserDetails({
                     {socials.website && (
                       <SocialButton url={socials.website} icon={<RiGlobalFill />} />
                     )}
-                  </div>
+                  </Group>
                 </div>
               )}
             </div>
-          </div>
+          </Grid>
         </div>
       </div>
     </div>

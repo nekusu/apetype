@@ -1,6 +1,6 @@
 'use client';
 
-import { Button, Tooltip } from '@/components/core';
+import { Button, Group, Tooltip } from '@/components/core';
 import { version } from '@/utils/version';
 import { useLocalStorage } from '@mantine/hooks';
 import { useEffect } from 'react';
@@ -18,16 +18,16 @@ export default function Version() {
         (t) => (
           <div className='flex flex-col gap-2'>
             New version {version}!
-            <div className='flex gap-2'>
-              <Button className='w-full' variant='subtle' onClick={() => toast.dismiss(t.id)}>
+            <Group>
+              <Button variant='subtle' onClick={() => toast.dismiss(t.id)}>
                 dismiss
               </Button>
-              <Button asChild active className='w-full' variant='filled'>
+              <Button asChild active>
                 <a href={RELEASE_URL} target='_blank' rel='noopener noreferrer'>
                   see changelog
                 </a>
               </Button>
-            </div>
+            </Group>
           </div>
         ),
         { duration: Number.POSITIVE_INFINITY },
@@ -37,7 +37,7 @@ export default function Version() {
 
   return (
     <Tooltip label='See changelog' offset={8} placement='left'>
-      <Button asChild className='p-0 text-sm'>
+      <Button asChild className='p-0 text-sm' variant='text'>
         <a href={RELEASE_URL} target='_blank' rel='noopener noreferrer'>
           <RiGitBranchFill />v{version}
         </a>

@@ -24,9 +24,8 @@ export default function Home() {
             <Tooltip label='Open command line' offset={8} placement='left'>
               <Button
                 className='absolute right-0 bottom-0 rounded-full p-2.5'
-                variant='filled'
                 active
-                onClick={() => commandLine.handler?.open()}
+                onClick={() => commandLine.handler.open()}
               >
                 <RiTerminalLine size={18} />
               </Button>
