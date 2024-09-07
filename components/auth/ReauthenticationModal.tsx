@@ -13,20 +13,21 @@ import type { AuthCredential, AuthProvider } from 'firebase/auth';
 import { useCallback, useState } from 'react';
 import { type SubmitHandler, useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
-import { type Input as ValiInput, minLength, object, string } from 'valibot';
+import { type InferInput, minLength, nonEmpty, object, pipe, string } from 'valibot';
 import { PasswordInput } from '.';
 
 export interface ReauthenticationModalProps extends ModalProps {
   onReauthenticate?: (credential: AuthCredential | null) => void;
 }
 
-const passwordSchema = object({
-  password: string([
-    minLength(1, 'Password is required'),
+const PasswordSchema = object({
+  password: pipe(
+    string(),
+    nonEmpty('Password is required'),
     minLength(8, 'Password must have at least 8 characters'),
-  ]),
+  ),
 });
-type PasswordForm = ValiInput<typeof passwordSchema>;
+type PasswordInput = InferInput<typeof PasswordSchema>;
 
 export default function ReauthenticationModal({
   onReauthenticate,
@@ -39,9 +40,9 @@ export default function ReauthenticationModal({
     handleSubmit,
     register,
     setError,
-  } = useForm<PasswordForm>({
+  } = useForm<PasswordInput>({
     defaultValues: { password: '' },
-    resolver: valibotResolver(passwordSchema),
+    resolver: valibotResolver(PasswordSchema),
   });
   const [popupOpened, popupHandler] = useDisclosure(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -76,7 +77,7 @@ export default function ReauthenticationModal({
     },
     [popupHandler, reauthenticate],
   );
-  const onSubmit: SubmitHandler<PasswordForm> = async ({ password }) => {
+  const onSubmit: SubmitHandler<PasswordInput> = async ({ password }) => {
     const { auth, EmailAuthProvider } = await getFirebaseAuth();
     if (!auth.currentUser?.email) return;
     try {

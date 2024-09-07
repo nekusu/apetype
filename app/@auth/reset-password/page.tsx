@@ -11,12 +11,12 @@ import { useState } from 'react';
 import { type SubmitHandler, useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
 import { RiMailFill } from 'react-icons/ri';
-import { type Input as ValiInput, email, minLength, object, string, toTrimmed } from 'valibot';
+import { type InferInput, email, nonEmpty, object, pipe, string, trim } from 'valibot';
 
-const resetPasswordSchema = object({
-  email: string([toTrimmed(), minLength(1, 'Email is required'), email('Invalid email')]),
+const ResetPasswordSchema = object({
+  email: pipe(string(), trim(), nonEmpty('Email is required'), email('Invalid email')),
 });
-type ResetPasswordForm = ValiInput<typeof resetPasswordSchema>;
+type ResetPasswordInput = InferInput<typeof ResetPasswordSchema>;
 
 export default function ResetPasswordPage() {
   const router = useRouter();
@@ -25,14 +25,14 @@ export default function ResetPasswordPage() {
     handleSubmit,
     register,
     setError,
-  } = useForm<ResetPasswordForm>({
+  } = useForm<ResetPasswordInput>({
     defaultValues: { email: '' },
-    resolver: valibotResolver(resetPasswordSchema),
+    resolver: valibotResolver(ResetPasswordSchema),
   });
   const focusTrapRef = useFocusTrap();
   const [isLoading, setIsLoading] = useState(false);
 
-  const onSubmit: SubmitHandler<ResetPasswordForm> = async ({ email }) => {
+  const onSubmit: SubmitHandler<ResetPasswordInput> = async ({ email }) => {
     const { auth, sendPasswordResetEmail } = await getFirebaseAuth();
     try {
       setIsLoading(true);

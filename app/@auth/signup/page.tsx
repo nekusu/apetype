@@ -14,50 +14,52 @@ import { type SubmitHandler, useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
 import { RiMailFill, RiUser4Fill } from 'react-icons/ri';
 import {
-  type Input as ValiInput,
-  custom,
+  type InferInput,
+  check,
   email,
   forward,
   maxLength,
   minLength,
+  nonEmpty,
   number,
   object,
+  pipe,
   regex,
   string,
-  toTrimmed,
+  trim,
 } from 'valibot';
 
-const signupSchema = object(
-  {
-    username: string([
-      minLength(1, 'Username is required'),
+const SignupSchema = pipe(
+  object({
+    username: pipe(
+      string(),
+      nonEmpty('Username is required'),
       minLength(3, 'Username must have at least 3 characters'),
       maxLength(32, 'Username must have at most 32 characters'),
       regex(/^[a-zA-Z0-9_]+$/, 'Username can only contain letters, numbers, and underscores'),
-    ]),
-    email: string([toTrimmed(), minLength(1, 'Email is required'), email('Invalid email')]),
-    password: string([
-      minLength(1, 'Password is required'),
+    ),
+    email: pipe(string(), trim(), nonEmpty('Email is required'), email('Invalid email')),
+    password: pipe(
+      string(),
+      nonEmpty('Password is required'),
       minLength(8, 'Password must have at least 8 characters'),
-    ]),
-    confirmPassword: string([minLength(1, 'Password confirmation is required')]),
+    ),
+    confirmPassword: pipe(string(), nonEmpty('Password confirmation is required')),
     passwordStrength: number(),
-  },
-  [
-    forward(
-      custom(
-        ({ password, confirmPassword }) => password === confirmPassword,
-        'Passwords do not match',
-      ),
-      ['confirmPassword'],
+  }),
+  forward(
+    check(
+      ({ password, confirmPassword }) => password === confirmPassword,
+      'Passwords do not match',
     ),
-    forward(
-      custom(({ passwordStrength }) => passwordStrength >= 2, 'Password is too weak'),
-      ['password'],
-    ),
-  ],
+    ['confirmPassword'],
+  ),
+  forward(
+    check(({ passwordStrength }) => passwordStrength >= 2, 'Password is too weak'),
+    ['password'],
+  ),
 );
-type SignupForm = ValiInput<typeof signupSchema>;
+type SignupInput = InferInput<typeof SignupSchema>;
 
 export default function SignupPage() {
   const {
@@ -67,9 +69,9 @@ export default function SignupPage() {
     setError,
     setValue,
     watch,
-  } = useForm<SignupForm>({
+  } = useForm<SignupInput>({
     defaultValues: { username: '', email: '', password: '', confirmPassword: '' },
-    resolver: valibotResolver(signupSchema),
+    resolver: valibotResolver(SignupSchema),
   });
   const focusTrapRef = useFocusTrap();
   const [visiblePassword, setVisiblePassword] = useState(false);
@@ -84,7 +86,7 @@ export default function SignupPage() {
     [setValue],
   );
 
-  const onSubmit: SubmitHandler<SignupForm> = async ({ username, email, password }) => {
+  const onSubmit: SubmitHandler<SignupInput> = async ({ username, email, password }) => {
     const [
       { auth, createUserWithEmailAndPassword, sendEmailVerification, updateProfile },
       { getDocuments, serverTimestamp, setDocument, where },

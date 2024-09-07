@@ -4,15 +4,15 @@ import { Button, Grid, Modal, Text, Tooltip } from '@/components/core';
 import type { ModalProps } from '@/components/core/Modal';
 import { useSettings } from '@/context/settingsContext';
 import { formatFileSize } from '@/utils/misc';
-import type { Settings } from '@/utils/settings';
+import type { Settings, ValidationIssue } from '@/utils/settings';
 import { useDidUpdate, useDisclosure } from '@mantine/hooks';
-import { type ChangeEvent, useEffect, useRef, useState } from 'react';
-import { toast } from 'react-hot-toast';
+import dayjs from 'dayjs';
+import { type ChangeEvent, useRef, useState } from 'react';
 import type { IconType } from 'react-icons';
 import {
   RiAlertLine,
-  RiBracesLine,
   RiErrorWarningLine,
+  RiFileLine,
   RiQuestionLine,
   RiSpam2Line,
 } from 'react-icons/ri';
@@ -21,12 +21,14 @@ import Setting from './Setting';
 
 interface WarningProps {
   icon: IconType;
-  properties?: { path: string[]; defaultValue?: unknown }[];
-  type: string;
+  issues?: ValidationIssue[];
+  type: 'missing' | 'invalid' | 'unknown';
 }
 
-function Warning({ icon: Icon, properties, type }: WarningProps) {
-  return properties?.length ? (
+function Warning({ icon: Icon, issues, type }: WarningProps) {
+  if (!issues?.length) return null;
+
+  return (
     <div className='flex items-center gap-1.5'>
       <Icon className='shrink-0 text-error' />
       <Text className='text-sm text-sub leading-tight'>
@@ -34,47 +36,34 @@ function Warning({ icon: Icon, properties, type }: WarningProps) {
           className='z-50 max-w-xs text-xs'
           label={
             <ul className='text-left'>
-              {properties.map(({ path, defaultValue }) => {
-                const pathString = path.join('.');
-                const stringifiedValue = JSON.stringify(defaultValue);
-                return (
-                  <li key={pathString}>
-                    - {pathString}{' '}
-                    <span className='text-sub'>
-                      {stringifiedValue && (
-                        <>
-                          (default: <span className='italic'>{stringifiedValue}</span>)
-                        </>
-                      )}
-                    </span>
-                  </li>
-                );
-              })}
+              {issues.map(({ path, defaultValue }) => (
+                <li key={path}>
+                  - {path}{' '}
+                  {type !== 'unknown' && (
+                    <span className='text-sub'>(default: {JSON.stringify(defaultValue)})</span>
+                  )}
+                </li>
+              ))}
             </ul>
           }
           offset={6}
           placement='bottom-start'
         >
           <span className='cursor-pointer border-error border-b border-dashed text-error transition hover:border-text hover:text-text'>
-            {properties.length} {type} propert{properties.length > 1 ? 'ies' : 'y'}
+            {issues.length} {type} propert{issues.length > 1 ? 'ies' : 'y'}
           </span>
         </Tooltip>
-        {['invalid', 'missing'].includes(type) ? (
-          <>, default value{properties.length > 1 && 's'} will be used instead.</>
-        ) : (
-          ' will be ignored.'
-        )}
       </Text>
     </div>
-  ) : null;
+  );
 }
 
 function ImportSettingsModal({ className, ...props }: ModalProps) {
   const { opened, onClose } = props;
   const { setSettings, validate } = useSettings();
   const [file, setFile] = useState<File | undefined>();
-  const [[settings, validation], setValidation] = useState<ReturnType<typeof validate> | []>([]);
-  const { missing, invalid, unknown } = validation ?? {};
+  const [[settings, issues], setValidation] = useState<ReturnType<typeof validate> | []>([]);
+  const { missing, invalid, unknown } = issues ?? {};
   const [error, setError] = useState('');
   const formRef = useRef<HTMLFormElement>(null);
 
@@ -115,11 +104,11 @@ function ImportSettingsModal({ className, ...props }: ModalProps) {
         <Text asChild className='text-2xl'>
           <h3>Import settings</h3>
         </Text>
-        <Grid className='grid-cols-[auto_1fr] items-center'>
+        <Grid className='grid-cols-[auto_1fr] items-center gap-y-0'>
           <Button asChild className={twJoin(file && 'row-span-2')}>
             <label>
               select file
-              <RiBracesLine />
+              <RiFileLine />
               <input accept='.json' className='hidden' onChange={handleChange} type='file' />
             </label>
           </Button>
@@ -139,10 +128,15 @@ function ImportSettingsModal({ className, ...props }: ModalProps) {
               <Text className='text-error text-sm'>{error}</Text>
             </div>
           )}
-          <Warning icon={RiAlertLine} properties={invalid} type='invalid' />
-          <Warning icon={RiSpam2Line} properties={missing} type='missing' />
-          <Warning icon={RiQuestionLine} properties={unknown} type='unknown' />
+          <Warning icon={RiAlertLine} issues={invalid} type='invalid' />
+          <Warning icon={RiSpam2Line} issues={missing} type='missing' />
+          <Warning icon={RiQuestionLine} issues={unknown} type='unknown' />
         </div>
+        {(!!invalid?.length || !!missing?.length) && (
+          <Text className='text-sm' dimmed>
+            Default values will be applied for invalid or missing properties.
+          </Text>
+        )}
         <Button disabled={!settings || !!error} onClick={onClose} type='submit'>
           apply
         </Button>
@@ -154,26 +148,22 @@ function ImportSettingsModal({ className, ...props }: ModalProps) {
 export default function ImportExportSettings() {
   const settings = useSettings();
   const [modalOpened, modalHandler] = useDisclosure(false);
-  const [settingsURL, setSettingsURL] = useState('');
 
-  useEffect(() => {
+  const exportSettings = () => {
     const blob = new Blob([JSON.stringify(settings, null, 2)], { type: 'application/json' });
-    setSettingsURL(URL.createObjectURL(blob));
-  }, [settings]);
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `apetype-settings_${dayjs().format('YYYY-MM-DD')}.json`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
 
   return (
     <>
       <Setting id='importExportSettings'>
         <Button onClick={modalHandler.open}>import</Button>
-        <Button asChild>
-          <a
-            href={settingsURL}
-            download='settings.json'
-            onClick={() => toast.success('Settings exported successfully!')}
-          >
-            export
-          </a>
-        </Button>
+        <Button onClick={exportSettings}>export</Button>
       </Setting>
       <ImportSettingsModal opened={modalOpened} onClose={modalHandler.close} />
     </>

@@ -5,7 +5,6 @@ import { settingsList } from '@/utils/settings';
 import type { ThemeInfo } from '@/utils/theme';
 import type { KeymapLayout } from '@/utils/typingTest';
 import { LazyMotion } from 'framer-motion';
-import { nanoid } from 'nanoid/non-secure';
 import { type ReactNode, createContext, useContext, useMemo } from 'react';
 import { type Updater, useImmer } from 'use-immer';
 
@@ -82,7 +81,7 @@ export function GlobalProvider({ children, languages, layouts, themes }: GlobalP
     [setGlobalValues],
   );
   const restartTest = useThrottle(() => {
-    const newTestId = nanoid(10);
+    const newTestId = crypto.randomUUID();
     setGlobalValues((draft) => {
       draft.testId = newTestId;
       draft.isUserTyping = false;

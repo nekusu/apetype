@@ -13,7 +13,7 @@ import { useMemo, useState } from 'react';
 import { type SubmitHandler, useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
 import { RiLockFill, RiLockUnlockFill, RiQuestionLine } from 'react-icons/ri';
-import { type Input as ValiInput, maxLength, minLength, object, string, toTrimmed } from 'valibot';
+import { type InferInput, maxLength, nonEmpty, object, pipe, string, trim } from 'valibot';
 
 export interface AIThemeGenerationModalProps extends ModalProps {
   addTheme: (theme: Optional<CustomTheme, 'id'>) => void;
@@ -48,14 +48,15 @@ const CREATIVITY: Record<Creativity, number> = { low: 1, medium: 1.5, high: 2 };
 const DEFAULT_PALETTE = Array(6).fill('-') as string[];
 const LABELS = ['background', 'main', 'sub', 'sub alt', 'text', 'error'] as const;
 
-const themeSchema = object({
-  name: string([
-    toTrimmed(),
-    minLength(1, 'Name is required'),
+const ThemeSchema = object({
+  name: pipe(
+    string(),
+    trim(),
+    nonEmpty('Name is required'),
     maxLength(32, 'Name must have at most 32 characters'),
-  ]),
+  ),
 });
-type ThemeForm = ValiInput<typeof themeSchema>;
+type ThemeInput = InferInput<typeof ThemeSchema>;
 
 export default function AIThemeGenerationModal({
   addTheme,
@@ -66,9 +67,9 @@ export default function AIThemeGenerationModal({
     formState: { errors },
     handleSubmit,
     register,
-  } = useForm<ThemeForm>({
+  } = useForm<ThemeInput>({
     defaultValues: { name: '' },
-    resolver: valibotResolver(themeSchema),
+    resolver: valibotResolver(ThemeSchema),
   });
   const [model, setModel] = useState<Model>('transformer');
   const [creativity, setCreativity] = useState(1.5);
@@ -83,7 +84,7 @@ export default function AIThemeGenerationModal({
     [lockedColors, lastUsedOptions, lastUsedOptions.current, model, creativity],
   );
 
-  const onSubmit: SubmitHandler<ThemeForm> = ({ name }) => {
+  const onSubmit: SubmitHandler<ThemeInput> = ({ name }) => {
     const palette = palettes[activePalette];
     const errorColor = colord(palette[5]);
     const colors: ThemeColors = {

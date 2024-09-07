@@ -27,7 +27,7 @@ import {
   RiLoaderLine,
   RiUpload2Fill,
 } from 'react-icons/ri';
-import { url, type Input as ValiInput, object, optional, string, toTrimmed } from 'valibot';
+import { url, type InferInput, object, optional, pipe, string, trim } from 'valibot';
 
 const Cropper = dynamic(() => import('react-easy-crop'), {
   loading: () => <Loading transition={{ duration: 0.15 }} style={{ height: 448 }} />,
@@ -126,8 +126,8 @@ async function getCroppedImage(
   });
 }
 
-const imageSchema = object({ imageURL: optional(string([toTrimmed(), url()])) });
-type ImageForm = ValiInput<typeof imageSchema>;
+const ImageSchema = object({ imageURL: optional(pipe(string(), trim(), url())) });
+type ImageInput = InferInput<typeof ImageSchema>;
 
 export default function SetImageModal({
   title,
@@ -149,10 +149,10 @@ export default function SetImageModal({
     setError,
     setValue,
     watch,
-  } = useForm<ImageForm>({
+  } = useForm<ImageInput>({
     defaultValues: { imageURL: '' },
     mode: 'onChange',
-    resolver: valibotResolver(imageSchema),
+    resolver: valibotResolver(ImageSchema),
   });
   const imageURLValue = watch('imageURL');
   const [imageURL, setImageURL] = useState<string | null>(null);
@@ -258,16 +258,16 @@ export default function SetImageModal({
         {imageURL ? (
           <div className='aspect-square w-md max-w-[calc(100vw-7rem)]'>
             <Transition
-              className='relative h-full w-full overflow-hidden rounded-lg'
+              className='relative h-full w-full overflow-hidden rounded-xl'
               variants={{
                 hidden: { display: 'none', opacity: 0 },
-                visible: { display: 'block', opacity: 1, transition: { delay: 0.25 } },
+                visible: { display: 'block', opacity: 1, transition: { delay: 0.2 } },
               }}
             >
               <Cropper
                 classes={{
                   containerClassName: 'bg-sub-alt',
-                  cropAreaClassName: '!border-4 !border-main rounded-xl transition-border-radius',
+                  cropAreaClassName: '!border-4 !border-main rounded-xl transition-all',
                 }}
                 image={imageURL}
                 cropShape={shape}

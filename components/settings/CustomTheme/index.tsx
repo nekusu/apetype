@@ -10,21 +10,12 @@ import { useDidUpdate, useDisclosure, useToggle } from '@mantine/hooks';
 import { colord, extend } from 'colord';
 import a11yPlugin from 'colord/plugins/a11y';
 import { AnimatePresence, type HTMLMotionProps } from 'framer-motion';
-import { nanoid } from 'nanoid/non-secure';
 import { useEffect, useRef } from 'react';
 import { type SubmitHandler, useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
 import { RiAlertLine, RiDeleteBin7Line, RiPaintBrushFill, RiSparklingFill } from 'react-icons/ri';
 import { twMerge } from 'tailwind-merge';
-import {
-  type Input as ValiInput,
-  custom,
-  maxLength,
-  minLength,
-  object,
-  string,
-  toTrimmed,
-} from 'valibot';
+import { type InferInput, check, maxLength, nonEmpty, object, pipe, string, trim } from 'valibot';
 import AIThemeGenerationModal from './AIThemeGenerationModal';
 import ColorInput from './ColorInput';
 import ReadabilityModal from './ReadabilityModal';
@@ -32,17 +23,19 @@ import ReadabilityModal from './ReadabilityModal';
 extend([a11yPlugin]);
 
 const color = (color: string) =>
-  string([
-    toTrimmed(),
-    minLength(1, `${color} color is required`),
-    custom((color) => validateColor(color).isValid, 'Invalid color'),
-  ]);
-const customThemeSchema = object({
-  name: string([
-    toTrimmed(),
-    minLength(1, 'Name is required'),
+  pipe(
+    string(),
+    trim(),
+    nonEmpty(`${color} color is required`),
+    check((color) => validateColor(color).isValid, 'Invalid color'),
+  );
+const CustomThemeSchema = object({
+  name: pipe(
+    string(),
+    trim(),
+    nonEmpty('Name is required'),
     maxLength(32, 'Name must have at most 32 characters'),
-  ]),
+  ),
   colors: object({
     bg: color('Background'),
     main: color('Main'),
@@ -56,7 +49,7 @@ const customThemeSchema = object({
     colorfulErrorExtra: color('Colorful error extra'),
   }),
 });
-type CustomThemeForm = ValiInput<typeof customThemeSchema>;
+type CustomThemeInput = InferInput<typeof CustomThemeSchema>;
 
 export default function CustomTheme({ className, ...props }: HTMLMotionProps<'div'>) {
   const { theme, customThemes, customTheme: customThemeId, setSettings } = useSettings();
@@ -69,10 +62,10 @@ export default function CustomTheme({ className, ...props }: HTMLMotionProps<'di
     register,
     setValue,
     watch,
-  } = useForm<CustomThemeForm>({
+  } = useForm<CustomThemeInput>({
     defaultValues: { name: '', colors: {} },
     mode: 'onChange',
-    resolver: valibotResolver(customThemeSchema),
+    resolver: valibotResolver(CustomThemeSchema),
   });
   const colors = watch('colors');
   const [themeModalOpened, themeModalHandler] = useDisclosure(false);
@@ -81,7 +74,7 @@ export default function CustomTheme({ className, ...props }: HTMLMotionProps<'di
   const customTheme = customThemes.find(({ id }) => id === customThemeId);
 
   const addTheme = (theme: Optional<CustomTheme, 'id'>) => {
-    const id = theme.id ?? nanoid(28);
+    const id = theme.id ?? crypto.randomUUID();
     setSettings((draft) => {
       if (!draft.customThemes.some((theme) => theme.id === id)) {
         draft.customThemes.push({ ...theme, id });
@@ -128,7 +121,7 @@ export default function CustomTheme({ className, ...props }: HTMLMotionProps<'di
       .writeText(`${window.location.origin}?customTheme=${encodedTheme}`)
       .then(() => toast.success('URL copied to clipboard!'));
   };
-  const onSubmit: SubmitHandler<CustomThemeForm> = ({ name, colors }) => {
+  const onSubmit: SubmitHandler<CustomThemeInput> = ({ name, colors }) => {
     setSettings((draft) => {
       const index = draft.customThemes.findIndex(({ id }) => id === draft.customTheme);
       if (index >= 0) {

@@ -13,12 +13,14 @@ import { useCallback, useDeferredValue, useEffect, useState } from 'react';
 import { type SubmitHandler, useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
 import {
-  type Input as ValiInput,
-  custom,
+  type InferInput,
+  check,
   forward,
   minLength,
+  nonEmpty,
   number,
   object,
+  pipe,
   string,
 } from 'valibot';
 import Setting from './Setting';
@@ -28,30 +30,29 @@ interface PasswordModalProps extends ModalProps {
   passwordAuthenticated?: boolean;
 }
 
-const passwordSchema = object(
-  {
-    password: string([
-      minLength(1, 'Password is required'),
+const PasswordSchema = pipe(
+  object({
+    password: pipe(
+      string(),
+      nonEmpty('Password is required'),
       minLength(8, 'Password must have at least 8 characters'),
-    ]),
-    confirmPassword: string([minLength(1, 'Password confirmation is required')]),
+    ),
+    confirmPassword: pipe(string(), nonEmpty('Password confirmation is required')),
     passwordStrength: number(),
-  },
-  [
-    forward(
-      custom(
-        ({ password, confirmPassword }) => password === confirmPassword,
-        'Passwords do not match',
-      ),
-      ['confirmPassword'],
+  }),
+  forward(
+    check(
+      ({ password, confirmPassword }) => password === confirmPassword,
+      'Passwords do not match',
     ),
-    forward(
-      custom(({ passwordStrength }) => passwordStrength >= 2, 'Password is too weak'),
-      ['password'],
-    ),
-  ],
+    ['confirmPassword'],
+  ),
+  forward(
+    check(({ passwordStrength }) => passwordStrength >= 2, 'Password is too weak'),
+    ['password'],
+  ),
 );
-type PasswordForm = ValiInput<typeof passwordSchema>;
+type PasswordInput = InferInput<typeof PasswordSchema>;
 
 function PasswordModal({ updatePassword, passwordAuthenticated, ...props }: PasswordModalProps) {
   const { currentUser } = useAuth();
@@ -61,9 +62,9 @@ function PasswordModal({ updatePassword, passwordAuthenticated, ...props }: Pass
     register,
     setValue,
     watch,
-  } = useForm<PasswordForm>({
+  } = useForm<PasswordInput>({
     defaultValues: { password: '', confirmPassword: '' },
-    resolver: valibotResolver(passwordSchema),
+    resolver: valibotResolver(PasswordSchema),
   });
   const [reauthModalOpened, reauthModalHandler] = useDisclosure(false);
   const [visiblePassword, setVisiblePassword] = useState(false);
@@ -88,7 +89,7 @@ function PasswordModal({ updatePassword, passwordAuthenticated, ...props }: Pass
       setIsLoading(false);
     }
   };
-  const onSubmit: SubmitHandler<PasswordForm> = async ({ password }) => handlePassword(password);
+  const onSubmit: SubmitHandler<PasswordInput> = async ({ password }) => handlePassword(password);
 
   useEffect(() => {
     setUserInputs([currentUser?.displayName ?? '', currentUser?.email ?? '']);

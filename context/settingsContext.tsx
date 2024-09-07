@@ -41,10 +41,9 @@ export function SettingsProvider({ children }: SettingsProviderProps) {
   );
   const validate: typeof validateSettings = useCallback(
     (settings, customProperties) => {
-      type StringTuple = [string, ...string[]];
-      const languages = settingsList.language.options.map(({ value }) => value) as StringTuple;
-      const layouts = settingsList.keymapLayout.options.map(({ value }) => value) as StringTuple;
-      const themes = settingsList.theme.options.map(({ value }) => value) as StringTuple;
+      const languages = settingsList.language.options.map(({ value }) => value);
+      const layouts = settingsList.keymapLayout.options.map(({ value }) => value);
+      const themes = settingsList.theme.options.map(({ value }) => value);
       return validateSettings(settings, {
         language: picklist(languages),
         keymapLayout: picklist(layouts),

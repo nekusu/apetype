@@ -1,5 +1,5 @@
 import { colord } from 'colord';
-import { toCamelCase } from './misc';
+import { camel } from 'radashi';
 
 export interface ThemeInfo {
   name: string;
@@ -89,7 +89,7 @@ export function validateColor(value = '', colors?: ThemeColors) {
   const variableRegex = /^var\((--(.*)-color)\)$/;
   const match = value.match(variableRegex);
   if (match) {
-    if (colors) color = validateColor(colors[toCamelCase(match[2])], colors).color;
+    if (colors) color = validateColor(colors[camel(match[2])], colors).color;
     else color = getComputedStyle(document.body).getPropertyValue(match[1]);
   }
   return { color, isValid: colord(color).isValid() };

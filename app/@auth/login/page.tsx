@@ -12,24 +12,27 @@ import { Controller, type SubmitHandler, useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
 import { RiMailFill } from 'react-icons/ri';
 import {
-  type Input as ValiInput,
+  type InferInput,
   boolean,
   email,
   minLength,
+  nonEmpty,
   object,
+  pipe,
   string,
-  toTrimmed,
+  trim,
 } from 'valibot';
 
-const loginSchema = object({
-  email: string([toTrimmed(), minLength(1, 'Email is required'), email('Invalid email')]),
-  password: string([
-    minLength(1, 'Password is required'),
+const LoginSchema = object({
+  email: pipe(string(), trim(), nonEmpty('Email is required'), email('Invalid email')),
+  password: pipe(
+    string(),
+    nonEmpty('Password is required'),
     minLength(8, 'Password must have at least 8 characters'),
-  ]),
+  ),
   remember: boolean(),
 });
-type LoginForm = ValiInput<typeof loginSchema>;
+type LoginInput = InferInput<typeof LoginSchema>;
 
 export default function LoginPage() {
   const {
@@ -39,15 +42,15 @@ export default function LoginPage() {
     register,
     setError,
     setValue,
-  } = useForm<LoginForm>({
+  } = useForm<LoginInput>({
     defaultValues: { email: '', password: '', remember: true },
-    resolver: valibotResolver(loginSchema),
+    resolver: valibotResolver(LoginSchema),
   });
   const focusTrapRef = useFocusTrap();
   const [popupOpened, popupHandler] = useDisclosure(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  const onSubmit: SubmitHandler<LoginForm> = async ({ email, password, remember }) => {
+  const onSubmit: SubmitHandler<LoginInput> = async ({ email, password, remember }) => {
     const {
       auth,
       browserLocalPersistence,

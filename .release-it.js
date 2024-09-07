@@ -17,23 +17,21 @@ module.exports = {
       preset: {
         name: 'conventionalcommits',
         types: [
-          {
-            type: 'feat',
-            section: 'New Features',
-          },
-          {
-            type: 'perf',
-            section: 'Performance Improvements',
-          },
-          {
-            type: 'fix',
-            section: 'Bug Fixes',
-          },
+          { type: 'feat', section: 'New Features' },
+          { type: 'perf', section: 'Performance Improvements' },
+          { type: 'fix', section: 'Bug Fixes' },
+          { type: 'chore', section: 'Internal Updates' },
+          { type: 'refactor', section: 'Internal Updates' },
         ],
       },
       writerOpts: {
         commitGroupsSort: (a, b) => {
-          const sections = ['New Features', 'Performance Improvements', 'Bug Fixes'];
+          const sections = [
+            'New Features',
+            'Performance Improvements',
+            'Bug Fixes',
+            'Internal Updates',
+          ];
           return sections.indexOf(a.title) - sections.indexOf(b.title);
         },
         commitsSort: 'header',

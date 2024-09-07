@@ -1,23 +1,13 @@
 import { useSettings } from '@/context/settingsContext';
 import { useTypingTest } from '@/context/typingTestContext';
 import { useInterval } from '@mantine/hooks';
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 
 export function useStats() {
   const { mode, time } = useSettings();
   const { setValues } = useTypingTest();
-  const interval = useInterval(() => update(), 1000);
 
-  const start = () => {
-    const timestamp = performance.now();
-    setValues((draft) => {
-      draft.startTime = timestamp;
-      draft.timer = mode === 'time' ? time : 0;
-    });
-    interval.start();
-  };
-
-  const update = () => {
+  const update = useCallback(() => {
     setValues((draft) => {
       const { words, wordIndex, currentStats, stats, timer, startTime, elapsedTime } = draft;
       const timestamp = performance.now();
@@ -51,7 +41,18 @@ export function useStats() {
       draft.timer = mode === 'time' ? timer - 1 : timer;
       draft.elapsedTime = newElapsedTime;
     });
-  };
+  }, [mode, setValues]);
+
+  const interval = useInterval(update, 1000);
+
+  const start = useCallback(() => {
+    const timestamp = performance.now();
+    setValues((draft) => {
+      draft.startTime = timestamp;
+      draft.timer = mode === 'time' ? time : 0;
+    });
+    interval.start();
+  }, [interval, mode, setValues, time]);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: not needed
   useEffect(() => {

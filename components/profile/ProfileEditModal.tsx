@@ -4,28 +4,33 @@ import { Button, Group, Input, Modal, Text, Textarea, Tooltip } from '@/componen
 import type { ModalProps } from '@/components/core/Modal';
 import { useUser } from '@/context/userContext';
 import { getFirebaseFirestore } from '@/utils/firebase';
-import { capitalize } from '@/utils/misc';
 import { type Social, socialIcons, socialNames, socialURLs } from '@/utils/socials';
 import type { User } from '@/utils/user';
 import { valibotResolver } from '@hookform/resolvers/valibot';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import type { FirebaseError } from 'firebase/app';
+import { capitalize } from 'radashi';
 import { useEffect, useState } from 'react';
 import { type SubmitHandler, useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
 import { RiExternalLinkLine, RiGlobalFill } from 'react-icons/ri';
 import {
+  type InferInput,
+  type MaxLengthAction,
   type OptionalSchema,
+  type SchemaWithPipe,
   type StringSchema,
-  type Input as ValiInput,
+  type TrimAction,
   maxLength,
   minLength,
+  nonEmpty,
   object,
   optional,
+  pipe,
   regex,
   string,
-  toTrimmed,
+  trim,
 } from 'valibot';
 
 dayjs.extend(relativeTime);
@@ -42,36 +47,46 @@ function SocialLink({ url }: { url: string }) {
   );
 }
 
-const profileSchema = object({
-  username: string([
-    minLength(1, 'Username is required'),
+const ProfileSchema = object({
+  username: pipe(
+    string(),
+    nonEmpty('Username is required'),
     minLength(3, 'Username must have at least 3 characters'),
     maxLength(32, 'Username must have at most 32 characters'),
     regex(/^[a-zA-Z0-9_]+$/, 'Username can only contain letters, numbers, and underscores'),
-  ]),
-  bio: optional(string([toTrimmed(), maxLength(512, 'Bio must have at most 512 characters')])),
+  ),
+  bio: optional(pipe(string(), trim(), maxLength(512, 'Bio must have at most 512 characters'))),
   keyboard: optional(
-    string([toTrimmed(), maxLength(256, 'Keyboard details must have at most 256 characters')]),
+    pipe(string(), trim(), maxLength(256, 'Keyboard details must have at most 256 characters')),
   ),
   socials: object({
     website: optional(
-      string([toTrimmed(), maxLength(128, 'Website URL must have at most 128 characters')]),
+      pipe(string(), trim(), maxLength(128, 'Website URL must have at most 128 characters')),
     ),
     ...socialNames.reduce(
       (socials, name) => {
         socials[name] = optional(
-          string([
-            toTrimmed(),
+          pipe(
+            string(),
+            trim(),
             maxLength(64, `${capitalize(name)} username must have at most 64 characters`),
-          ]),
+          ),
         );
         return socials;
       },
-      {} as Record<Social, OptionalSchema<StringSchema<string>>>,
+      {} as Record<
+        Social,
+        OptionalSchema<
+          SchemaWithPipe<
+            [StringSchema<undefined>, TrimAction, MaxLengthAction<string, 64, string>]
+          >,
+          undefined
+        >
+      >,
     ),
   }),
 });
-type ProfileForm = ValiInput<typeof profileSchema>;
+type ProfileInput = InferInput<typeof ProfileSchema>;
 
 export default function ProfileEditModal(props: ModalProps) {
   const { opened, onClose } = props;
@@ -83,15 +98,15 @@ export default function ProfileEditModal(props: ModalProps) {
     reset,
     setError,
     watch,
-  } = useForm<ProfileForm>({
+  } = useForm<ProfileInput>({
     defaultValues: { username: '', socials: {} },
     mode: 'onChange',
-    resolver: valibotResolver(profileSchema),
+    resolver: valibotResolver(ProfileSchema),
   });
   const socials = watch('socials');
   const [isLoading, setIsLoading] = useState(false);
 
-  const onSubmit: SubmitHandler<ProfileForm> = async ({
+  const onSubmit: SubmitHandler<ProfileInput> = async ({
     username,
     bio,
     keyboard,

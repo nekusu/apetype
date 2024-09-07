@@ -35,7 +35,7 @@ export function useSound(sound?: false | Sound | `${string}.webm`, config: Manag
     const keysLength = manager.current.keys.length;
     const index = keysLength > 1 ? getRandomNumber(keysLength - 1) : 0;
     const stack = manager.current.get(manager.current.keys[index]);
-    stack?.on('statechange', setState);
+    stack?.on('state', setState);
     stack?.prepare().then((sound) => sound?.play());
   }, []);
 

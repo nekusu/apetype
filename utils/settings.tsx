@@ -1,30 +1,28 @@
 import { Key } from '@/components/core';
+import { camel, get, set } from 'radashi';
 import type { ReactNode } from 'react';
-import { clone, pathOr } from 'remeda';
 import {
-  type BaseSchema,
+  type GenericSchema,
   array,
   boolean,
-  custom,
+  check,
   forward,
+  getDotPath,
   integer,
   literal,
-  merge,
-  minLength,
   minValue,
-  never,
+  nonEmpty,
   null_,
   number,
-  object,
-  parse,
   picklist,
+  pipe,
   safeParse,
+  strictObject,
   string,
-  toTrimmed,
+  trim,
   union,
   uuid,
 } from 'valibot';
-import { toCamelCase } from './misc';
 import type { CustomTheme } from './theme';
 
 export type Sound = 'beep' | 'click' | 'hitmarker' | 'nk-creams' | 'osu' | 'pop' | 'typewriter';
@@ -97,7 +95,7 @@ const HIDE_SHOW_OPTIONS = [SHOW_OPTION, HIDE_OPTION];
 
 function create<T extends keyof Settings = 'mode'>({ options, ...params }: SettingParams<T>) {
   return {
-    id: toCamelCase(params.command) as keyof Settings,
+    id: camel(params.command) as keyof Settings,
     options:
       (options?.map((value) => (typeof value !== 'object' ? { value } : value)) as Option<T>[]) ??
       [],
@@ -581,10 +579,10 @@ export const defaultSettings: Settings = {
   persistentCache: true,
 };
 
-const positiveInteger = () => number([integer(), minValue(0)]);
-const nonEmptyString = () => string([toTrimmed(), minLength(1)]);
-const settingsSchema = object(
-  {
+const positiveInteger = () => pipe(number(), integer(), minValue(0));
+const nonEmptyString = () => pipe(string(), trim(), nonEmpty());
+const SettingsSchema = pipe(
+  strictObject({
     mode: picklist(['time', 'words']),
     time: positiveInteger(),
     words: positiveInteger(),
@@ -625,27 +623,24 @@ const settingsSchema = object(
     themeType: picklist(['preset', 'custom']),
     theme: nonEmptyString(),
     customThemes: array(
-      object(
-        {
-          id: string([uuid()]),
-          name: string(),
-          colors: object({
-            bg: string(),
-            main: string(),
-            caret: string(),
-            sub: string(),
-            subAlt: string(),
-            text: string(),
-            error: string(),
-            errorExtra: string(),
-            colorfulError: string(),
-            colorfulErrorExtra: string(),
-          }),
-        },
-        never(),
-      ),
+      strictObject({
+        id: pipe(string(), uuid()),
+        name: nonEmptyString(),
+        colors: strictObject({
+          bg: nonEmptyString(),
+          main: nonEmptyString(),
+          caret: nonEmptyString(),
+          sub: nonEmptyString(),
+          subAlt: nonEmptyString(),
+          text: nonEmptyString(),
+          error: nonEmptyString(),
+          errorExtra: nonEmptyString(),
+          colorfulError: nonEmptyString(),
+          colorfulErrorExtra: nonEmptyString(),
+        }),
+      }),
     ),
-    customTheme: union([string([uuid()]), null_()]),
+    customTheme: union([pipe(string(), uuid()), null_()]),
     liveWpm: boolean(),
     liveAccuracy: boolean(),
     timerProgress: boolean(),
@@ -653,62 +648,50 @@ const settingsSchema = object(
     outOfFocusWarning: boolean(),
     capsLockWarning: boolean(),
     persistentCache: boolean(),
-  },
-  [
-    forward(
-      custom(
-        ({ customThemes, customTheme }) =>
-          !customTheme || customThemes.some(({ id }) => id === customTheme),
-      ),
-      ['customTheme'],
+  }),
+  forward(
+    check(
+      ({ customThemes, customTheme }) =>
+        !customTheme || customThemes.some(({ id }) => id === customTheme),
     ),
-  ],
-);
-parse(settingsSchema, defaultSettings) satisfies Settings;
+    ['customTheme'],
+  ),
+) satisfies GenericSchema<Settings>;
 
-interface Issue {
-  path: string[];
+export interface ValidationIssue {
+  path: string | null;
   value: unknown;
   defaultValue?: unknown;
 }
 
-// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: todo
 export function validateSettings(
-  settings: Partial<Settings>,
-  customProperties: Partial<Record<keyof Settings, BaseSchema>> = {},
+  settings: Settings,
+  customProperties: Partial<Record<keyof Settings, GenericSchema>> = {},
 ) {
-  const mergedSettingsSchema = merge([settingsSchema, object(customProperties)], never());
-  const result = safeParse(mergedSettingsSchema, settings);
-  const missing: Issue[] = [];
-  const invalid: Issue[] = [];
-  const unknown: Issue[] = [];
-  const newSettings = clone(settings);
+  const [missing, invalid, unknown]: ValidationIssue[][] = [[], [], []];
+  const MergedSettingsSchema = strictObject({
+    ...SettingsSchema.entries,
+    ...strictObject(customProperties).entries,
+  });
+  const { success, issues, output } = safeParse(MergedSettingsSchema, settings);
+  let newSettings = output as Settings;
 
-  if (!result.success)
-    for (const { path, validation } of result.issues) {
-      if (!path) continue;
-      const pathKeys = path.map(({ key }) => key) as [keyof Settings];
-      const lastKey = pathKeys.at(-1);
-      let current: Partial<Settings> | Settings[keyof Settings] = newSettings;
-      for (const { key: _key, value } of path) {
-        const key = _key as keyof Settings;
-        if (lastKey === key) {
-          const issue: Issue = { path: pathKeys, value };
-          if (validation === 'never') {
-            unknown.push(issue);
-            delete current[key];
-            continue;
-          }
-          issue.defaultValue = pathOr(
-            defaultSettings,
-            pathKeys,
-            null as unknown as string,
-          ) as never;
-          if (value) invalid.push(issue);
-          else missing.push(issue);
-        } else current = current[key] as never;
-      }
+  if (success) return [newSettings, { missing, invalid, unknown }] as const;
+
+  for (const vIssue of issues) {
+    const { path: issuePath, expected } = vIssue;
+    const path = getDotPath(vIssue);
+    if (!(issuePath && path)) continue;
+    const { value } = issuePath.at(-1) ?? {};
+    const issue: ValidationIssue = { path, value };
+    if (expected === 'never') unknown.push(issue);
+    else {
+      if (value !== undefined) invalid.push(issue);
+      else missing.push(issue);
+      issue.defaultValue = get(defaultSettings, path, null);
+      newSettings = set(newSettings, path, issue.defaultValue);
     }
+  }
 
-  return [newSettings as Settings, { missing, invalid, unknown }] as const;
+  return [newSettings, { missing, invalid, unknown }] as const;
 }
