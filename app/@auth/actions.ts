@@ -1,10 +1,10 @@
 'use server';
 
+import { getURL } from '@/utils/supabase/auth';
 import { createClient } from '@/utils/supabase/server';
 import { createClient as createServiceRoleClient } from '@supabase/supabase-js';
 import type { Provider } from '@supabase/supabase-js';
 import { revalidatePath } from 'next/cache';
-import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 
 interface FormValues {
@@ -36,10 +36,9 @@ export async function signInWithPassword({ email, password }: Omit<FormValues, '
 
 export async function signInWithProvider(provider: Provider) {
   const supabase = createClient();
-  const origin = headers().get('origin');
   const res = await supabase.auth.signInWithOAuth({
     provider,
-    options: { redirectTo: `${origin}/auth/callback` },
+    options: { redirectTo: `${getURL()}/auth/callback` },
   });
   if (res.error) return parse(res);
   if (res.data.url) redirect(res.data.url);
@@ -63,8 +62,11 @@ export async function signUpWithPassword({ username, email, password }: Required
   const res = await supabase.auth.signUp({
     email,
     password,
-    // biome-ignore lint/style/useNamingConvention: metadata is not camelCase
-    options: { data: { name: username, password_authenticated: true } },
+    options: {
+      // biome-ignore lint/style/useNamingConvention: metadata is not camelCase
+      data: { name: username, password_authenticated: true },
+      emailRedirectTo: `${getURL()}/auth/confirm`,
+    },
   });
   if (res.error) return parse(res);
   revalidatePath('/', 'layout');

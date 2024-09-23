@@ -9,6 +9,7 @@ import { Text } from '@/components/core/Text';
 import { Transition } from '@/components/core/Transition';
 import { useUser } from '@/context/userContext';
 import { getAuthUser } from '@/queries/get-auth-user';
+import { getURL } from '@/utils/supabase/auth';
 import supabase from '@/utils/supabase/browser';
 import { valibotResolver } from '@hookform/resolvers/valibot';
 import { useFocusTrap } from '@mantine/hooks';
@@ -60,7 +61,9 @@ export default function ResetPasswordPage() {
   const onEmailSubmit: SubmitHandler<EmailFormInput> = async ({ email }) => {
     setIsLoading(true);
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email);
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${getURL()}/auth/confirm`,
+      });
       if (error) throw error;
       await refetch();
       toast(
