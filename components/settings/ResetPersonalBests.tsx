@@ -1,31 +1,35 @@
 'use client';
 
-import { ReauthenticationModal } from '@/components/auth';
-import { Button, Group, Modal, Text } from '@/components/core';
+import { Button } from '@/components/core/Button';
+import { Group } from '@/components/core/Group';
+import { Modal } from '@/components/core/Modal';
+import { Text } from '@/components/core/Text';
 import { useUser } from '@/context/userContext';
-import { getFirebaseFirestore } from '@/utils/firebase';
+import supabase from '@/utils/supabase/browser';
 import { useDisclosure } from '@mantine/hooks';
-import type { FirebaseError } from 'firebase/app';
+import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { toast } from 'react-hot-toast';
-import Setting from './Setting';
+import { Setting } from './Setting';
 
-export default function ResetPersonalBests() {
-  const { updateUser } = useUser();
+export function ResetPersonalBests() {
+  const queryClient = useQueryClient();
+  const { user } = useUser();
   const [confirmationModalOpened, confirmationModalHandler] = useDisclosure(false);
-  const [reauthModalOpened, reauthModalHandler] = useDisclosure(false);
   const [isLoading, setIsLoading] = useState(false);
 
   const resetPersonalBests = async () => {
-    const { deleteField } = await getFirebaseFirestore();
+    if (!user) return;
+    setIsLoading(true);
     try {
-      setIsLoading(true);
-      await updateUser({ personalBests: deleteField() });
+      await supabase.from('personal_bests').delete().eq('userId', user.id);
+      await queryClient.invalidateQueries({
+        predicate: ({ queryKey }) => queryKey.includes('personal_bests'),
+      });
       toast.success('Your personal bests have been successfully reset.');
       confirmationModalHandler.close();
     } catch (e) {
-      const error = e as FirebaseError;
-      toast.error(`Something went wrong! ${error.message}`);
+      toast.error(`Failed to reset personal bests! ${(e as Error).message}`);
     } finally {
       setIsLoading(false);
     }
@@ -52,17 +56,12 @@ export default function ResetPersonalBests() {
           </Text>
           <Group>
             <Button onClick={confirmationModalHandler.close}>cancel</Button>
-            <Button loading={isLoading} onClick={reauthModalHandler.open} variant='danger'>
+            <Button loading={isLoading} onClick={resetPersonalBests} variant='danger'>
               reset
             </Button>
           </Group>
         </div>
       </Modal>
-      <ReauthenticationModal
-        opened={reauthModalOpened}
-        onClose={reauthModalHandler.close}
-        onReauthenticate={resetPersonalBests}
-      />
     </>
   );
 }

@@ -4,7 +4,7 @@ import { useFocusWithin, useId, useMergedRef } from '@mantine/hooks';
 import { type ComponentPropsWithoutRef, type ElementRef, type ReactNode, forwardRef } from 'react';
 import { RiErrorWarningLine } from 'react-icons/ri';
 import { twMerge } from 'tailwind-merge';
-import Tooltip from './Tooltip';
+import { Tooltip } from './Tooltip';
 
 export interface TextareaProps extends ComponentPropsWithoutRef<'textarea'> {
   error?: false | string;
@@ -13,7 +13,7 @@ export interface TextareaProps extends ComponentPropsWithoutRef<'textarea'> {
   wrapperClassName?: string;
 }
 
-const Textarea = forwardRef<ElementRef<'textarea'>, TextareaProps>(function Textarea(
+export const Textarea = forwardRef<ElementRef<'textarea'>, TextareaProps>(function Textarea(
   { className, disabled, error, id, textareaClassName, label, wrapperClassName, ...props },
   ref,
 ) {
@@ -66,5 +66,3 @@ const Textarea = forwardRef<ElementRef<'textarea'>, TextareaProps>(function Text
     </div>
   );
 });
-
-export default Textarea;

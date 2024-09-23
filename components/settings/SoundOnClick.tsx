@@ -1,11 +1,11 @@
 'use client';
 
-import { Button } from '@/components/core';
+import { Button } from '@/components/core/Button';
 import { useSettings } from '@/context/settingsContext';
 import { useSound } from '@/hooks/useSound';
 import type { Settings } from '@/utils/settings';
 import { RiLoaderLine, RiPlayFill, RiVolumeUpFill } from 'react-icons/ri';
-import Setting from './Setting';
+import { Setting } from './Setting';
 
 interface SoundButtonProps {
   alt?: string;
@@ -21,9 +21,7 @@ export function SoundButton({ alt, value }: SoundButtonProps) {
       active={soundOnClick === value}
       className='group grid w-full grid-cols-[1fr_auto_1fr] justify-items-end'
       onClick={() => {
-        setSettings((draft) => {
-          draft.soundOnClick = value;
-        });
+        setSettings({ soundOnClick: value });
         play();
       }}
     >
@@ -43,7 +41,7 @@ export function SoundButton({ alt, value }: SoundButtonProps) {
   );
 }
 
-export default function SoundOnClick() {
+export function SoundOnClick() {
   return (
     <Setting
       id='soundOnClick'

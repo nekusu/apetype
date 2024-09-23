@@ -2,20 +2,10 @@ import { useSettings } from '@/context/settingsContext';
 import { useTypingTest } from '@/context/typingTestContext';
 import { getRandomWords, parseWords } from '@/utils/typingTest';
 import { useCallback, useMemo } from 'react';
-import { useLanguage } from './useLanguage';
 
 export function useWords() {
-  const {
-    mode,
-    language: languageName,
-    freedomMode,
-    strictSpace,
-    stopOnError,
-    quickEnd,
-    lazyMode,
-  } = useSettings();
-  const { setValues } = useTypingTest();
-  const { language } = useLanguage(languageName);
+  const { mode, freedomMode, strictSpace, stopOnError, quickEnd, lazyMode } = useSettings();
+  const { language, setValues } = useTypingTest();
 
   const add = useCallback(
     (count: number) => {
@@ -40,7 +30,7 @@ export function useWords() {
     (input: string) => {
       // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: todo
       setValues((draft) => {
-        const { words, currentStats, wordIndex } = draft;
+        const { words, stats, wordIndex } = draft;
         const word = words[wordIndex];
 
         // Trim the input and remove leading/trailing spaces based on conditions
@@ -63,11 +53,11 @@ export function useWords() {
             if (stopOnError !== 'letter')
               letters.push({ original: inputLetter, typed: inputLetter, status: 'extra' });
 
-            currentStats.characters++;
-            currentStats.errors++;
+            stats.characters++;
+            stats.errors++;
           } else if (letter.typed !== inputLetter) {
             draft.lastCharacter = inputLetter;
-            currentStats.characters++;
+            stats.characters++;
 
             if (stopOnError !== 'letter' || letter.original === inputLetter)
               letter.typed = inputLetter;
@@ -75,7 +65,7 @@ export function useWords() {
             if (letter.original === inputLetter) letter.status = 'correct';
             else {
               if (stopOnError !== 'letter') letter.status = 'incorrect';
-              currentStats.errors++;
+              stats.errors++;
             }
           }
         });
@@ -136,8 +126,8 @@ export function useWords() {
               // If the word has been partially typed, remove the last character from the
               // input value, otherwise reset it
               draft.inputValue = word.typed ? draft.inputValue.trimEnd() : ' ';
-              currentStats.characters++;
-              currentStats.errors++;
+              stats.characters++;
+              stats.errors++;
             }
           } else {
             if (!strictSpace) draft.inputValue = ' ';
@@ -147,8 +137,8 @@ export function useWords() {
               const nextWord = words[wordIndex + 1]; // Set the status of any missed letters in the current word
               for (const letter of letters) if (!letter.typed) letter.status = 'missed';
               // Update errors and characters stats accordingly
-              if (letters.at(-1)?.status === 'missed') currentStats.errors++;
-              if (nextWord) currentStats.characters++;
+              if (letters.at(-1)?.status === 'missed') stats.errors++;
+              if (nextWord) stats.characters++;
               draft.wordIndex++;
               draft.inputValue = ' ';
             }

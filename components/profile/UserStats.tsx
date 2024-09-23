@@ -1,102 +1,129 @@
 'use client';
 
-import type { TypingTest, User } from '@/utils/user';
-import { useIntersection, useIsomorphicEffect } from '@mantine/hooks';
-import { useGetDocs } from '@tatsuokaniwa/swr-firestore';
-import { useMemo, useRef, useState } from 'react';
-import { RiLoaderLine } from 'react-icons/ri';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/core/Table';
+import { testsByUserIdOptions } from '@/queries/get-tests-by-user-id';
+import { getUserStatsById } from '@/queries/get-user-stats-by-id';
+import supabase from '@/utils/supabase/browser';
+import { useQuery as useSupabaseQuery } from '@supabase-cache-helpers/postgrest-react-query';
+import { useInfiniteQuery } from '@tanstack/react-query';
+import { round } from 'radashi';
+import { useMemo } from 'react';
 
-export type UserStatsProps =
-  | { user: User; highest?: undefined; average?: undefined }
-  | ({ user?: undefined } & Pick<User['typingStats'], 'highest' | 'average'>);
+interface RowProps {
+  label: 'wpm' | 'raw wpm' | 'accuracy' | 'consistency';
+  highest?: number;
+  avg?: number;
+  avgLast?: number;
+}
 
-const STAT_LABELS = ['wpm', 'raw', 'accuracy', 'consistency'] as const;
-
-export default function UserStats({ user, ...props }: UserStatsProps) {
-  const { highest, average } = user?.typingStats ?? props;
-  const { completedTests = 0 } = user?.typingStats ?? {};
-  const tableRef = useRef<HTMLTableElement>(null);
-  const { ref, entry } = useIntersection({ root: tableRef.current, threshold: 0.1 });
-  const [onScreen, setOnScreen] = useState(false);
-  const { data: lastTests, isLoading } = useGetDocs<TypingTest>(
-    user && completedTests > 10 && onScreen
-      ? { path: `users/${user.id}/tests`, orderBy: [['date', 'desc']], limit: 10 }
-      : null,
-    { revalidateIfStale: false },
+function Row({ label, highest, avg, avgLast }: RowProps) {
+  const showPercentage = label === 'accuracy' || label === 'consistency';
+  return (
+    <TableRow className='text-center text-3xl'>
+      <TableCell
+        className='!bg-transparent w-0 py-4 pr-10 pl-0 text-left text-2xl text-sub'
+        scope='row'
+      >
+        {label}
+      </TableCell>
+      <TableCell className='rounded-l-xl'>
+        {highest}
+        {showPercentage && '%'}
+      </TableCell>
+      <TableCell>
+        {avg}
+        {showPercentage && '%'}
+      </TableCell>
+      {avgLast && (
+        <TableCell>
+          {avgLast}
+          {showPercentage && '%'}
+        </TableCell>
+      )}
+    </TableRow>
   );
-  const averageLast = useMemo<UserStatsProps['average']>(() => {
-    if (!lastTests) return;
-    const stats = { wpm: 0, raw: 0, accuracy: 0, consistency: 0 };
-    type Key = keyof typeof stats;
-    for (const test of lastTests)
-      for (const _key in stats) {
-        const key = _key as Key;
-        stats[key] += test.result[key];
-      }
-    for (const key in stats) stats[key as Key] /= lastTests.length;
-    return stats;
-  }, [lastTests]);
+}
 
-  useIsomorphicEffect(() => {
-    if (entry?.isIntersecting) setOnScreen(true);
-  }, [entry?.isIntersecting]);
+const orderBy = 'createdAt';
+const desc = true;
+const lastCount = 10;
+
+export function UserStats({ userId }: { userId: string }) {
+  const { data: userStats } = useSupabaseQuery(getUserStatsById(supabase, userId));
+  const {
+    completedTests = 0,
+    avgWpm,
+    avgRaw,
+    avgAccuracy,
+    avgConsistency,
+    highestWpm,
+    highestRaw,
+    highestAccuracy,
+    highestConsistency,
+  } = userStats ?? {};
+  const { data } = useInfiniteQuery(
+    testsByUserIdOptions(supabase, userId, { orderBy, desc, pageSize: lastCount }),
+  );
+  const lastTests = data?.pages[0].data;
+  const { avgLastWpm, avgLastRaw, avgLastAccuracy, avgLastConsistency } = useMemo(() => {
+    if (!lastTests || completedTests <= lastCount) return {};
+    const { length } = lastTests;
+    const wpm = lastTests.reduce((acc, { wpm }) => acc + wpm, 0) / length;
+    const raw = lastTests.reduce((acc, { raw }) => acc + raw, 0) / length;
+    const accuracy = lastTests.reduce((acc, { accuracy }) => acc + accuracy, 0) / length;
+    const consistency = lastTests.reduce((acc, { consistency }) => acc + consistency, 0) / length;
+    return {
+      avgLastWpm: round(wpm, 2),
+      avgLastRaw: round(raw, 2),
+      avgLastAccuracy: round(accuracy, 2),
+      avgLastConsistency: round(consistency, 2),
+    };
+  }, [completedTests, lastTests]);
 
   return (
-    <table ref={ref} className='border-spacing-0 cursor-default'>
-      <thead>
-        <tr className='text-2xl text-sub transition-colors'>
+    <Table>
+      <TableHeader>
+        <TableRow className='text-2xl'>
           <th />
-          <th className='py-3 font-normal' scope='col'>
+          <TableHead className='py-3' scope='col'>
             highest
-          </th>
-          <th className='py-3 font-normal' scope='col'>
+          </TableHead>
+          <TableHead className='py-3' scope='col'>
             average
-          </th>
-          {completedTests > 10 && (
-            <th
-              className='flex flex-col items-center justify-center gap-1 py-2 font-normal leading-none'
-              scope='col'
-            >
-              average
-              <span className='text-xs'>(last {lastTests?.length} tests)</span>
-            </th>
+          </TableHead>
+          {lastTests && completedTests > lastCount && (
+            <TableHead className='py-1.5'>
+              <div className='flex flex-col gap-0.5 leading-none'>
+                average
+                <span className='text-xs'>(last {lastCount} tests)</span>
+              </div>
+            </TableHead>
           )}
-        </tr>
-      </thead>
-      <tbody>
-        {STAT_LABELS.map((label) => {
-          const showPercentage = ['accuracy', 'consistency'].includes(label) && '%';
-          return (
-            <tr key={label} className='group text-center text-3xl text-text transition-colors'>
-              <td className='w-0 py-4 pr-8 text-left text-2xl text-sub transition-colors'>
-                {label}
-              </td>
-              <td className='rounded-l-xl group-odd:bg-sub-alt'>
-                {highest?.[label]?.toFixed(2)}
-                {showPercentage}
-              </td>
-              <td className='last:rounded-r-xl group-odd:bg-sub-alt'>
-                {average?.[label]?.toFixed(2)}
-                {showPercentage}
-              </td>
-              {completedTests > 10 && (
-                <td className='rounded-r-xl group-odd:bg-sub-alt'>
-                  {isLoading ? (
-                    <span className='flex justify-center'>
-                      <RiLoaderLine className='animate-spin' />
-                    </span>
-                  ) : (
-                    <>
-                      {averageLast?.[label]?.toFixed(2)}
-                      {showPercentage}
-                    </>
-                  )}
-                </td>
-              )}
-            </tr>
-          );
-        })}
-      </tbody>
-    </table>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        <Row label='wpm' highest={highestWpm} avg={avgWpm} avgLast={avgLastWpm} />
+        <Row label='raw wpm' highest={highestRaw} avg={avgRaw} avgLast={avgLastRaw} />
+        <Row
+          label='accuracy'
+          highest={highestAccuracy}
+          avg={avgAccuracy}
+          avgLast={avgLastAccuracy}
+        />
+        <Row
+          label='consistency'
+          highest={highestConsistency}
+          avg={avgConsistency}
+          avgLast={avgLastConsistency}
+        />
+      </TableBody>
+    </Table>
   );
 }

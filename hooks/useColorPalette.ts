@@ -1,5 +1,5 @@
 import { shallowEqual, useListState } from '@mantine/hooks';
-import useSWRMutation from 'swr/mutation';
+import { useMutation } from '@tanstack/react-query';
 import { useStatefulRef } from './useStatefulRef';
 
 const HUEMINT_API_URL = 'https://api.huemint.com/color';
@@ -13,10 +13,9 @@ export function useColorPalette() {
     colorCount?: number;
   };
 
-  const { trigger, isMutating } = useSWRMutation(
-    HUEMINT_API_URL,
-    (url, { arg: { model, creativity, palette, colorCount } }: { arg: GenerateOptions }) =>
-      fetch(url, {
+  const { mutateAsync, isPending } = useMutation({
+    mutationFn: ({ model, creativity, palette, colorCount }: GenerateOptions) =>
+      fetch(HUEMINT_API_URL, {
         method: 'POST',
         mode: 'cors',
         headers: { 'Content-Type': 'application/json; charset=utf-8' },
@@ -34,7 +33,7 @@ export function useColorPalette() {
           num_results: 50,
         }),
       }).then((res) => res.json() as Promise<Data>),
-  );
+  });
   const [palettes, paletteHandler] = useListState<string[]>([]);
   const lastUsedOptions = useStatefulRef<GenerateOptions>({
     model: 'transformer',
@@ -47,12 +46,12 @@ export function useColorPalette() {
       lastUsedOptions.current = options ?? {};
     }
     try {
-      const data = await trigger(options ?? lastUsedOptions.current);
+      const data = await mutateAsync(options ?? lastUsedOptions.current);
       if (data?.results) paletteHandler.append(...data.results.map((r) => r.palette));
     } catch (e) {
       console.error(e);
     }
   };
 
-  return { generate, palettes, isLoading: isMutating, lastUsedOptions };
+  return { generate, palettes, isPending, lastUsedOptions };
 }

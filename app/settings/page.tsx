@@ -1,49 +1,42 @@
 'use client';
 
-import { Button, Text, Transition } from '@/components/core';
-import {
-  FontFamily,
-  ImportExportSettings,
-  PersistentCache,
-  ResetSettings,
-  Setting,
-  SoundOnClick,
-  Theme,
-} from '@/components/settings';
-import { useAuth } from '@/context/authContext';
-import { useGlobal } from '@/context/globalContext';
+import { Button } from '@/components/core/Button';
+import { Text } from '@/components/core/Text';
+import { Transition } from '@/components/core/Transition';
+import { AuthenticationMethods } from '@/components/settings/AuthenticationMethods';
+import { DeleteAccount } from '@/components/settings/DeleteAccount';
+import { FontFamily } from '@/components/settings/FontFamily';
+import { ImportExportSettings } from '@/components/settings/ImportExportSettings';
+import { PasswordAuthentication } from '@/components/settings/PasswordAuthentication';
+import { PersistentCache } from '@/components/settings/PersistentCache';
+import { ResetAccount } from '@/components/settings/ResetAccount';
+import { ResetPersonalBests } from '@/components/settings/ResetPersonalBests';
+import { ResetSettings } from '@/components/settings/ResetSettings';
+import { Setting } from '@/components/settings/Setting';
+import { SoundOnClick } from '@/components/settings/SoundOnClick';
+import { Theme } from '@/components/settings/Theme';
+import { useSettings } from '@/context/settingsContext';
 import { useUser } from '@/context/userContext';
 import { replaceSpaces } from '@/utils/misc';
-import { categories, type settingsList } from '@/utils/settings';
+import { type SettingsReference, categories } from '@/utils/settings';
 import { m } from 'framer-motion';
-import dynamic from 'next/dynamic';
 import { type ReactNode, useEffect, useMemo, useRef, useState } from 'react';
 import { twJoin } from 'tailwind-merge';
 
-const AuthenticationMethods = dynamic(() => import('@/components/settings/AuthenticationMethods'));
-const PasswordAuthentication = dynamic(
-  () => import('@/components/settings/PasswordAuthentication'),
-);
-const ResetPersonalBests = dynamic(() => import('@/components/settings/ResetPersonalBests'));
-const ResetAccount = dynamic(() => import('@/components/settings/ResetAccount'));
-const DeleteAccount = dynamic(() => import('@/components/settings/DeleteAccount'));
-
-type SettingsList = typeof settingsList;
 type Category = (typeof categories)[number];
 
 export default function SettingsPage() {
-  const { settingsList } = useGlobal();
-  const { signedIn } = useAuth();
+  const { settingsReference } = useSettings();
   const { user } = useUser();
-  const settingsListEntries = useMemo(
+  const settingsEntries = useMemo(
     () =>
-      Object.entries(settingsList).filter(([, { hidden }]) => !hidden) as [
-        keyof SettingsList,
-        SettingsList[keyof SettingsList],
+      Object.entries(settingsReference).filter(([, { hidden }]) => !hidden) as [
+        keyof SettingsReference,
+        SettingsReference[keyof SettingsReference],
       ][],
-    [settingsList],
+    [settingsReference],
   );
-  const customComponents: Partial<Record<keyof SettingsList, ReactNode>> = useMemo(
+  const customComponents: Partial<Record<keyof SettingsReference, ReactNode>> = useMemo(
     () => ({
       soundOnClick: <SoundOnClick key='soundOnClick' />,
       fontFamily: <FontFamily key='fontFamily' />,
@@ -51,28 +44,24 @@ export default function SettingsPage() {
       importExportSettings: <ImportExportSettings key='importExportSettings' />,
       resetSettings: <ResetSettings key='resetSettings' />,
       persistentCache: <PersistentCache key='persistentCache' />,
-      authenticationMethods: (signedIn || user) && (
-        <AuthenticationMethods key='authenticationMethods' />
-      ),
-      passwordAuthentication: (signedIn || user) && (
-        <PasswordAuthentication key='passwordAuthentication' />
-      ),
-      resetPersonalBests: (signedIn || user) && <ResetPersonalBests key='resetPersonalBests' />,
-      resetAccount: (signedIn || user) && <ResetAccount key='resetAccount' />,
-      deleteAccount: (signedIn || user) && <DeleteAccount key='deleteAccount' />,
+      authenticationMethods: user && <AuthenticationMethods key='authenticationMethods' />,
+      passwordAuthentication: user && <PasswordAuthentication key='passwordAuthentication' />,
+      resetPersonalBests: user && <ResetPersonalBests key='resetPersonalBests' />,
+      resetAccount: user && <ResetAccount key='resetAccount' />,
+      deleteAccount: user && <DeleteAccount key='deleteAccount' />,
     }),
-    [signedIn, user],
+    [user],
   );
   const settingsComponents = useMemo(() => {
-    const components = settingsListEntries.reduce(
+    const components = settingsEntries.reduce(
       (components, [id]) => {
         if (!customComponents[id]) components[id] = <Setting key={id} id={id} />;
         return components;
       },
-      {} as Record<keyof SettingsList, ReactNode>,
+      {} as Record<keyof SettingsReference, ReactNode>,
     );
     return { ...components, ...customComponents };
-  }, [customComponents, settingsListEntries]);
+  }, [customComponents, settingsEntries]);
   const [currentCategory, setCurrentCategory] = useState<Category>(categories[0]);
   const listRef = useRef<HTMLDivElement>(null);
 
@@ -138,7 +127,7 @@ export default function SettingsPage() {
               >
                 <h2>{category}</h2>
               </Text>
-              {settingsListEntries
+              {settingsEntries
                 .filter(([, setting]) => setting.category === category)
                 .map(([id]) => settingsComponents[id])}
             </section>

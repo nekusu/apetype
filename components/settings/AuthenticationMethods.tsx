@@ -1,64 +1,65 @@
 'use client';
 
-import { Button } from '@/components/core';
-import { useAuth } from '@/context/authContext';
-import { useDidMount } from '@/hooks/useDidMount';
-import { getFirebaseAuth } from '@/utils/firebase';
-import type { AuthenticationMethod } from '@/utils/firebase/auth';
-import type { FirebaseError } from 'firebase/app';
-import type { AuthProvider } from 'firebase/auth';
-import { useState } from 'react';
+import { Button } from '@/components/core/Button';
+import { getUserIdentities } from '@/queries/get-user-identities';
+import { authMethods } from '@/utils/supabase/auth';
+import supabase from '@/utils/supabase/browser';
+import type { Provider, UserIdentity } from '@supabase/supabase-js';
+import { useQuery } from '@tanstack/react-query';
+import { useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
-import Setting from './Setting';
+import { Setting } from './Setting';
 
-export default function AuthenticationMethods() {
-  const { currentUser } = useAuth();
+export function AuthenticationMethods() {
+  const { data: identities, error, refetch } = useQuery(getUserIdentities(supabase));
   const [providerLoading, setProviderLoading] = useState('');
-  const [authMethods, setAuthMethods] = useState<AuthenticationMethod[]>();
 
   const handleMethod = async (
-    providerName: string,
-    provider: AuthProvider,
-    type: 'link' | 'unlink',
+    params: { type: 'link'; provider: Provider } | { type: 'unlink'; identity: UserIdentity },
   ) => {
-    const { linkWithPopup, unlink } = await getFirebaseAuth();
-    if (!currentUser) return;
+    const provider = params.type === 'link' ? params.provider : params.identity.provider;
+    const providerName = authMethods.find((method) => method.provider === provider)?.name;
+    setProviderLoading(provider);
     try {
-      setProviderLoading(providerName);
-      if (type === 'link') await linkWithPopup(currentUser, provider);
-      else await unlink(currentUser, provider.providerId);
-      toast.success(
-        `Account ${type === 'link' ? 'linked to' : 'unlinked from'} ${providerName} successfully!`,
-      );
+      const { error } = await (params.type === 'link'
+        ? supabase.auth.linkIdentity({
+            provider: params.provider,
+            options: { redirectTo: `${location.origin}/auth/callback` },
+          })
+        : supabase.auth.unlinkIdentity(params.identity));
+      if (error) throw error;
+      await refetch();
+      if (params.type === 'unlink')
+        toast.success(`Account unlinked from ${providerName} successfully!`);
     } catch (e) {
-      toast.error(`Something went wrong! ${(e as FirebaseError).message}`);
+      toast.error(`Failed to ${params.type} account! ${(e as Error).message}`);
     } finally {
       setProviderLoading('');
     }
   };
 
-  useDidMount(() => {
-    (async () => {
-      const { authenticationMethods } = await getFirebaseAuth();
-      setAuthMethods(authenticationMethods);
-    })();
-  });
+  useEffect(() => {
+    if (error) toast.error(`Failed to get user identities! ${error.message}`);
+  }, [error]);
 
   return (
     <Setting id='authenticationMethods'>
-      {authMethods?.map(({ name, provider }) => {
-        const isProviderLinked = currentUser?.providerData.some(
-          ({ providerId }) => providerId === provider.providerId,
-        );
+      {authMethods.map(({ provider }) => {
+        const identity = identities?.find((identity) => identity.provider === provider);
+        const isProviderLinked = !!identity;
         return (
           <Button
-            key={name}
-            disabled={!!providerLoading}
-            loading={providerLoading === name}
-            onClick={() => handleMethod(name, provider, isProviderLinked ? 'unlink' : 'link')}
+            key={provider}
+            disabled={!!providerLoading && providerLoading !== provider}
+            loading={providerLoading === provider}
+            onClick={() =>
+              identity
+                ? handleMethod({ type: 'unlink', identity })
+                : handleMethod({ type: 'link', provider })
+            }
             variant={isProviderLinked ? 'danger' : 'filled'}
           >
-            {isProviderLinked && 'un'}link {name.toLowerCase()}
+            {isProviderLinked && 'un'}link {provider}
           </Button>
         );
       })}

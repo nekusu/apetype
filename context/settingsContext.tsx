@@ -1,21 +1,28 @@
 'use client';
 
-import { useCacheProvider } from '@/hooks/useCacheProvider';
 import { useDidMount } from '@/hooks/useDidMount';
+import { languageListOptions } from '@/queries/get-language-list';
+import { layoutListOptions } from '@/queries/get-layout-list';
+import { themeListOptions } from '@/queries/get-theme-list';
 import fonts from '@/utils/fonts';
-import { type Settings, defaultSettings, validateSettings } from '@/utils/settings';
-import { useIsomorphicEffect, useLocalStorage } from '@mantine/hooks';
-import { freeze, produce } from 'immer';
+import {
+  type Settings,
+  type SettingsReference,
+  defaultSettings,
+  settingsReference as reference,
+  validateSettings,
+} from '@/utils/settings';
+import { useIsomorphicEffect, useLocalStorage, useSetState } from '@mantine/hooks';
+import { useQuery } from '@tanstack/react-query';
 import { type ReactNode, createContext, useCallback, useContext, useEffect } from 'react';
-import { SWRConfig } from 'swr';
-import type { Updater } from 'use-immer';
 import { picklist } from 'valibot';
-import { useGlobal } from './globalContext';
 
 export interface SettingsContext extends Settings {
-  setSettings: Updater<Settings>;
+  settingsReference: SettingsReference;
+  setSettings: (
+    statePartial: Partial<Settings> | ((currentState: Settings) => Partial<Settings>),
+  ) => void;
   validate: typeof validateSettings;
-  cache: ReturnType<typeof useCacheProvider>;
 }
 
 interface SettingsProviderProps {
@@ -25,25 +32,42 @@ interface SettingsProviderProps {
 export const SettingsContext = createContext<SettingsContext | null>(null);
 
 export function SettingsProvider({ children }: SettingsProviderProps) {
-  const { settingsList, setGlobalValues } = useGlobal();
+  const { data: languages = [] } = useQuery(languageListOptions);
+  const { data: layouts = {} } = useQuery(layoutListOptions);
+  const { data: themes = [] } = useQuery(themeListOptions);
+  const [settingsReference, setSettingsReference] = useSetState<SettingsReference>({
+    ...reference,
+    language: {
+      ...reference.language,
+      options: languages.map((language) => ({ value: language })),
+    },
+    keymapLayout: {
+      ...reference.keymapLayout,
+      options: Object.keys(layouts).map((layout) => ({ value: layout.replaceAll('_', ' ') })),
+    },
+    theme: {
+      ...reference.theme,
+      options: themes.map(({ name }) => ({ value: name })),
+    },
+  });
   const [settings, _setSettings] = useLocalStorage<Settings>({
     key: 'settings',
-    defaultValue: freeze(defaultSettings),
+    defaultValue: defaultSettings,
   });
-  const cache = useCacheProvider(settings.persistentCache);
 
-  const setSettings: SettingsContext['setSettings'] = useCallback(
-    (updater) => {
-      if (typeof updater === 'function') _setSettings(produce(updater));
-      else _setSettings(freeze(updater));
-    },
+  const setSettings = useCallback(
+    (statePartial: Partial<Settings> | ((currentState: Settings) => Partial<Settings>)) =>
+      _setSettings((current) => ({
+        ...current,
+        ...(typeof statePartial === 'function' ? statePartial(current) : statePartial),
+      })),
     [_setSettings],
   );
   const validate: typeof validateSettings = useCallback(
     (settings, customProperties) => {
-      const languages = settingsList.language.options.map(({ value }) => value);
-      const layouts = settingsList.keymapLayout.options.map(({ value }) => value);
-      const themes = settingsList.theme.options.map(({ value }) => value);
+      const languages = settingsReference.language.options.map(({ value }) => value);
+      const layouts = settingsReference.keymapLayout.options.map(({ value }) => value);
+      const themes = settingsReference.theme.options.map(({ value }) => value);
       return validateSettings(settings, {
         language: picklist(languages),
         keymapLayout: picklist(layouts),
@@ -51,20 +75,20 @@ export function SettingsProvider({ children }: SettingsProviderProps) {
         ...customProperties,
       });
     },
-    [settingsList],
+    [settingsReference],
   );
 
   useDidMount(() => {
     _setSettings((settings) => validate(settings)[0]);
   });
   useEffect(() => {
-    setGlobalValues((draft) => {
-      draft.settingsList.customTheme.options = settings.customThemes.map(({ id, name }) => ({
-        alt: name,
-        value: id,
-      }));
-    });
-  }, [setGlobalValues, settings.customThemes]);
+    setSettingsReference((reference) => ({
+      customTheme: {
+        ...reference.customTheme,
+        options: settings.customThemes.map(({ id, name }) => ({ value: id, alt: name })),
+      },
+    }));
+  }, [setSettingsReference, settings.customThemes]);
   useIsomorphicEffect(() => {
     const font = fonts[settings.fontFamily];
     if (font) {
@@ -74,28 +98,14 @@ export function SettingsProvider({ children }: SettingsProviderProps) {
   }, [settings.fontFamily]);
 
   return (
-    <SettingsContext.Provider value={{ setSettings, validate, cache, ...settings }}>
-      <SWRConfig
-        value={{
-          fetcher: (input: RequestInfo, init: RequestInit) =>
-            fetch(input, init).then((res) => res.json()),
-          keepPreviousData: true,
-          revalidateOnFocus: false,
-          provider: cache.provider,
-        }}
-      >
-        {children}
-      </SWRConfig>
+    <SettingsContext.Provider value={{ settingsReference, setSettings, validate, ...settings }}>
+      {children}
     </SettingsContext.Provider>
   );
 }
 
 export function useSettings() {
   const context = useContext(SettingsContext);
-
-  if (!context) {
-    throw new Error('useSettings must be used within a SettingsProvider');
-  }
-
+  if (!context) throw new Error('useSettings must be used within a SettingsProvider');
   return context;
 }

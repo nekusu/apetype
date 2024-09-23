@@ -29,7 +29,7 @@ export interface ButtonProps
   loading?: boolean;
 }
 
-const Button = forwardRef<ElementRef<'button'>, ButtonProps>(function Button(
+export const Button = forwardRef<ElementRef<'button'>, ButtonProps>(function Button(
   {
     asChild,
     active = false,
@@ -66,5 +66,3 @@ const Button = forwardRef<ElementRef<'button'>, ButtonProps>(function Button(
     </Component>
   );
 });
-
-export default Button;

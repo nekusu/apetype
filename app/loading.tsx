@@ -1,8 +1,7 @@
 'use client';
 
-import { Transition } from '@/components/core';
-import { LogoIcon } from '@/components/layout';
-import type { LogoIconProps } from '@/components/layout/LogoIcon';
+import { Transition } from '@/components/core/Transition';
+import { LogoIcon, type LogoIconProps } from '@/components/layout/LogoIcon';
 import { type HTMLMotionProps, useAnimation } from 'framer-motion';
 import { useEffect } from 'react';
 import { twMerge } from 'tailwind-merge';
@@ -13,10 +12,9 @@ export interface LoadingProps extends HTMLMotionProps<'div'> {
 
 export default function Loading({
   className,
-  logoIconProps: _logoIconProps,
+  logoIconProps: { className: logoIconClassName, ...logoIconProps } = {},
   ...props
 }: LoadingProps) {
-  const { className: logoIconClassName, ...logoIconProps } = _logoIconProps ?? {};
   const animationControls = useAnimation();
 
   useEffect(() => {

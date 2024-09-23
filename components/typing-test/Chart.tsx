@@ -1,7 +1,7 @@
 'use client';
 
 import Loading from '@/app/loading';
-import { Text } from '@/components/core';
+import { Text } from '@/components/core/Text';
 import { useSettings } from '@/context/settingsContext';
 import { useTheme } from '@/context/themeContext';
 import type { TypingTestValues } from '@/context/typingTestContext';
@@ -50,7 +50,7 @@ const ReactChart = dynamic(
   },
 );
 
-export type ChartProps = Pick<TypingTestValues, 'stats' | 'elapsedTime'>;
+export type ChartProps = Pick<TypingTestValues, 'chartData' | 'elapsedTime'>;
 
 interface ChartTooltipProps {
   position: { top: number; left: number };
@@ -88,25 +88,25 @@ function ChartTooltip({ position: { top, left }, data, disabled }: ChartTooltipP
   );
 }
 
-export default function Chart({ stats, elapsedTime }: ChartProps) {
+export function Chart({ chartData, elapsedTime }: ChartProps) {
   const { showDecimalPlaces, themeType } = useSettings();
-  const theme = useTheme();
-  const { raw, wpm, errors } = stats;
+  const { colors: themeColors } = useTheme();
+  const { raw, wpm, errors } = chartData;
   const [tooltip, setTooltip] = useImmer<ChartTooltipProps>({
     position: { top: 0, left: 0 },
     disabled: true,
   });
   const colors = useMemo(
     () =>
-      Object.entries(theme.colors[themeType] ?? {}).reduce((colors, [key, color]) => {
+      Object.entries(themeColors[themeType] ?? {}).reduce((colors, [key, color]) => {
         colors[key] = validateColor(color).color;
         return colors;
       }, {} as ThemeColors),
-    [theme.colors, themeType],
+    [themeColors, themeType],
   );
 
-  const labels = Array.from({ length: stats.raw.length }, (_, i) => i + 1);
-  if (stats.raw.length > elapsedTime) labels[stats.raw.length - 1] = elapsedTime;
+  const labels = Array.from({ length: chartData.raw.length }, (_, i) => i + 1);
+  if (chartData.raw.length > elapsedTime) labels[chartData.raw.length - 1] = elapsedTime;
   const style = {
     font: { family: getComputedStyle(document.body).getPropertyValue('--font') },
     color: colors?.sub,

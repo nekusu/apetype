@@ -133,4 +133,4 @@ const Content = forwardRef<ElementRef<'div'>, ComponentPropsWithoutRef<'div'>>(
   },
 );
 
-export { Root, Trigger, Content };
+export const Popover = { Root, Trigger, Content };

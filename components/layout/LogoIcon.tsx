@@ -10,13 +10,7 @@ export interface LogoIconProps extends ComponentPropsWithoutRef<'svg'> {
   rectProps?: SVGMotionProps<SVGRectElement>;
 }
 
-export default function LogoIcon({
-  className,
-  controls,
-  pathProps,
-  rectProps,
-  ...props
-}: LogoIconProps) {
+export function LogoIcon({ className, controls, pathProps, rectProps, ...props }: LogoIconProps) {
   const _pathProps: typeof pathProps = useMemo(
     () => ({
       variants: {

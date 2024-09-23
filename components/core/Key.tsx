@@ -6,7 +6,7 @@ export interface KeyProps extends ComponentPropsWithoutRef<'div'> {
   asChild?: boolean;
 }
 
-const Key = forwardRef<ElementRef<'div'>, KeyProps>(function Key(
+export const Key = forwardRef<ElementRef<'div'>, KeyProps>(function Key(
   { asChild, className, ...props },
   ref,
 ) {
@@ -22,5 +22,3 @@ const Key = forwardRef<ElementRef<'div'>, KeyProps>(function Key(
     />
   );
 });
-
-export default Key;

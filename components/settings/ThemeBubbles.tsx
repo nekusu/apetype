@@ -7,7 +7,13 @@ export interface ThemeBubblesProps extends ComponentPropsWithoutRef<'div'> {
   withBackground?: boolean;
 }
 
-function ThemeBubbles({ className, colors, style, withBackground, ...props }: ThemeBubblesProps) {
+export const ThemeBubbles = memo(function ThemeBubbles({
+  className,
+  colors,
+  style,
+  withBackground,
+  ...props
+}: ThemeBubblesProps) {
   const { bg, main, sub, text } = colors;
   return (
     <div
@@ -24,6 +30,4 @@ function ThemeBubbles({ className, colors, style, withBackground, ...props }: Th
       <div style={{ background: text }} />
     </div>
   );
-}
-
-export default memo(ThemeBubbles);
+});

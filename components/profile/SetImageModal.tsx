@@ -1,18 +1,16 @@
 'use client';
 
 import Loading from '@/app/loading';
-import {
-  Button,
-  Divider,
-  Grid,
-  Group,
-  Input,
-  Modal,
-  Text,
-  Tooltip,
-  Transition,
-} from '@/components/core';
-import type { ModalProps } from '@/components/core/Modal';
+import { Button } from '@/components/core/Button';
+import { Divider } from '@/components/core/Divider';
+import { Grid } from '@/components/core/Grid';
+import { Group } from '@/components/core/Group';
+import { Input } from '@/components/core/Input';
+import { Modal, type ModalProps } from '@/components/core/Modal';
+import { Text } from '@/components/core/Text';
+import { Tooltip } from '@/components/core/Tooltip';
+import { Transition } from '@/components/core/Transition';
+import type { Enums } from '@/utils/supabase/database';
 import { valibotResolver } from '@hookform/resolvers/valibot';
 import { useDidUpdate } from '@mantine/hooks';
 import dynamic from 'next/dynamic';
@@ -42,7 +40,7 @@ export interface SetImageModalProps extends ModalProps {
   targetWidth?: number;
   targetHeight?: number;
   onDelete?: () => Promise<void>;
-  onSave?: (imageBlob: Blob | null, shape?: 'rect' | 'round') => Promise<void>;
+  onSave?: (imageBlob: Blob | null, shape: Enums<'avatarShape'>) => Promise<void>;
 }
 
 function createImage(url: string): Promise<HTMLImageElement> {
@@ -129,7 +127,7 @@ async function getCroppedImage(
 const ImageSchema = object({ imageURL: optional(pipe(string(), trim(), url())) });
 type ImageInput = InferInput<typeof ImageSchema>;
 
-export default function SetImageModal({
+export function SetImageModal({
   title,
   aspect = 1,
   enableShapeSelection,
@@ -161,6 +159,7 @@ export default function SetImageModal({
   const [zoom, setZoom] = useState(1);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
   const [isValidatingImage, setIsValidatingImage] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleFile = (file?: File | null) => {
@@ -195,11 +194,14 @@ export default function SetImageModal({
     }
   };
   const deleteImage = async () => {
+    setIsDeleting(true);
     try {
-      onClose?.();
       await onDelete?.();
+      onClose?.();
     } catch (e) {
-      toast.error((e as Error).message);
+      toast.error(`Failed to delete image! ${(e as Error).message}`);
+    } finally {
+      setIsDeleting(false);
     }
   };
   const saveImage = async () => {
@@ -209,17 +211,20 @@ export default function SetImageModal({
         imageURL && croppedAreaPixels
           ? await getCroppedImage(imageURL, croppedAreaPixels, targetWidth, targetHeight)
           : null;
-      await onSave?.(croppedImage, enableShapeSelection ? shape : undefined);
+      await onSave?.(croppedImage, enableShapeSelection ? shape : initialShape);
       onClose?.();
     } catch (e) {
-      toast.error((e as Error).message);
+      toast.error(`Failed to upload image! ${(e as Error).message}`);
     } finally {
       setIsLoading(false);
     }
   };
 
   useDidUpdate(() => {
-    if (opened) reset();
+    if (opened) {
+      reset();
+      setShape(initialShape);
+    }
   }, [opened]);
   useDidUpdate(() => {
     setShape(initialShape);
@@ -227,8 +232,8 @@ export default function SetImageModal({
   useDidUpdate(() => {
     if (imageURLValue && isValid) {
       (async () => {
+        setIsValidatingImage(true);
         try {
-          setIsValidatingImage(true);
           await createImage(imageURLValue);
           setImageURL(imageURLValue);
         } catch {
@@ -295,17 +300,15 @@ export default function SetImageModal({
             <Input
               error={errors.imageURL?.message}
               placeholder='paste image or url'
-              leftNode={<RiImageFill />}
+              leftNode={
+                isValidatingImage ? <RiLoaderLine className='animate-spin' /> : <RiImageFill />
+              }
               rightNode={
-                isValidatingImage ? (
-                  <RiLoaderLine className='animate-spin' />
-                ) : (
-                  <Tooltip label={imageURLValue ? 'Clear' : 'Paste from clipboard'}>
-                    <Button className='p-0' onClick={pasteFromClipboard} variant='text'>
-                      {imageURLValue ? <RiCloseLine /> : <RiClipboardLine />}
-                    </Button>
-                  </Tooltip>
-                )
+                <Tooltip label={imageURLValue ? 'Clear' : 'Paste from clipboard'}>
+                  <Button className='p-0' onClick={pasteFromClipboard} variant='text'>
+                    {imageURLValue ? <RiCloseLine /> : <RiClipboardLine />}
+                  </Button>
+                </Tooltip>
               }
               onPaste={(e) => handleFile(e.clipboardData.files[0])}
               {...register('imageURL')}
@@ -329,7 +332,7 @@ export default function SetImageModal({
           <>
             {enableShapeSelection && (
               <Grid className='gap-y-1'>
-                <Text className='col-span-full' dimmed>
+                <Text className='col-span-full text-sm' dimmed>
                   image shape
                 </Text>
                 {(['rect', 'round'] as const).map((s) => (
@@ -351,14 +354,19 @@ export default function SetImageModal({
                 </Button>
               ) : (
                 onDelete && (
-                  <Button disabled={isLoading} onClick={deleteImage} variant='danger'>
+                  <Button
+                    disabled={isLoading}
+                    loading={isDeleting}
+                    onClick={deleteImage}
+                    variant='danger'
+                  >
                     delete
                   </Button>
                 )
               )}
               <Button
                 active
-                disabled={shape === initialShape && !imageURL}
+                disabled={isDeleting || (shape === initialShape && !imageURL)}
                 loading={isLoading}
                 onClick={saveImage}
               >

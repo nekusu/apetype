@@ -1,4 +1,6 @@
-import { Button, Text, Transition } from '@/components/core';
+import { Button } from '@/components/core/Button';
+import { Text } from '@/components/core/Text';
+import { Transition } from '@/components/core/Transition';
 import Link from 'next/link';
 import { RiKeyboardBoxFill } from 'react-icons/ri';
 

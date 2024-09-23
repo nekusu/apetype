@@ -1,14 +1,14 @@
 import { type ComponentPropsWithoutRef, type ElementRef, type ReactNode, forwardRef } from 'react';
 import { twMerge } from 'tailwind-merge';
-import Grid from './Grid';
-import Text from './Text';
+import { Grid } from './Grid';
+import { Text } from './Text';
 
 export interface DividerProps extends ComponentPropsWithoutRef<'div'> {
   label?: ReactNode;
   orientation?: 'horizontal' | 'vertical';
 }
 
-const Divider = forwardRef<ElementRef<'div'>, DividerProps>(function Divider(
+export const Divider = forwardRef<ElementRef<'div'>, DividerProps>(function Divider(
   { className, label, orientation = 'vertical', ...props },
   ref,
 ) {
@@ -36,5 +36,3 @@ const Divider = forwardRef<ElementRef<'div'>, DividerProps>(function Divider(
     />
   );
 });
-
-export default Divider;

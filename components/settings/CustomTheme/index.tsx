@@ -1,12 +1,19 @@
 'use client';
 
-import { Button, Grid, Group, Input, Text, Tooltip, Transition } from '@/components/core';
-import { ThemeButton } from '@/components/settings';
+import { Button } from '@/components/core/Button';
+import { Grid } from '@/components/core/Grid';
+import { Group } from '@/components/core/Group';
+import { Input } from '@/components/core/Input';
+import { Text } from '@/components/core/Text';
+import { Tooltip } from '@/components/core/Tooltip';
+import { Transition } from '@/components/core/Transition';
+import { ThemeButton } from '@/components/settings/ThemeButton';
 import { useSettings } from '@/context/settingsContext';
 import { useTheme } from '@/context/themeContext';
 import { type CustomTheme, validateColor } from '@/utils/theme';
 import { valibotResolver } from '@hookform/resolvers/valibot';
 import { useDidUpdate, useDisclosure, useToggle } from '@mantine/hooks';
+import type { Optional } from '@tanstack/react-query';
 import { colord, extend } from 'colord';
 import a11yPlugin from 'colord/plugins/a11y';
 import { AnimatePresence, type HTMLMotionProps } from 'framer-motion';
@@ -16,9 +23,9 @@ import { toast } from 'react-hot-toast';
 import { RiAlertLine, RiDeleteBin7Line, RiPaintBrushFill, RiSparklingFill } from 'react-icons/ri';
 import { twMerge } from 'tailwind-merge';
 import { type InferInput, check, maxLength, nonEmpty, object, pipe, string, trim } from 'valibot';
-import AIThemeGenerationModal from './AIThemeGenerationModal';
-import ColorInput from './ColorInput';
-import ReadabilityModal from './ReadabilityModal';
+import { AIThemeGenerationModal } from './AIThemeGenerationModal';
+import { ColorInput } from './ColorInput';
+import { ReadabilityModal } from './ReadabilityModal';
 
 extend([a11yPlugin]);
 
@@ -51,7 +58,7 @@ const CustomThemeSchema = object({
 });
 type CustomThemeInput = InferInput<typeof CustomThemeSchema>;
 
-export default function CustomTheme({ className, ...props }: HTMLMotionProps<'div'>) {
+export function CustomTheme({ className, ...props }: HTMLMotionProps<'div'>) {
   const { theme, customThemes, customTheme: customThemeId, setSettings } = useSettings();
   const { colors: themeColors } = useTheme();
   const [themeCreation, toggleThemeCreation] = useToggle(['AI', 'preset']);
@@ -75,21 +82,21 @@ export default function CustomTheme({ className, ...props }: HTMLMotionProps<'di
 
   const addTheme = (theme: Optional<CustomTheme, 'id'>) => {
     const id = theme.id ?? crypto.randomUUID();
-    setSettings((draft) => {
-      if (!draft.customThemes.some((theme) => theme.id === id)) {
-        draft.customThemes.push({ ...theme, id });
-        draft.customThemes.sort((a, b) => a.name.localeCompare(b.name));
-        if (!theme.id) draft.customTheme = id;
-      }
+    setSettings(({ customThemes }) => {
+      const newCustomThemes = [...customThemes, { ...theme, id }];
+      newCustomThemes.sort((a, b) => a.name.localeCompare(b.name));
+      return { customThemes: newCustomThemes, customTheme: id };
     });
   };
   const deleteTheme = (id: string) => {
-    setSettings((draft) => {
-      if (id === draft.customTheme) {
-        const index = draft.customThemes.findIndex(({ id }) => id === draft.customTheme);
-        draft.customTheme = draft.customThemes[index > 0 ? index - 1 : index + 1]?.id;
+    setSettings(({ customThemes, customTheme }) => {
+      let newCustomTheme = customTheme;
+      if (id === customTheme) {
+        const index = customThemes.findIndex(({ id }) => id === customTheme);
+        newCustomTheme = customThemes[index > 0 ? index - 1 : index + 1]?.id;
       }
-      draft.customThemes = draft.customThemes.filter((theme) => theme.id !== id);
+      const newCustomThemes = customThemes.filter((theme) => theme.id !== id);
+      return { customThemes: newCustomThemes, customTheme: newCustomTheme };
     });
   };
   const showRestoreThemeToast = (theme: CustomTheme) => {
@@ -122,13 +129,15 @@ export default function CustomTheme({ className, ...props }: HTMLMotionProps<'di
       .then(() => toast.success('URL copied to clipboard!'));
   };
   const onSubmit: SubmitHandler<CustomThemeInput> = ({ name, colors }) => {
-    setSettings((draft) => {
-      const index = draft.customThemes.findIndex(({ id }) => id === draft.customTheme);
+    setSettings(({ customThemes, customTheme }) => {
+      const newCustomThemes = [...customThemes];
+      const index = customThemes.findIndex(({ id }) => id === customTheme);
       if (index >= 0) {
-        draft.customThemes[index].name = name;
-        draft.customThemes[index].colors = colors;
-        draft.customThemes.sort((a, b) => a.name.localeCompare(b.name));
+        newCustomThemes[index].name = name;
+        newCustomThemes[index].colors = colors;
+        newCustomThemes.sort((a, b) => a.name.localeCompare(b.name));
       }
+      return { customThemes: newCustomThemes };
     });
     toast.success('Theme saved successfully!');
   };
@@ -177,7 +186,7 @@ export default function CustomTheme({ className, ...props }: HTMLMotionProps<'di
             <div className='absolute inset-0 flex flex-col gap-4'>
               <CreateThemeButton />
               <div className='flex h-full flex-col gap-2 overflow-y-auto pt-0.5'>
-                <AnimatePresence>
+                <AnimatePresence mode='popLayout'>
                   {customThemes.map(({ id, name, colors }) => (
                     <Transition key={id} layoutId={id}>
                       <ThemeButton
@@ -195,11 +204,7 @@ export default function CustomTheme({ className, ...props }: HTMLMotionProps<'di
                         }
                         name={name}
                         selected={id === customThemeId}
-                        onClick={() =>
-                          setSettings((draft) => {
-                            draft.customTheme = id;
-                          })
-                        }
+                        onClick={() => setSettings({ customTheme: id })}
                         colors={colors}
                       />
                     </Transition>
@@ -214,6 +219,7 @@ export default function CustomTheme({ className, ...props }: HTMLMotionProps<'di
                 error={errors.name?.message}
                 wrapperClassName='col-span-2'
                 label='name'
+                autoComplete='off'
                 {...register('name')}
               />
               {Object.entries(colors).map(([k, value]) => {

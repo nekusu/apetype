@@ -1,65 +1,24 @@
 'use client';
 
-import { EmailToast, PasswordInput, PasswordStrength, SignInMethods } from '@/components/auth';
-import { Button, Divider, Input, Text, Transition } from '@/components/core';
-import { getFirebaseAuth, getFirebaseFirestore } from '@/utils/firebase';
-import { type User, defaultUserDetails } from '@/utils/user';
-import { valibotResolver } from '@hookform/resolvers/valibot';
-import { useDisclosure, useFocusTrap } from '@mantine/hooks';
+import { EmailToast } from '@/components/auth/EmailToast';
+import { PasswordInput } from '@/components/auth/PasswordInput';
+import { PasswordStrength } from '@/components/auth/PasswordStrength';
+import { SignInMethods } from '@/components/auth/SignInMethods';
+import { Button } from '@/components/core/Button';
+import { Divider } from '@/components/core/Divider';
+import { Input } from '@/components/core/Input';
+import { Text } from '@/components/core/Text';
+import { Transition } from '@/components/core/Transition';
+import { useFocusTrap } from '@mantine/hooks';
+import type { AuthError } from '@supabase/supabase-js';
 import type { ZxcvbnResult } from '@zxcvbn-ts/core';
-import type { FirebaseError } from 'firebase/app';
 import Link from 'next/link';
 import { useCallback, useDeferredValue, useMemo, useState } from 'react';
 import { type SubmitHandler, useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
-import { RiMailFill, RiUser4Fill } from 'react-icons/ri';
-import {
-  type InferInput,
-  check,
-  email,
-  forward,
-  maxLength,
-  minLength,
-  nonEmpty,
-  number,
-  object,
-  pipe,
-  regex,
-  string,
-  trim,
-} from 'valibot';
-
-const SignupSchema = pipe(
-  object({
-    username: pipe(
-      string(),
-      nonEmpty('Username is required'),
-      minLength(3, 'Username must have at least 3 characters'),
-      maxLength(32, 'Username must have at most 32 characters'),
-      regex(/^[a-zA-Z0-9_]+$/, 'Username can only contain letters, numbers, and underscores'),
-    ),
-    email: pipe(string(), trim(), nonEmpty('Email is required'), email('Invalid email')),
-    password: pipe(
-      string(),
-      nonEmpty('Password is required'),
-      minLength(8, 'Password must have at least 8 characters'),
-    ),
-    confirmPassword: pipe(string(), nonEmpty('Password confirmation is required')),
-    passwordStrength: number(),
-  }),
-  forward(
-    check(
-      ({ password, confirmPassword }) => password === confirmPassword,
-      'Passwords do not match',
-    ),
-    ['confirmPassword'],
-  ),
-  forward(
-    check(({ passwordStrength }) => passwordStrength >= 2, 'Password is too weak'),
-    ['password'],
-  ),
-);
-type SignupInput = InferInput<typeof SignupSchema>;
+import { RiGhostFill, RiMailFill } from 'react-icons/ri';
+import { signUpWithPassword } from '../actions';
+import { type SignupInput, signupResolver } from '../schemas';
 
 export default function SignupPage() {
   const {
@@ -71,7 +30,7 @@ export default function SignupPage() {
     watch,
   } = useForm<SignupInput>({
     defaultValues: { username: '', email: '', password: '', confirmPassword: '' },
-    resolver: valibotResolver(SignupSchema),
+    resolver: signupResolver,
   });
   const focusTrapRef = useFocusTrap();
   const [visiblePassword, setVisiblePassword] = useState(false);
@@ -79,35 +38,19 @@ export default function SignupPage() {
   const userInputs = useMemo(() => [username, email], [username, email]);
   const deferredPassword = useDeferredValue(password);
   const deferredUserInputs = useDeferredValue(userInputs);
-  const [popupOpened, popupHandler] = useDisclosure(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [providerLoading, setProviderLoading] = useState(false);
   const handleResult = useCallback(
     (result: ZxcvbnResult | null) => setValue('passwordStrength', result ? result.score : 0),
     [setValue],
   );
 
-  const onSubmit: SubmitHandler<SignupInput> = async ({ username, email, password }) => {
-    const [
-      { auth, createUserWithEmailAndPassword, sendEmailVerification, updateProfile },
-      { getDocuments, serverTimestamp, setDocument, where },
-    ] = await Promise.all([getFirebaseAuth(), getFirebaseFirestore()]);
+  const onSubmit: SubmitHandler<SignupInput> = async (values) => {
+    const { username, email } = values;
+    setIsLoading(true);
     try {
-      setIsLoading(true);
-      const usersWithSameName = await getDocuments<User>('users', where('name', '==', username));
-      if (usersWithSameName.size > 0) {
-        setError('username', { message: 'Username is already taken' }, { shouldFocus: true });
-        return;
-      }
-      const { user } = await createUserWithEmailAndPassword(auth, email, password);
-      await setDocument<User>('users', user.uid, {
-        name: username,
-        joinedAt: serverTimestamp(),
-        ...defaultUserDetails,
-      });
-      if (auth.currentUser) {
-        await updateProfile(auth.currentUser, { displayName: username });
-        await sendEmailVerification(auth.currentUser);
-      }
+      const res = await signUpWithPassword(values);
+      if (res?.error) throw res.error;
       toast(
         (t) => (
           <EmailToast
@@ -118,13 +61,14 @@ export default function SignupPage() {
         ),
         { duration: Number.POSITIVE_INFINITY },
       );
-      toast.success(`Account created successfully! Welcome aboard, ${user.displayName}!`);
+      toast.success(`Account created successfully! Welcome aboard, ${username}!`);
     } catch (e) {
-      const error = e as FirebaseError;
-      if (error.code === 'auth/email-already-in-use')
-        setError('email', { message: 'Email is already in use' }, { shouldFocus: true });
-      else toast.error(`Something went wrong! ${error.message}`);
-    } finally {
+      const { code, message } = e as AuthError;
+      if (code === 'username_already_in_use')
+        setError('username', { message }, { shouldFocus: true });
+      else if (code === 'email_already_in_use')
+        setError('email', { message }, { shouldFocus: true });
+      else toast.error(`Failed to sign up! ${message}`);
       setIsLoading(false);
     }
   };
@@ -139,8 +83,8 @@ export default function SignupPage() {
       </Text>
       <SignInMethods
         disabled={isLoading}
-        onStart={popupHandler.open}
-        onFinish={popupHandler.close}
+        onStart={() => setProviderLoading(true)}
+        onError={() => setProviderLoading(false)}
       />
       <Divider label='or continue with email' />
       <form className='flex flex-col gap-3.5' onSubmit={handleSubmit(onSubmit)}>
@@ -148,7 +92,7 @@ export default function SignupPage() {
           <Input
             placeholder='username'
             error={errors.username?.message}
-            leftNode={<RiUser4Fill />}
+            leftNode={<RiGhostFill />}
             data-autofocus
             {...register('username')}
           />
@@ -178,7 +122,7 @@ export default function SignupPage() {
           userInputs={deferredUserInputs}
           onResult={handleResult}
         />
-        <Button disabled={popupOpened} loading={isLoading} type='submit'>
+        <Button disabled={providerLoading} loading={isLoading} type='submit'>
           sign up
         </Button>
       </form>
@@ -187,6 +131,7 @@ export default function SignupPage() {
         <Button
           asChild
           className='inline-flex p-0 text-text text-xs hover:text-main focus-visible:text-main'
+          disabled={providerLoading}
           variant='text'
         >
           <Link href='/login'>Sign in</Link>

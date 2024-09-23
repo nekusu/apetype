@@ -6,10 +6,12 @@ import { useSound } from '@/hooks/useSound';
 import { useDidUpdate } from '@mantine/hooks';
 import { useRef } from 'react';
 
-export default function Sound() {
+export function Sound() {
   const { blindMode, soundVolume: volume, soundOnClick, soundOnError } = useSettings();
-  const { inputValue, currentStats } = useTypingTest();
-  const { errors } = currentStats;
+  const {
+    inputValue,
+    stats: { errors },
+  } = useTypingTest();
   const lastErrorCount = useRef(0);
   const { play: playClick } = useSound(soundOnClick, { volume });
   const { play: playError } = useSound(soundOnError && 'error.webm', { volume });

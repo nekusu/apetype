@@ -1,6 +1,8 @@
 'use client';
 
-import { Button, Group, Tooltip } from '@/components/core';
+import { Button } from '@/components/core/Button';
+import { Group } from '@/components/core/Group';
+import { Tooltip } from '@/components/core/Tooltip';
 import { version } from '@/utils/version';
 import { useLocalStorage } from '@mantine/hooks';
 import { useEffect } from 'react';
@@ -9,7 +11,7 @@ import { RiGitBranchFill } from 'react-icons/ri';
 
 const RELEASE_URL = `https://github.com/nekusu/apetype/releases/tag/v${version}`;
 
-export default function Version() {
+export function Version() {
   const [lastVersion, setLastVersion] = useLocalStorage({ key: 'lastVersion' });
 
   useEffect(() => {

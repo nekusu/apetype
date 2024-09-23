@@ -1,14 +1,18 @@
 'use client';
 
-import { Button, Divider, Input, Key, Modal, Text, Transition } from '@/components/core';
-import { useGlobal } from '@/context/globalContext';
+import { Button } from '@/components/core/Button';
+import { Divider } from '@/components/core/Divider';
+import { Input } from '@/components/core/Input';
+import { Key } from '@/components/core/Key';
+import { Modal } from '@/components/core/Modal';
+import { Text } from '@/components/core/Text';
+import { Transition } from '@/components/core/Transition';
 import { useSettings } from '@/context/settingsContext';
-import { useDidUpdate, useDisclosure } from '@mantine/hooks';
+import { useDisclosure } from '@mantine/hooks';
 import { useEffect, useState } from 'react';
 import type { IconType } from 'react-icons';
 import { RiInputMethodFill, RiTimeFill, RiToolsFill } from 'react-icons/ri';
 
-const DEFAULT_ICON_SIZE = 15;
 const ICONS: Record<string, IconType> = {
   time: RiTimeFill,
   words: RiInputMethodFill,
@@ -27,70 +31,56 @@ function getDurationPreview(time: number) {
   return `Total time: ${timeString}`;
 }
 
-export default function Settings() {
-  const { settingsList } = useGlobal();
-  const settings = useSettings();
+export function Settings() {
+  const { settingsReference, ...settings } = useSettings();
   const { mode, setSettings } = settings;
+  const mode2 = settings[mode];
   const [modalOpened, modalHandler] = useDisclosure(false);
-  const [customAmount, setCustomAmount] = useState(settings[mode]);
-  const customActive = !settingsList[mode].options
-    .map(({ value }) => value)
-    .includes(settings[mode]);
+  const [customAmount, setCustomAmount] = useState(0);
+  const customActive = !settingsReference[mode].options.map(({ value }) => value).includes(mode2);
   const Icon = ICONS[mode];
 
   useEffect(() => {
-    setCustomAmount(settings[mode]);
-  }, [mode, settings]);
-  useDidUpdate(() => {
-    if (modalOpened) setCustomAmount(settings[mode]);
-  }, [modalOpened, mode, settings]);
+    setCustomAmount(mode2);
+  }, [mode2]);
 
   return (
     <Transition className='flex self-start justify-self-center rounded-lg bg-sub-alt px-2 transition hover:shadow-lg'>
-      {settingsList.mode.options.map(({ value }) => {
+      {settingsReference.mode.options.map(({ value }) => {
         const Icon = ICONS[value];
-
         return (
           <Button
             key={value}
             active={mode === value}
             className='px-2 py-3 text-xs'
-            onClick={() =>
-              setSettings((draft) => {
-                draft.mode = value;
-              })
-            }
+            onClick={() => setSettings({ mode: value })}
             variant='text'
           >
-            <Icon size={DEFAULT_ICON_SIZE} />
+            <Icon size={15} />
             {value}
           </Button>
         );
       })}
       <Divider className='mx-1.5' />
-      {settingsList[mode].options.map(({ value }) => (
+      {settingsReference[mode].options.map(({ value }) => (
         <Button
           key={value}
-          active={settings[mode] === value}
+          active={mode2 === value}
           className='px-2 py-3 text-xs'
-          onClick={() =>
-            setSettings((draft) => {
-              draft[mode] = value;
-            })
-          }
+          onClick={() => setSettings({ [mode]: value })}
           variant='text'
         >
           {value}
         </Button>
       ))}
-      {settingsList[mode].custom && (
+      {settingsReference[mode].custom && (
         <Button
           active={customActive}
           className='px-2 py-3 text-xs'
           onClick={modalHandler.open}
           variant='text'
         >
-          <RiToolsFill size={DEFAULT_ICON_SIZE} />
+          <RiToolsFill size={15} />
           {customActive && (customAmount || 'Infinite')}
         </Button>
       )}
@@ -99,9 +89,7 @@ export default function Settings() {
           className='flex flex-col gap-3.5'
           onSubmit={(event) => {
             event.preventDefault();
-            setSettings((draft) => {
-              draft[mode] = customAmount;
-            });
+            setSettings({ [mode]: customAmount });
             modalHandler.close();
           }}
         >

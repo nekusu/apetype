@@ -12,7 +12,7 @@ export interface CaretProps {
   y: number;
 }
 
-export default function Caret({ width = '.5em', x, y }: CaretProps) {
+export function Caret({ width = '.5em', x, y }: CaretProps) {
   const { isUserTyping } = useGlobal();
   const { smoothCaret, caretStyle, fontSize } = useSettings();
 

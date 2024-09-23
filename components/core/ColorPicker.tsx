@@ -1,10 +1,7 @@
-'use client';
-
 import { colord } from 'colord';
 import { HexAlphaColorPicker } from 'react-colorful';
 import { twMerge } from 'tailwind-merge';
-import { Popover } from '.';
-import type { PopoverOptions } from './Popover';
+import { Popover, type PopoverOptions } from './Popover';
 
 export interface ColorPickerProps extends PopoverOptions {
   color: string;
@@ -12,7 +9,7 @@ export interface ColorPickerProps extends PopoverOptions {
   triggerClassName?: string;
 }
 
-export default function ColorPicker({
+export function ColorPicker({
   color,
   onChange,
   triggerClassName,

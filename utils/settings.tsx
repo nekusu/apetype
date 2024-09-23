@@ -1,4 +1,4 @@
-import { Key } from '@/components/core';
+import { Key } from '@/components/core/Key';
 import { camel, get, set } from 'radashi';
 import type { ReactNode } from 'react';
 import {
@@ -91,9 +91,9 @@ const ON_OPTION = { alt: 'on', value: true } as const;
 const OFF_ON_OPTIONS = [OFF_OPTION, ON_OPTION];
 const HIDE_OPTION = { alt: 'hide', value: false } as const;
 const SHOW_OPTION = { alt: 'show', value: true } as const;
-const HIDE_SHOW_OPTIONS = [SHOW_OPTION, HIDE_OPTION];
+const HIDE_SHOW_OPTIONS = [HIDE_OPTION, SHOW_OPTION];
 
-function create<T extends keyof Settings = 'mode'>({ options, ...params }: SettingParams<T>) {
+function create<T extends keyof Settings>({ options, ...params }: SettingParams<T>) {
   return {
     id: camel(params.command) as keyof Settings,
     options:
@@ -115,7 +115,7 @@ export const categories = [
 ] as const;
 const warningMessage = <span className='text-error'>You can't undo this action!</span>;
 
-export const settingsList = {
+export const settingsReference = {
   mode: create<'mode'>({
     command: 'mode',
     options: ['time', 'words'],
@@ -511,8 +511,8 @@ export const settingsList = {
     category: 'danger zone',
     description: (
       <>
-        Resets your typing stats, personal bests and tests history. Other profile details will not
-        be affected.
+        Resets your typing stats, personal bests and test history. Other profile details will not be
+        affected.
         <br />
         {warningMessage}
       </>
@@ -530,6 +530,7 @@ export const settingsList = {
     ),
   }),
 };
+export type SettingsReference = typeof settingsReference;
 
 export const defaultSettings: Settings = {
   mode: 'time',
@@ -567,7 +568,7 @@ export const defaultSettings: Settings = {
   colorfulMode: true,
   randomizeTheme: false,
   themeType: 'preset',
-  theme: 'serika dark',
+  theme: 'aurora',
   customThemes: [],
   customTheme: null,
   liveWpm: true,

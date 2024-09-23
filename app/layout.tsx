@@ -1,20 +1,31 @@
-import { MainLayout } from '@/components/layout';
-import { AuthProvider } from '@/context/authContext';
+import { MainLayout } from '@/components/layout/MainLayout';
 import { GlobalProvider } from '@/context/globalContext';
+import { QueryProvider } from '@/context/queryContext';
 import { SettingsProvider } from '@/context/settingsContext';
 import { ThemeProvider } from '@/context/themeContext';
 import { UserProvider } from '@/context/userContext';
+import { cachedLanguageListOptions } from '@/queries/get-language-list';
+import { cachedLayoutListOptions } from '@/queries/get-layout-list';
+import { cachedThemeOptions } from '@/queries/get-theme';
+import { cachedThemeListOptions } from '@/queries/get-theme-list';
+import { getUserById } from '@/queries/get-user-by-id';
 import { lexendDeca } from '@/utils/fonts';
-import { STATIC_URL } from '@/utils/monkeytype';
-import type { ThemeInfo } from '@/utils/theme';
-import type { KeymapLayout } from '@/utils/typingTest';
+import { createClient } from '@/utils/supabase/server';
+import { type ThemeColors, themeColorVariables } from '@/utils/theme';
+import { prefetchQuery } from '@supabase-cache-helpers/postgrest-react-query';
+import { HydrationBoundary, QueryClient, dehydrate } from '@tanstack/react-query';
 import type { Metadata } from 'next';
 import dynamic from 'next/dynamic';
+import { mapKeys } from 'radashi';
 import type { ReactNode } from 'react';
 import './globals.css';
 
-const CommandLine = dynamic(() => import('@/components/command-line/CommandLine'));
-const ParallelRouteModal = dynamic(() => import('@/components/layout/ParallelRouteModal'));
+const CommandLine = dynamic(() => import('@/components/core/CommandLine'));
+const ParallelRouteModal = dynamic(() =>
+  import('@/components/layout/ParallelRouteModal').then(
+    ({ ParallelRouteModal }) => ParallelRouteModal,
+  ),
+);
 
 export const metadata: Metadata = {
   title: 'Apetype',
@@ -22,52 +33,48 @@ export const metadata: Metadata = {
     'Experience the ultimate typing practice platform, Apetype, where customization meets sleek design and a wide range of features. Take on various typing challenges, track your progress, and enhance your typing speed like never before.',
 };
 
-async function getLanguages() {
-  const res = await fetch(`${STATIC_URL}/languages/_list.json`);
-  const languages = (await res.json()) as string[];
-  return languages.map((name) => name.replaceAll('_', ' '));
-}
-async function getLayouts() {
-  const res = await fetch(`${STATIC_URL}/layouts/_list.json`);
-  const layouts = (await res.json()) as Record<string, KeymapLayout>;
-  return layouts;
-}
-async function getThemes() {
-  const res = await fetch(`${STATIC_URL}/themes/_list.json`);
-  const themes = (await res.json()) as ThemeInfo[];
-  return themes
-    .sort((a, b) => a.name.localeCompare(b.name))
-    .map(({ name, ...rest }) => ({ name: name.replaceAll('_', ' '), ...rest }));
-}
-
 export default async function RootLayout(props: { children: ReactNode; auth: ReactNode }) {
-  const [languages, layouts, themes] = await Promise.all([
-    getLanguages(),
-    getLayouts(),
-    getThemes(),
-  ]);
+  const queryClient = new QueryClient();
+  const supabase = createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const queries: [Promise<ThemeColors>, ...Promise<void>[]] = [
+    queryClient.fetchQuery(cachedThemeOptions('aurora')),
+    queryClient.prefetchQuery(cachedLanguageListOptions),
+    queryClient.prefetchQuery(cachedLayoutListOptions),
+    queryClient.prefetchQuery(cachedThemeListOptions),
+  ];
+  if (user) queries.push(prefetchQuery(queryClient, getUserById(supabase, user.id)));
+  const [defaultTheme] = await Promise.all(queries);
 
   return (
-    <html lang='en' className={lexendDeca.variable}>
+    <html
+      lang='en'
+      className={lexendDeca.variable}
+      style={mapKeys(defaultTheme, (key) => themeColorVariables[key])}
+    >
       <body className='flex justify-center bg-bg font-default transition-colors'>
-        <GlobalProvider languages={languages} layouts={layouts} themes={themes}>
-          <SettingsProvider>
-            <ThemeProvider previewDelay={250} themes={themes}>
-              <AuthProvider>
-                <UserProvider>
-                  <MainLayout>{props.children}</MainLayout>
-                  <CommandLine />
-                  <ParallelRouteModal
-                    routes={['login', 'reset-password', 'signup']}
-                    trapFocus={false}
-                  >
-                    {props.auth}
-                  </ParallelRouteModal>
-                </UserProvider>
-              </AuthProvider>
-            </ThemeProvider>
-          </SettingsProvider>
-        </GlobalProvider>
+        <QueryProvider>
+          <HydrationBoundary state={dehydrate(queryClient)}>
+            <GlobalProvider>
+              <SettingsProvider>
+                <ThemeProvider previewDelay={250}>
+                  <UserProvider id={user?.id}>
+                    <MainLayout>{props.children}</MainLayout>
+                    <CommandLine />
+                    <ParallelRouteModal
+                      routes={['login', 'reset-password', 'signup']}
+                      trapFocus={false}
+                    >
+                      {props.auth}
+                    </ParallelRouteModal>
+                  </UserProvider>
+                </ThemeProvider>
+              </SettingsProvider>
+            </GlobalProvider>
+          </HydrationBoundary>
+        </QueryProvider>
       </body>
     </html>
   );

@@ -34,25 +34,6 @@
         "noUnusedVariables": "error",
         "useHookAtTopLevel": "error"
       },
-      "style": {
-        "noNegationElse": "error",
-        "useCollapsedElseIf": "error",
-        "useNamingConvention": {
-          "level": "error",
-          "options": {
-            "strictCase": false,
-            "conventions": [
-              {
-                "selector": { "kind": "objectLiteralProperty" },
-                "formats": ["PascalCase", "camelCase"]
-              }
-            ]
-          }
-        },
-        "useForOf": "error",
-        "useShorthandArrayType": "error",
-        "useShorthandAssign": "error"
-      },
       "nursery": {
         "noDuplicateElseIf": "error",
         "noEvolvingTypes": "error",
@@ -72,13 +53,40 @@
           }
         }
       },
+      "performance": {
+        "noBarrelFile": "error"
+      },
+      "style": {
+        "noNegationElse": "error",
+        "useCollapsedElseIf": "error",
+        "useNamingConvention": {
+          "level": "error",
+          "options": {
+            "strictCase": false,
+            "conventions": [
+              {
+                "selector": { "kind": "objectLiteralProperty" },
+                "formats": ["PascalCase", "camelCase"]
+              }
+            ]
+          }
+        },
+        "useForOf": "error",
+        "useShorthandArrayType": "error",
+        "useShorthandAssign": "error"
+      },
       "suspicious": {
         "noEmptyBlockStatements": "error",
         "noRedeclare": "off",
         "useAwait": "error"
       }
     },
-    "ignore": ["utils/misc.ts"]
+    "ignore": [
+      "env.d.ts",
+      "utils/misc.ts",
+      "utils/supabase/database.ts",
+      "utils/supabase/database-extended.ts"
+    ]
   },
   "vcs": {
     "enabled": true,

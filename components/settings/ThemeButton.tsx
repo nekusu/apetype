@@ -1,10 +1,10 @@
-import { Button } from '@/components/core';
+import { Button } from '@/components/core/Button';
 import type { ButtonProps } from '@/components/core/Button';
 import type { ThemeColors } from '@/utils/theme';
 import { type ReactNode, forwardRef } from 'react';
 import { RiCheckLine, RiLoaderLine } from 'react-icons/ri';
 import { twMerge } from 'tailwind-merge';
-import ThemeBubbles from './ThemeBubbles';
+import { ThemeBubbles } from './ThemeBubbles';
 
 export interface ThemeButtonProps extends Omit<ButtonProps, 'ref' | 'name'> {
   colors: Partial<ThemeColors>;
@@ -14,7 +14,7 @@ export interface ThemeButtonProps extends Omit<ButtonProps, 'ref' | 'name'> {
   selected: boolean;
 }
 
-const ThemeButton = forwardRef<HTMLButtonElement, ThemeButtonProps>(function ThemeButton(
+export const ThemeButton = forwardRef<HTMLButtonElement, ThemeButtonProps>(function ThemeButton(
   { className, colors, leftNode, loading, name, selected, style, ...props },
   ref,
 ) {
@@ -49,5 +49,3 @@ const ThemeButton = forwardRef<HTMLButtonElement, ThemeButtonProps>(function The
     </Button>
   );
 });
-
-export default ThemeButton;

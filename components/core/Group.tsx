@@ -7,7 +7,7 @@ export interface GroupProps extends ComponentPropsWithoutRef<'div'> {
   grow?: boolean;
 }
 
-const Group = forwardRef<ElementRef<'div'>, GroupProps>(function Group(
+export const Group = forwardRef<ElementRef<'div'>, GroupProps>(function Group(
   { asChild, className, grow = true, ...props },
   ref,
 ) {
@@ -20,5 +20,3 @@ const Group = forwardRef<ElementRef<'div'>, GroupProps>(function Group(
     />
   );
 });
-
-export default Group;
