@@ -99,6 +99,12 @@ export function TypingTestProvider({ children }: { children: ReactNode }) {
   };
 
   useEffect(() => {
+    if (language?.rightToLeft) {
+      setSettings({ language: 'english' });
+      toast('Right-to-left languages are not supported yet.', { icon: <RiAlertFill /> });
+    }
+  }, [language, setSettings]);
+  useEffect(() => {
     if (lazyMode && language?.noLazyMode) {
       setSettings({ lazyMode: false });
       toast('This language does not support lazy mode.', { icon: <RiAlertFill /> });

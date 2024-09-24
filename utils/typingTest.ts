@@ -1,5 +1,6 @@
 export interface Language {
   name: string;
+  rightToLeft?: boolean;
   noLazyMode?: boolean;
   words: string[];
 }
