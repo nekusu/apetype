@@ -1,13 +1,21 @@
 'use client';
 
+import { Button } from '@/components/core/Button';
+import { DataTable } from '@/components/core/DataTable';
 import { Group } from '@/components/core/Group';
+import { Modal } from '@/components/core/Modal';
 import { Text } from '@/components/core/Text';
+import { Tooltip } from '@/components/core/Tooltip';
 import { useSettings } from '@/context/settingsContext';
 import { getPersonalBestsByUserId } from '@/queries/get-pb-by-user-id';
-import type { Settings } from '@/utils/settings';
 import supabase from '@/utils/supabase/browser';
+import { useDisclosure } from '@mantine/hooks';
 import { useQuery } from '@supabase-cache-helpers/postgrest-react-query';
+import { getSortedRowModel } from '@tanstack/react-table';
 import dayjs from 'dayjs';
+import { objectify } from 'radashi';
+import { useMemo, useState } from 'react';
+import { RiCheckFill, RiMore2Fill } from 'react-icons/ri';
 import { twJoin } from 'tailwind-merge';
 
 type PersonalBest = Exclude<
@@ -15,10 +23,12 @@ type PersonalBest = Exclude<
   null
 >[number];
 interface PersonalBestProps {
-  mode: Settings['mode'];
+  mode: (typeof MODES)[number];
   amount: number;
   data?: PersonalBest;
 }
+
+const MODES = ['time', 'words'] as const;
 
 function PersonalBest({ mode, amount, data }: PersonalBestProps) {
   const { raw, wpm, accuracy, consistency, createdAt } = data ?? {};
@@ -65,28 +75,106 @@ function PersonalBest({ mode, amount, data }: PersonalBestProps) {
 
 export function PersonalBests({ userId }: { userId: string }) {
   const { settingsReference } = useSettings();
-  const { data: personalBests } = useQuery(getPersonalBestsByUserId(supabase, userId));
+  const { data } = useQuery(getPersonalBestsByUserId(supabase, userId));
+  const [modalOpened, modalHandler] = useDisclosure(false);
+  const [selectedMode, setSelectedMode] = useState<(typeof MODES)[number]>('time');
+  const personalBests = useMemo(() => {
+    const personalBests = objectify(
+      MODES,
+      (mode) => mode,
+      () => [] as PersonalBest[],
+    );
+    for (const pb of data ?? [])
+      for (const mode of MODES) if (pb.mode === mode) personalBests[mode].push(pb);
+    return personalBests;
+  }, [data]);
 
   return (
-    <Group className='cursor-default gap-6'>
-      <Group className='gap-4 rounded-xl bg-sub-alt p-4 transition-colors'>
-        {settingsReference.time.options.map(({ value }) => {
-          const personalBest = personalBests?.find(
-            ({ mode, mode2, language }) =>
-              mode === 'time' && +mode2 === value && language === 'english',
-          );
-          return <PersonalBest key={value} mode='time' amount={value} data={personalBest} />;
-        })}
+    <>
+      <Group className='cursor-default gap-6'>
+        {MODES.map((mode) => (
+          <Group key={mode} className='relative gap-4 rounded-xl bg-sub-alt p-4 transition-colors'>
+            {settingsReference[mode].options.map(({ value }) => {
+              const personalBest = personalBests[mode].find(({ mode2 }) => +mode2 === value);
+              return (
+                <PersonalBest
+                  key={`${mode}-${value}`}
+                  mode={mode}
+                  amount={value}
+                  data={personalBest}
+                />
+              );
+            })}
+            {!!personalBests[mode].length && (
+              <Tooltip className='bg-bg' label='Show all personal bests' placement='left'>
+                <Button
+                  className='absolute top-0 right-0 bottom-0 rounded-r-xl rounded-l-none px-0.5 active:scale-none'
+                  onClick={() => {
+                    setSelectedMode(mode);
+                    modalHandler.open();
+                  }}
+                >
+                  <RiMore2Fill size={24} />
+                </Button>
+              </Tooltip>
+            )}
+          </Group>
+        ))}
       </Group>
-      <Group className='gap-4 rounded-xl bg-sub-alt p-4 transition-colors'>
-        {settingsReference.words.options.map(({ value }) => {
-          const personalBest = personalBests?.find(
-            ({ mode, mode2, language }) =>
-              mode === 'words' && +mode2 === value && language === 'english',
-          );
-          return <PersonalBest key={value} mode='words' amount={value} data={personalBest} />;
-        })}
-      </Group>
-    </Group>
+      <Modal
+        className='min-w-5xl'
+        trapFocus={false}
+        opened={modalOpened}
+        onClose={modalHandler.close}
+      >
+        <DataTable
+          columns={[
+            {
+              accessorKey: 'mode2',
+              header: selectedMode,
+              enableSorting: true,
+              sortingFn: 'alphanumeric',
+            },
+            { accessorKey: 'wpm', enableSorting: true, sortingFn: 'alphanumeric' },
+            { accessorKey: 'raw', enableSorting: true, sortingFn: 'alphanumeric' },
+            {
+              id: 'accuracy',
+              accessorFn: ({ accuracy }) => `${accuracy}%`,
+              enableSorting: true,
+              sortingFn: 'alphanumeric',
+            },
+            {
+              id: 'consistency',
+              accessorFn: ({ consistency }) => `${consistency}%`,
+              enableSorting: true,
+              sortingFn: 'alphanumeric',
+            },
+            { accessorKey: 'language' },
+            {
+              id: 'lazyMode',
+              header: 'lazy mode',
+              cell: ({
+                row: {
+                  original: { lazyMode },
+                },
+              }) => lazyMode && <RiCheckFill size={20} />,
+            },
+            {
+              id: 'createdAt',
+              header: 'date',
+              accessorFn: ({ createdAt }) => dayjs(createdAt).format('DD MMM YYYY HH:mm'),
+              enableSorting: true,
+              sortingFn: 'datetime',
+            },
+          ]}
+          data={personalBests[selectedMode]}
+          idPrefix='pb'
+          idProperty='testId'
+          manualSorting={false}
+          initialState={{ sorting: [{ id: 'mode2', desc: false }] }}
+          getSortedRowModel={getSortedRowModel()}
+        />
+      </Modal>
+    </>
   );
 }

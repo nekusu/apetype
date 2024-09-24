@@ -9,28 +9,34 @@ import {
   useReactTable,
 } from '@tanstack/react-table';
 import { AnimatePresence } from 'framer-motion';
+import { useState } from 'react';
 import { RiArrowDownLine } from 'react-icons/ri';
 import { twJoin } from 'tailwind-merge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './Table';
 
 export interface DataTableProps<TData> extends Omit<TableOptions<TData>, 'getCoreRowModel'> {
   loading?: boolean;
+  idPrefix?: string;
+  idProperty?: keyof TData;
   stickyHeader?: boolean;
 }
 
-export function DataTable<TData extends { id: string }>({
+export function DataTable<TData>({
   loading,
+  idPrefix = '',
+  idProperty = 'id' as keyof TData,
   stickyHeader,
   ...options
 }: DataTableProps<TData>) {
   const { getHeaderGroups, getRowModel } = useReactTable({
     getCoreRowModel: getCoreRowModel(),
-    getRowId: (row) => row.id,
+    getRowId: (row) => idPrefix + row[idProperty],
     manualSorting: true,
     enableMultiSort: false,
     ...options,
   });
   const { ref: intersectionRef, entry } = useIntersection({ threshold: 1 });
+  const [thHoveredIndex, setThHoveredIndex] = useState<number>();
 
   return (
     <div className='relative'>
@@ -47,12 +53,12 @@ export function DataTable<TData extends { id: string }>({
           ref={stickyHeader ? intersectionRef : null}
           className={twJoin(
             stickyHeader && '-top-px sticky',
-            entry && !entry.isIntersecting && 'rounded-b-xl bg-bg shadow-xl',
+            entry && !entry.isIntersecting && 'rounded-b-xl bg-bg shadow-xl transition-colors',
           )}
         >
           {getHeaderGroups().map(({ id, headers }) => (
             <TableRow key={id} className='text-left text-sm'>
-              {headers.map(({ id, column, getContext }) => {
+              {headers.map(({ id, column, getContext }, i) => {
                 const { header, enableSorting } = column.columnDef;
                 const isSorted = column.getIsSorted();
                 return (
@@ -60,14 +66,21 @@ export function DataTable<TData extends { id: string }>({
                     key={id}
                     className={twJoin(
                       enableSorting && 'cursor-pointer hover:bg-sub-alt hover:text-text',
-                      entry && !entry.isIntersecting && 'rounded-t-none',
+                      isSorted && 'text-text',
+                      entry &&
+                        !entry.isIntersecting &&
+                        'rounded-t-none first:rounded-bl-xl last:rounded-br-xl',
                     )}
                     onClick={() =>
                       enableSorting &&
                       column.toggleSorting(isSorted === false || isSorted === 'asc')
                     }
+                    onMouseEnter={() =>
+                      enableSorting && (i === 0 || i === headers.length - 1) && setThHoveredIndex(i)
+                    }
+                    onMouseLeave={() => setThHoveredIndex(undefined)}
                   >
-                    {enableSorting ? (
+                    {isSorted ? (
                       <div className='-my-2 -mx-3 flex items-center gap-1.5 p-[inherit] transition-transform active:translate-y-0.5'>
                         {header ? flexRender(header, getContext()) : column.id}
                         <RiArrowDownLine
@@ -89,7 +102,7 @@ export function DataTable<TData extends { id: string }>({
         </TableHeader>
         <TableBody>
           {getRowModel().rows?.length ? (
-            getRowModel().rows.map(({ id, getVisibleCells }) => (
+            getRowModel().rows.map(({ id, getVisibleCells }, rowIndex) => (
               <TableRow
                 key={id}
                 layoutId={id}
@@ -98,8 +111,17 @@ export function DataTable<TData extends { id: string }>({
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.4, type: 'spring' }}
               >
-                {getVisibleCells().map(({ id, column, getContext }) => (
-                  <TableCell key={id}>{flexRender(column.columnDef.cell, getContext())}</TableCell>
+                {getVisibleCells().map(({ id, column, getContext }, cellIndex) => (
+                  <TableCell
+                    key={id}
+                    className={twJoin(
+                      rowIndex === 0 &&
+                        cellIndex === thHoveredIndex &&
+                        'first:rounded-tl-none last:rounded-tr-none',
+                    )}
+                  >
+                    {flexRender(column.columnDef.cell, getContext())}
+                  </TableCell>
                 ))}
               </TableRow>
             ))

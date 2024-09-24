@@ -54,7 +54,7 @@ const TableHead = forwardRef<HTMLTableCellElement, ThHTMLAttributes<HTMLTableCel
     <th
       ref={ref}
       className={twMerge(
-        'rounded-t-lg px-3 py-2 font-normal transition-colors first:rounded-bl-lg last:rounded-br-lg',
+        'relative rounded-t-lg px-3 py-2 font-normal transition-colors',
         className,
       )}
       {...props}
@@ -68,7 +68,7 @@ const TableCell = forwardRef<HTMLTableCellElement, TdHTMLAttributes<HTMLTableCel
     <td
       ref={ref}
       className={twMerge(
-        'p-3 transition-colors first:rounded-l-xl last:rounded-r-xl group-odd:bg-sub-alt',
+        'p-3 transition-[color,background-color,border-color,text-decoration-color,fill,stroke,border-radius] first:rounded-l-xl last:rounded-r-xl group-odd:bg-sub-alt',
         className,
       )}
       {...props}
