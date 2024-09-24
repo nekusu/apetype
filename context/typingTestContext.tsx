@@ -8,7 +8,7 @@ import {
   calculateCharStats,
   consistency,
 } from '@/utils/typingTest';
-import { useDidUpdate } from '@mantine/hooks';
+import { useDidUpdate, useTimeout } from '@mantine/hooks';
 import { useQuery } from '@tanstack/react-query';
 import { type ReactNode, createContext, useContext, useEffect, useRef } from 'react';
 import { toast } from 'react-hot-toast';
@@ -66,7 +66,7 @@ export const initialTypingTestValues: TypingTestValues = {
 };
 
 export function TypingTestProvider({ children }: { children: ReactNode }) {
-  const { testId, setGlobalValues, restartTest } = useGlobal();
+  const { testId, isUserTyping, setGlobalValues, restartTest } = useGlobal();
   const { settingsReference, ...settings } = useSettings();
   const {
     mode,
@@ -83,6 +83,10 @@ export function TypingTestProvider({ children }: { children: ReactNode }) {
   const { words, stats, chartData, elapsedTime, isTestRunning, isTestFinished } = values;
   const { raw, wpm, characters, errors } = stats;
   const { data: language } = useQuery(languageOptions(languageName));
+  const { start: startAFK, clear: clearAFK } = useTimeout(() => {
+    restartTest();
+    toast.error('Test failed: You were AFK for too long!');
+  }, 3000);
   const startTime = useRef(0);
   const isValidTest = settings[mode] >= settingsReference[mode].options[0].value;
 
@@ -100,6 +104,12 @@ export function TypingTestProvider({ children }: { children: ReactNode }) {
       toast('This language does not support lazy mode.', { icon: <RiAlertFill /> });
     }
   }, [lazyMode, language, setSettings]);
+  useDidUpdate(() => {
+    if (isTestRunning) {
+      if (isUserTyping) clearAFK();
+      else startAFK();
+    }
+  }, [isTestRunning, isUserTyping]);
   useDidUpdate(() => {
     let toastId: string | undefined;
     if (!isValidTest)
