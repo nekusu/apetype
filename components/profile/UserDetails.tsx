@@ -90,7 +90,8 @@ export function UserDetails({
             <Image
               className='rounded-t-xl blur-[350px]'
               src={bannerURL}
-              alt={'Blurred banner'}
+              alt='Blurred banner'
+              unoptimized
               fill
             />
           </Transition>

@@ -26,6 +26,7 @@ export function LazyImage({ loadingProps: _loadingProps, onLoad, src, ...props }
       {src && (
         <Image
           src={src}
+          unoptimized
           onLoad={(img) => {
             setIsLoading(false);
             onLoad?.(img);

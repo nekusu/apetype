@@ -13,6 +13,7 @@ import { Transition } from '@/components/core/Transition';
 import type { Enums } from '@/utils/supabase/database';
 import { valibotResolver } from '@hookform/resolvers/valibot';
 import { useDidUpdate } from '@mantine/hooks';
+import Compressor from 'compressorjs';
 import dynamic from 'next/dynamic';
 import { useState } from 'react';
 import type { Area } from 'react-easy-crop';
@@ -43,7 +44,7 @@ export interface SetImageModalProps extends ModalProps {
   onSave?: (imageBlob: Blob | null, shape: Enums<'avatarShape'>) => Promise<void>;
 }
 
-function createImage(url: string): Promise<HTMLImageElement> {
+async function createImage(url: string): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
     const img = new Image();
     img.setAttribute('crossorigin', 'anonymous');
@@ -51,6 +52,14 @@ function createImage(url: string): Promise<HTMLImageElement> {
     img.addEventListener('error', (error) => reject(error));
     img.src = url;
   });
+}
+async function canvasToBlob(canvas: HTMLCanvasElement): Promise<Blob | null> {
+  return new Promise((resolve) => canvas.toBlob((file) => resolve(file), 'image/png'));
+}
+async function compress(file: Blob, options?: Compressor.Options): Promise<Blob | null> {
+  return await new Promise(
+    (resolve, reject) => new Compressor(file, { ...options, success: resolve, error: reject }),
+  );
 }
 async function getCroppedImage(
   imageSrc: string,
@@ -61,7 +70,6 @@ async function getCroppedImage(
   const image = await createImage(imageSrc);
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d');
-
   if (!ctx) return null;
 
   canvas.width = image.width;
@@ -72,7 +80,6 @@ async function getCroppedImage(
 
   const croppedCanvas = document.createElement('canvas');
   const croppedCtx = croppedCanvas.getContext('2d');
-
   if (!croppedCtx) return null;
 
   croppedCanvas.width = pixelCrop.width;
@@ -89,38 +96,14 @@ async function getCroppedImage(
     pixelCrop.height,
   );
 
-  let finalCanvas = croppedCanvas;
-  const resizedCanvas = document.createElement('canvas');
-  const resizedCtx = resizedCanvas.getContext('2d');
+  const blob = await canvasToBlob(croppedCanvas);
+  if (!blob) return null;
 
-  if (!resizedCtx) return null;
-
-  if (
-    targetWidth &&
-    targetHeight &&
-    pixelCrop.width > targetWidth &&
-    pixelCrop.height > targetHeight
-  ) {
-    resizedCanvas.width = targetWidth;
-    resizedCanvas.height = targetHeight;
-    resizedCtx.drawImage(
-      croppedCanvas,
-      0,
-      0,
-      croppedCanvas.width,
-      croppedCanvas.height,
-      0,
-      0,
-      targetWidth,
-      targetHeight,
-    );
-    finalCanvas = resizedCanvas;
-  }
-
-  return new Promise((resolve) => {
-    finalCanvas.toBlob((file) => {
-      if (file) resolve(file);
-    }, 'image/png');
+  return await compress(blob, {
+    quality: 0.8,
+    height: Math.min(pixelCrop.height, targetHeight ?? pixelCrop.height),
+    width: Math.min(pixelCrop.width, targetWidth ?? pixelCrop.width),
+    mimeType: 'image/webp',
   });
 }
 

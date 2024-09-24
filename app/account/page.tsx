@@ -50,7 +50,7 @@ export default function AccountPage() {
     if (imageBlob) {
       const { data, error } = await supabase.storage
         .from('users')
-        .upload(`${imageType}s/${user.id}.png`, imageBlob, { upsert: true });
+        .upload(`${imageType}s/${user.id}.webp`, imageBlob, { upsert: true });
       if (error) throw error;
       userData[`${imageType}URL`] =
         `${process.env.NEXT_PUBLIC_SUPABASE_PROJECT_URL}/storage/v1/object/public/users/${data.path}?timestamp=${dayjs().unix()}`;
@@ -61,7 +61,7 @@ export default function AccountPage() {
   };
   const deleteImage = async () => {
     const [{ error }] = await Promise.all([
-      supabase.storage.from('users').remove([`${imageType}s/${user.id}.png`]),
+      supabase.storage.from('users').remove([`${imageType}s/${user.id}.webp`]),
       updateUser({ [`${imageType}URL`]: null }),
     ]);
     if (error) throw error;
