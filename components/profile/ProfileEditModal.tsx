@@ -1,34 +1,34 @@
 'use client';
 
-import { Button, Group, Input, Modal, Text, Textarea, Tooltip } from '@/components/core';
-import type { ModalProps } from '@/components/core/Modal';
+import { checkUsername } from '@/app/@auth/actions';
+import { UsernameSchema } from '@/app/@auth/schemas';
+import { Button } from '@/components/core/Button';
+import { Group } from '@/components/core/Group';
+import { Input } from '@/components/core/Input';
+import { Modal, type ModalProps } from '@/components/core/Modal';
+import { Text } from '@/components/core/Text';
+import { Textarea } from '@/components/core/Textarea';
+import { Tooltip } from '@/components/core/Tooltip';
 import { useUser } from '@/context/userContext';
-import { getFirebaseFirestore } from '@/utils/firebase';
-import { type Social, socialIcons, socialNames, socialURLs } from '@/utils/socials';
-import type { User } from '@/utils/user';
+import { type SocialKey, socialsData } from '@/utils/socials';
+import supabase from '@/utils/supabase/browser';
 import { valibotResolver } from '@hookform/resolvers/valibot';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
-import type { FirebaseError } from 'firebase/app';
 import { capitalize } from 'radashi';
 import { useEffect, useState } from 'react';
 import { type SubmitHandler, useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
-import { RiExternalLinkLine, RiGlobalFill } from 'react-icons/ri';
+import { RiExternalLinkLine } from 'react-icons/ri';
 import {
   type InferInput,
   type MaxLengthAction,
-  type OptionalSchema,
   type SchemaWithPipe,
   type StringSchema,
   type TrimAction,
   maxLength,
-  minLength,
-  nonEmpty,
   object,
-  optional,
   pipe,
-  regex,
   string,
   trim,
 } from 'valibot';
@@ -48,39 +48,31 @@ function SocialLink({ url }: { url: string }) {
 }
 
 const ProfileSchema = object({
-  username: pipe(
+  username: UsernameSchema,
+  bio: pipe(string(), trim(), maxLength(512, 'Bio must have at most 512 characters')),
+  keyboard: pipe(
     string(),
-    nonEmpty('Username is required'),
-    minLength(3, 'Username must have at least 3 characters'),
-    maxLength(32, 'Username must have at most 32 characters'),
-    regex(/^[a-zA-Z0-9_]+$/, 'Username can only contain letters, numbers, and underscores'),
-  ),
-  bio: optional(pipe(string(), trim(), maxLength(512, 'Bio must have at most 512 characters'))),
-  keyboard: optional(
-    pipe(string(), trim(), maxLength(256, 'Keyboard details must have at most 256 characters')),
+    trim(),
+    maxLength(256, 'Keyboard details must have at most 256 characters'),
   ),
   socials: object({
-    website: optional(
-      pipe(string(), trim(), maxLength(128, 'Website URL must have at most 128 characters')),
-    ),
-    ...socialNames.reduce(
+    ...Object.keys(socialsData).reduce(
       (socials, name) => {
-        socials[name] = optional(
-          pipe(
-            string(),
-            trim(),
-            maxLength(64, `${capitalize(name)} username must have at most 64 characters`),
+        const maxCharacters = name === 'website' ? 128 : 64;
+        socials[name as SocialKey] = pipe(
+          string(),
+          trim(),
+          maxLength(
+            maxCharacters,
+            `${name === 'website' ? 'Website URL' : capitalize(name)} username must have at most ${maxCharacters} characters`,
           ),
         );
         return socials;
       },
       {} as Record<
-        Social,
-        OptionalSchema<
-          SchemaWithPipe<
-            [StringSchema<undefined>, TrimAction, MaxLengthAction<string, 64, string>]
-          >,
-          undefined
+        SocialKey,
+        SchemaWithPipe<
+          [StringSchema<undefined>, TrimAction, MaxLengthAction<string, 128 | 64, string>]
         >
       >,
     ),
@@ -88,7 +80,7 @@ const ProfileSchema = object({
 });
 type ProfileInput = InferInput<typeof ProfileSchema>;
 
-export default function ProfileEditModal(props: ModalProps) {
+export function ProfileEditModal(props: ModalProps) {
   const { opened, onClose } = props;
   const { user, updateUser } = useUser();
   const {
@@ -106,56 +98,38 @@ export default function ProfileEditModal(props: ModalProps) {
   const socials = watch('socials');
   const [isLoading, setIsLoading] = useState(false);
 
-  const onSubmit: SubmitHandler<ProfileInput> = async ({
-    username,
-    bio,
-    keyboard,
-    socials: { website, ..._socials },
-  }) => {
-    const { getDocuments, serverTimestamp, where } = await getFirebaseFirestore();
+  const onSubmit: SubmitHandler<ProfileInput> = async ({ username, bio, keyboard, socials }) => {
+    if (!user) return;
+    setIsLoading(true);
     try {
-      setIsLoading(true);
-      if (user?.name !== username) {
-        const usersWithSameName = await getDocuments<User>('users', where('name', '==', username));
-        if (usersWithSameName.size > 0) {
+      if (user.name !== username) {
+        const { data: usernameExists } = await checkUsername(username);
+        if (usernameExists) {
           setError('username', { message: 'Username is already taken' }, { shouldFocus: true });
           return;
         }
+        await supabase.auth.updateUser({ data: { name: username } });
       }
-      const socials = socialNames.reduce(
-        (socials, name) => {
-          socials[`socials.${name}`] = _socials[name];
-          return socials;
-        },
-        {} as Record<`socials.${Social}`, string | undefined>,
-      );
       await updateUser({
         name: username,
-        nameLastChangedAt: user && user.name !== username ? serverTimestamp() : null,
+        nameLastChangedAt: user.name !== username ? dayjs().format() : null,
         bio,
         keyboard,
-        'socials.website': website,
-        ...socials,
+        socials,
       });
       onClose?.();
     } catch (e) {
-      toast.error(`Something went wrong! ${(e as FirebaseError).message}`);
+      toast.error(`Failed to update profile! ${(e as Error).message}`);
     } finally {
       setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    if (opened && user)
-      reset({
-        username: user.name,
-        bio: user.bio,
-        keyboard: user.keyboard,
-        socials: {
-          website: user.socials?.website,
-          ...user.socials,
-        },
-      });
+    if (opened && user) {
+      const { name: username, bio, keyboard, socials } = user;
+      reset({ username, bio, keyboard, socials });
+    }
   }, [opened, reset, user]);
 
   return (
@@ -193,34 +167,26 @@ export default function ProfileEditModal(props: ModalProps) {
             <Text className='-mb-0.5 text-sm leading-none' dimmed>
               socials
             </Text>
-            {socialNames.map((name) => (
-              <Input
-                key={name}
-                error={errors.socials?.[name]?.message}
-                leftNode={
-                  <div className='flex items-center gap-2'>
-                    {socialIcons[name]}
-                    <span className='-mr-2 leading-none'>{socialURLs[name]}</span>
-                  </div>
-                }
-                rightNode={
-                  socials[name] && <SocialLink url={`${socialURLs[name]}${socials[name]}`} />
-                }
-                {...register(`socials.${name}`)}
-              />
-            ))}
-            <Input
-              error={errors.socials?.website?.message}
-              placeholder='website'
-              leftNode={
-                <div className='flex items-center gap-2'>
-                  <RiGlobalFill />
-                  {socials.website && <span className='-mr-2 leading-none'>https://</span>}
-                </div>
-              }
-              rightNode={socials.website && <SocialLink url={socials.website} />}
-              {...register('socials.website')}
-            />
+            {Object.entries(socialsData).map(([key, { icon, url }]) => {
+              const name = key as SocialKey;
+              return (
+                <Input
+                  key={name}
+                  error={errors.socials?.[name]?.message}
+                  placeholder={name === 'website' ? 'website' : ''}
+                  leftNode={
+                    <div className='flex items-center gap-2'>
+                      {icon}
+                      <span className='-mr-2 leading-none'>
+                        {!url && socials[name] ? 'https://' : url}
+                      </span>
+                    </div>
+                  }
+                  rightNode={socials[name] && <SocialLink url={`${url}${socials[name]}`} />}
+                  {...register(`socials.${name}`)}
+                />
+              );
+            })}
           </div>
         </div>
         <Group>

@@ -7,7 +7,7 @@ export interface TextProps extends ComponentPropsWithoutRef<'div'> {
   dimmed?: boolean;
 }
 
-const Text = forwardRef<ElementRef<'div'>, TextProps>(function Text(
+export const Text = forwardRef<ElementRef<'div'>, TextProps>(function Text(
   { asChild, className, dimmed = false, ...props },
   ref,
 ) {
@@ -20,5 +20,3 @@ const Text = forwardRef<ElementRef<'div'>, TextProps>(function Text(
     />
   );
 });
-
-export default Text;

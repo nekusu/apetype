@@ -1,9 +1,19 @@
-import { Group, Text } from '@/components/core';
-import { type Settings, type Time, type Words, settingsList } from '@/utils/settings';
-import type { PersonalBest, User } from '@/utils/user';
+'use client';
+
+import { Group } from '@/components/core/Group';
+import { Text } from '@/components/core/Text';
+import { useSettings } from '@/context/settingsContext';
+import { getPersonalBestsByUserId } from '@/queries/get-pb-by-user-id';
+import type { Settings } from '@/utils/settings';
+import supabase from '@/utils/supabase/browser';
+import { useQuery } from '@supabase-cache-helpers/postgrest-react-query';
 import dayjs from 'dayjs';
 import { twJoin } from 'tailwind-merge';
 
+type PersonalBest = Exclude<
+  Awaited<ReturnType<typeof getPersonalBestsByUserId>>['data'],
+  null
+>[number];
 interface PersonalBestProps {
   mode: Settings['mode'];
   amount: number;
@@ -11,6 +21,7 @@ interface PersonalBestProps {
 }
 
 function PersonalBest({ mode, amount, data }: PersonalBestProps) {
+  const { raw, wpm, accuracy, consistency, createdAt } = data ?? {};
   const testType = (
     <Text className='text-center text-sm' dimmed>
       {amount} {mode === 'time' ? 'seconds' : 'words'}
@@ -26,13 +37,13 @@ function PersonalBest({ mode, amount, data }: PersonalBestProps) {
         >
           {testType}
           <div className='flex flex-col items-center gap-0.5 [&>*]:text-center [&>*]:text-xs'>
-            <Text>{data.wpm.toFixed(2)} wpm</Text>
-            <Text>{data.raw.toFixed(2)} raw</Text>
-            <Text>{data.accuracy.toFixed(2)} acc</Text>
-            <Text>{data.consistency.toFixed(2)} con</Text>
+            <Text>{wpm} wpm</Text>
+            <Text>{raw} raw</Text>
+            <Text>{accuracy} acc</Text>
+            <Text>{consistency} con</Text>
           </div>
           <Text className='text-center text-sm' dimmed>
-            {dayjs.unix(data.date.seconds).format('DD MMM YYYY')}
+            {dayjs(createdAt).format('DD MMM YYYY')}
           </Text>
         </div>
       )}
@@ -43,32 +54,38 @@ function PersonalBest({ mode, amount, data }: PersonalBestProps) {
         )}
       >
         {testType}
-        <Text className='text-4xl leading-tight'>{data?.wpm ? Math.floor(data.wpm) : '-'}</Text>
+        <Text className='text-4xl leading-tight'>{wpm ? Math.floor(wpm) : '-'}</Text>
         <Text className='text-2xl leading-tight opacity-50'>
-          {data?.accuracy ? `${Math.floor(data.accuracy)}%` : '-'}
+          {accuracy ? `${Math.floor(accuracy)}%` : '-'}
         </Text>
       </div>
     </div>
   );
 }
 
-export default function PersonalBests({ data }: { data: User['personalBests'] }) {
+export function PersonalBests({ userId }: { userId: string }) {
+  const { settingsReference } = useSettings();
+  const { data: personalBests } = useQuery(getPersonalBestsByUserId(supabase, userId));
+
   return (
     <Group className='cursor-default gap-6'>
       <Group className='gap-4 rounded-xl bg-sub-alt p-4 transition-colors'>
-        {settingsList.time.options.map(({ value }) => (
-          <PersonalBest key={value} mode='time' amount={value} data={data?.time?.[value as Time]} />
-        ))}
+        {settingsReference.time.options.map(({ value }) => {
+          const personalBest = personalBests?.find(
+            ({ mode, mode2, language }) =>
+              mode === 'time' && +mode2 === value && language === 'english',
+          );
+          return <PersonalBest key={value} mode='time' amount={value} data={personalBest} />;
+        })}
       </Group>
       <Group className='gap-4 rounded-xl bg-sub-alt p-4 transition-colors'>
-        {settingsList.words.options.map(({ value }) => (
-          <PersonalBest
-            key={value}
-            mode='words'
-            amount={value}
-            data={data?.words?.[value as Words]}
-          />
-        ))}
+        {settingsReference.words.options.map(({ value }) => {
+          const personalBest = personalBests?.find(
+            ({ mode, mode2, language }) =>
+              mode === 'words' && +mode2 === value && language === 'english',
+          );
+          return <PersonalBest key={value} mode='words' amount={value} data={personalBest} />;
+        })}
       </Group>
     </Group>
   );

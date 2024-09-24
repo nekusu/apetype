@@ -1,15 +1,17 @@
 import { useSettings } from '@/context/settingsContext';
 import { useTypingTest } from '@/context/typingTestContext';
 import { useInterval } from '@mantine/hooks';
-import { useCallback, useEffect } from 'react';
+import { round } from 'radashi';
+import { useCallback, useEffect, useRef } from 'react';
 
 export function useStats() {
   const { mode, time } = useSettings();
   const { setValues } = useTypingTest();
+  const lastCharacterCount = useRef(0);
 
   const update = useCallback(() => {
     setValues((draft) => {
-      const { words, wordIndex, currentStats, stats, timer, startTime, elapsedTime } = draft;
+      const { words, wordIndex, stats, chartData, timer, startTime, elapsedTime } = draft;
       const timestamp = performance.now();
       let rawInput = '';
       let wpmInput = '';
@@ -25,19 +27,19 @@ export function useStats() {
       rawInput = rawInput.trim();
       wpmInput = wpmInput.trim();
 
-      const newElapsedTime = +((timestamp - startTime) / 1000).toFixed(2);
-      const characters = currentStats.characters - stats.characters.reduce((a, b) => a + b, 0);
-      const errors = currentStats.errors - stats.errors.reduce((a, b) => a + b, 0);
+      const newElapsedTime = round((timestamp - startTime) / 1000, 2);
+      const characters = stats.characters - lastCharacterCount.current;
+      const errors = stats.errors - chartData.errors.reduce((a, b) => a + b, 0);
       const currentRaw = characters / 5 / ((newElapsedTime - elapsedTime) / 60);
       const raw = rawInput.length / 5 / (newElapsedTime / 60);
       const wpm = wpmInput.length / 5 / (newElapsedTime / 60);
 
-      currentStats.raw = raw;
-      currentStats.wpm = wpm;
-      stats.raw.push(currentRaw);
-      stats.wpm.push(wpm);
-      stats.characters.push(characters);
-      stats.errors.push(errors);
+      lastCharacterCount.current = stats.characters;
+      stats.raw = raw;
+      stats.wpm = wpm;
+      chartData.raw.push(currentRaw);
+      chartData.wpm.push(wpm);
+      chartData.errors.push(errors);
       draft.timer = mode === 'time' ? timer - 1 : timer;
       draft.elapsedTime = newElapsedTime;
     });

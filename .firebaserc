@@ -1,8 +1,0 @@
-{
-  "projects": {
-    "production": "nekusu-apetype",
-    "preview": "nekusu-apetype-preview"
-  },
-  "targets": {},
-  "etags": {}
-}

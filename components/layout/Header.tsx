@@ -1,16 +1,20 @@
 'use client';
 
-import { Button, Grid, Text, Tooltip, Transition } from '@/components/core';
-import { ProfilePicture } from '@/components/profile';
+import { signOut } from '@/app/@auth/actions';
+import { Button } from '@/components/core/Button';
+import { Grid } from '@/components/core/Grid';
+import { Text } from '@/components/core/Text';
+import { Tooltip } from '@/components/core/Tooltip';
+import { Transition } from '@/components/core/Transition';
+import { Avatar } from '@/components/profile/Avatar';
 import { useGlobal } from '@/context/globalContext';
 import { useUser } from '@/context/userContext';
-import { getFirebaseAuth } from '@/utils/firebase';
 import { lexendDeca } from '@/utils/fonts';
-import type { FirebaseError } from 'firebase-admin';
+import { useQueryClient } from '@tanstack/react-query';
 import { AnimatePresence, useAnimation } from 'framer-motion';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Fragment, useCallback, useEffect, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import {
   RiInformationFill,
@@ -22,7 +26,7 @@ import {
   RiVipCrownFill,
 } from 'react-icons/ri';
 import { twJoin } from 'tailwind-merge';
-import LogoIcon from './LogoIcon';
+import { LogoIcon } from './LogoIcon';
 
 const BUTTONS = [
   { label: 'Home', href: '/', icon: <RiKeyboardBoxFill /> },
@@ -36,28 +40,34 @@ const VARIANTS = {
   exit: { opacity: 0 },
 };
 
-export default function Header() {
+export function Header() {
+  const queryClient = useQueryClient();
   const { testId, isUserTyping, restartTest } = useGlobal();
-  const { user, savePendingData, deleteCachedUserData } = useUser();
+  const { user } = useUser();
   const router = useRouter();
   const pathname = usePathname();
   const animationControls = useAnimation();
-  const [loggingOut, setLoggingOut] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const logout = useCallback(async () => {
-    const { auth, signOut } = await getFirebaseAuth();
+  const handleSignOut = async () => {
+    setIsLoading(true);
     try {
-      setLoggingOut(true);
-      await Promise.all([savePendingData(), deleteCachedUserData()]);
-      await signOut(auth);
-      toast.success('Signed out! See you next time!');
+      const res = await signOut();
+      if (res?.error) throw res.error;
+      queryClient.removeQueries({
+        predicate: ({ queryKey }) =>
+          queryKey.includes('users') ||
+          queryKey.includes('user_stats') ||
+          queryKey.includes('personal_bests') ||
+          queryKey.includes('tests'),
+      });
+      toast.success('You have been signed out. Come back soon!');
     } catch (e) {
-      const error = e as FirebaseError;
-      toast.error(`Something went wrong! ${error.message}`);
+      toast.error(`Failed to sign out! ${(e as Error).message}`);
     } finally {
-      setLoggingOut(false);
+      setIsLoading(false);
     }
-  }, [deleteCachedUserData, savePendingData]);
+  };
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: this is intentional
   useEffect(() => {
@@ -132,10 +142,10 @@ export default function Header() {
               {user && pathname !== '/account' && (
                 <Button asChild className='px-2 text-sm' variant='text'>
                   <Link href='/account'>
-                    <ProfilePicture
-                      className='w-5 border-0 bg-sub-alt'
+                    <Avatar
+                      className='border-0 bg-sub-alt'
                       expandable={false}
-                      imageProps={{ src: user.profilePicture?.url }}
+                      imageProps={{ src: user.avatarURL, height: 20, width: 20 }}
                     />
                     {user.name}
                   </Link>
@@ -143,12 +153,12 @@ export default function Header() {
               )}
               <Tooltip label={`Sign ${user ? 'out' : 'in'}`}>
                 {user ? (
-                  loggingOut ? (
+                  isLoading ? (
                     <div className='p-2 text-xl'>
                       <RiLoaderLine className='animate-spin text-main' />
                     </div>
                   ) : (
-                    <Button className='px-2 text-xl' onClick={logout} variant='text'>
+                    <Button className='px-2 text-xl' onClick={handleSignOut} variant='text'>
                       <RiLogoutCircleRFill />
                     </Button>
                   )

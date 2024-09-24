@@ -1,9 +1,9 @@
-import { Button, Modal, Text } from '@/components/core';
-import type { ModalProps } from '@/components/core/Modal';
+import { Button } from '@/components/core/Button';
+import { Modal, type ModalProps } from '@/components/core/Modal';
+import { Text } from '@/components/core/Text';
 
-export default function ReadabilityModal(props: ModalProps) {
+export function ReadabilityModal(props: ModalProps) {
   const { onClose } = props;
-
   return (
     <Modal {...props}>
       <div className='flex max-w-sm flex-col gap-3.5 text-sm'>

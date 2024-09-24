@@ -1,21 +1,17 @@
 'use client';
 
-import { Transition } from '@/components/core';
-import { useAuth } from '@/context/authContext';
-import { useGlobal } from '@/context/globalContext';
+import { Transition } from '@/components/core/Transition';
 import { useSettings } from '@/context/settingsContext';
 import { useTypingTest } from '@/context/typingTestContext';
-import { useUser } from '@/context/userContext';
-import { useDidMount } from '@/hooks/useDidMount';
 import { useStats } from '@/hooks/useStats';
 import { accuracy as acc } from '@/utils/typingTest';
 import { FloatingPortal } from '@floating-ui/react';
 import { useDidUpdate } from '@mantine/hooks';
 import { m } from 'framer-motion';
+import { useMemo } from 'react';
 import { twJoin } from 'tailwind-merge';
 
-export default function Stats() {
-  const { setGlobalValues } = useGlobal();
+export function Stats() {
   const {
     mode,
     time,
@@ -28,43 +24,20 @@ export default function Stats() {
     liveAccuracy,
     timerProgress,
   } = useSettings();
-  const { signedIn } = useAuth();
-  const { setPendingData, removePendingData } = useUser();
-  const { wordIndex, currentStats, timer, isTestRunning, setValues } = useTypingTest();
-  const { wpm, characters, errors } = currentStats;
-  const stats = useStats();
-  const accuracy = acc(characters, errors);
+  const { wordIndex, stats, timer, isTestRunning, finishTest } = useTypingTest();
+  const { wpm, characters, errors } = stats;
+  const accuracy = useMemo(() => acc(characters, errors), [characters, errors]);
+  const { start, update } = useStats();
 
-  useDidMount(() => {
-    if (!signedIn) removePendingData();
-  });
   useDidUpdate(() => {
-    let startTime = 0;
-    if (isTestRunning) {
-      stats.start();
-      startTime = performance.now();
-      setPendingData((draft) => {
-        draft.typingStats.startedTests += 1;
-      });
-    }
-    return () => {
-      if (startTime)
-        setPendingData((draft) => {
-          draft.typingStats.timeTyping += (performance.now() - startTime) / 1000;
-        });
-    };
+    if (isTestRunning) start();
   }, [isTestRunning]);
   useDidUpdate(() => {
     const timeFinished = mode === 'time' && time > 0 && timer <= 0;
     const wordsFinished = mode === 'words' && words > 0 && wordIndex >= words;
     if (timeFinished || wordsFinished) {
-      if (mode !== 'time') stats.update();
-      setValues((draft) => {
-        draft.isTestRunning = false;
-      });
-      setGlobalValues((draft) => {
-        draft.isTestFinished = true;
-      });
+      if (mode !== 'time') update();
+      finishTest();
     }
   }, [timer, wordIndex]);
 

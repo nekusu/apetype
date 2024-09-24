@@ -1,21 +1,16 @@
 'use client';
 
 import { useDidMount } from '@/hooks/useDidMount';
+import { themeOptions } from '@/queries/get-theme';
+import { themeListOptions } from '@/queries/get-theme-list';
 import { getRandomNumber, replaceSpaces } from '@/utils/misc';
-import { STATIC_URL } from '@/utils/monkeytype';
-import {
-  type CustomTheme,
-  type ThemeColors,
-  type ThemeInfo,
-  extractThemeColors,
-  setThemeColors,
-} from '@/utils/theme';
+import { type CustomTheme, type ThemeColors, setThemeColors } from '@/utils/theme';
 import { useDidUpdate, useIsomorphicEffect, useTimeout } from '@mantine/hooks';
+import { useQuery } from '@tanstack/react-query';
 import { colord } from 'colord';
 import { type ReactNode, createContext, useCallback, useContext, useMemo, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { RiAlertFill } from 'react-icons/ri';
-import useSWRImmutable from 'swr/immutable';
 import { type Updater, useImmer } from 'use-immer';
 import { useGlobal } from './globalContext';
 import { useSettings } from './settingsContext';
@@ -26,10 +21,10 @@ export interface ThemeValues {
     preset?: ThemeColors;
     custom?: ThemeColors;
   };
-  isLoading?: boolean;
 }
 
 export interface ThemeContext extends ThemeValues {
+  isFetching: boolean;
   setThemeValues: Updater<ThemeValues>;
   previewTheme: (id: string) => void;
   clearPreview: () => void;
@@ -38,13 +33,13 @@ export interface ThemeContext extends ThemeValues {
 interface ThemeProviderProps {
   children: ReactNode;
   previewDelay: number;
-  themes: ThemeInfo[];
 }
 
 export const ThemeContext = createContext<ThemeContext | null>(null);
 
-export function ThemeProvider({ children, previewDelay, themes }: ThemeProviderProps) {
+export function ThemeProvider({ children, previewDelay }: ThemeProviderProps) {
   const { testId } = useGlobal();
+  const { data: themes = [] } = useQuery(themeListOptions);
   const {
     randomizeTheme,
     themeType,
@@ -65,14 +60,11 @@ export function ThemeProvider({ children, previewDelay, themes }: ThemeProviderP
   });
   const [presetName, setPresetName] = useState(replaceSpaces(theme));
   const [previewThemeId, setPreviewThemeId] = useState<string | null>(null);
+  const { data: presetColors, isFetching } = useQuery(themeOptions(presetName));
   const { start, clear } = useTimeout((params: string[]) => {
     const [name] = params;
     setPresetName(replaceSpaces(name));
   }, previewDelay);
-  const { data: presetColors, isLoading } = useSWRImmutable<ThemeColors, Error>(
-    `${STATIC_URL}/themes/${presetName}.css`,
-    (url: string) => fetch(url).then(async (res) => extractThemeColors(await res.text())),
-  );
   const customTheme = useMemo(
     () => customThemes.find(({ id }) => id === (previewThemeId ?? customThemeId)),
     [customThemeId, customThemes, previewThemeId],
@@ -104,21 +96,25 @@ export function ThemeProvider({ children, previewDelay, themes }: ThemeProviderP
 
       window.history.replaceState('', '', '/');
       setTimeout(() => {
-        setSettings((draft) => {
-          if (draft.customThemes.find(({ id }) => id === customTheme.id))
+        setSettings(({ customThemes }) => {
+          if (customThemes.find(({ id }) => id === customTheme.id)) {
             toast(`Custom theme '${customTheme.name}' already exists!`, {
               id: toastId,
               icon: <RiAlertFill />,
             });
-          else {
-            draft.themeType = 'custom';
-            draft.customThemes.push(customTheme);
-            draft.customThemes.sort((a, b) => a.name.localeCompare(b.name));
-            draft.customTheme = customTheme.id;
-            toast.success(`Added '${customTheme.name}' custom theme successfully!`, {
-              id: toastId,
-            });
+            return { customTheme: customTheme.id };
           }
+          const newCustomThemes = [...customThemes];
+          newCustomThemes.push(customTheme);
+          newCustomThemes.sort((a, b) => a.name.localeCompare(b.name));
+          toast.success(`Added '${customTheme.name}' custom theme successfully!`, {
+            id: toastId,
+          });
+          return {
+            themeType: 'custom',
+            customThemes: newCustomThemes,
+            customTheme: customTheme.id,
+          };
         });
       }, 500);
     }
@@ -141,9 +137,7 @@ export function ThemeProvider({ children, previewDelay, themes }: ThemeProviderP
               (randomizeTheme === 'dark' && colord(bgColor).isDark())),
         );
         const randomTheme = themeList[getRandomNumber(themeList.length - 1)];
-        setSettings((draft) => {
-          if (randomTheme) draft.theme = randomTheme.name;
-        });
+        if (randomTheme) setSettings({ theme: randomTheme.name });
       } else {
         const themeList = customThemes.filter(
           ({ id, colors: { bg } }) =>
@@ -153,9 +147,7 @@ export function ThemeProvider({ children, previewDelay, themes }: ThemeProviderP
               (randomizeTheme === 'dark' && colord(bg).isDark())),
         );
         const randomTheme = themeList[getRandomNumber(themeList.length - 1)];
-        setSettings((draft) => {
-          if (randomTheme) draft.customTheme = randomTheme.id;
-        });
+        if (randomTheme) setSettings({ customTheme: randomTheme.id });
       }
     }
   }, [testId]);
@@ -165,7 +157,7 @@ export function ThemeProvider({ children, previewDelay, themes }: ThemeProviderP
       value={{
         ...themeValues,
         setThemeValues,
-        isLoading,
+        isFetching,
         previewTheme,
         clearPreview,
         colors: { preset: presetColors, custom: customTheme?.colors },
@@ -178,10 +170,6 @@ export function ThemeProvider({ children, previewDelay, themes }: ThemeProviderP
 
 export function useTheme() {
   const context = useContext(ThemeContext);
-
-  if (!context) {
-    throw new Error('useTheme must be used within a ThemeProvider');
-  }
-
+  if (!context) throw new Error('useTheme must be used within a ThemeProvider');
   return context;
 }

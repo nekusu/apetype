@@ -1,22 +1,18 @@
 'use client';
 
-import { Text, Transition } from '@/components/core';
 import { AnimatePresence, type HTMLMotionProps, m, useAnimation } from 'framer-motion';
 import { useEffect, useRef } from 'react';
 import { type Toast, resolveValue, toast, useToasterStore } from 'react-hot-toast';
 import { twJoin, twMerge } from 'tailwind-merge';
+import { Text } from './Text';
+import { Transition } from './Transition';
 
 export interface ToastProps extends HTMLMotionProps<'div'> {
   progressBarProps?: HTMLMotionProps<'div'>;
   t: Toast;
 }
 
-export default function Toast({
-  className,
-  progressBarProps: _progressBarProps,
-  t,
-  ...props
-}: ToastProps) {
+export function Toast({ className, progressBarProps: _progressBarProps, t, ...props }: ToastProps) {
   const { className: progressBarClassName, ...progressBarProps } = _progressBarProps ?? {};
   const { pausedAt } = useToasterStore();
   const animationControls = useAnimation();

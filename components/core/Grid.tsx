@@ -6,7 +6,7 @@ export interface GridProps extends ComponentPropsWithoutRef<'div'> {
   asChild?: boolean;
 }
 
-const Grid = forwardRef<ElementRef<'div'>, GridProps>(function Grid(
+export const Grid = forwardRef<ElementRef<'div'>, GridProps>(function Grid(
   { asChild, className, ...props },
   ref,
 ) {
@@ -15,5 +15,3 @@ const Grid = forwardRef<ElementRef<'div'>, GridProps>(function Grid(
     <Component ref={ref} className={twMerge('grid grid-cols-2 gap-2', className)} {...props} />
   );
 });
-
-export default Grid;

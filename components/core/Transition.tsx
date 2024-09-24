@@ -1,6 +1,6 @@
 'use client';
 
-import { type HTMLMotionProps, m, type Variants } from 'framer-motion';
+import { type HTMLMotionProps, type Variants, m } from 'framer-motion';
 import { type ElementRef, forwardRef } from 'react';
 
 const DEFAULT_VARIANTS: Variants = {
@@ -8,7 +8,7 @@ const DEFAULT_VARIANTS: Variants = {
   visible: { opacity: 1, pointerEvents: 'auto' },
 };
 
-const Transition = forwardRef<ElementRef<'div'>, HTMLMotionProps<'div'>>(function Transition(
+export const Transition = forwardRef<ElementRef<'div'>, HTMLMotionProps<'div'>>(function Transition(
   { variants = DEFAULT_VARIANTS, ...props },
   ref,
 ) {
@@ -24,5 +24,3 @@ const Transition = forwardRef<ElementRef<'div'>, HTMLMotionProps<'div'>>(functio
     />
   );
 });
-
-export default Transition;

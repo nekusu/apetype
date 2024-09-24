@@ -1,7 +1,11 @@
 'use client';
 
-import { Button, ColorPicker, Input, Key, Text, Tooltip } from '@/components/core';
-import type { InputProps } from '@/components/core/Input';
+import { Button } from '@/components/core/Button';
+import { ColorPicker } from '@/components/core/ColorPicker';
+import { Input, type InputProps } from '@/components/core/Input';
+import { Key } from '@/components/core/Key';
+import { Text } from '@/components/core/Text';
+import { Tooltip } from '@/components/core/Tooltip';
 import { type ThemeColors, themeColorLabels } from '@/utils/theme';
 import { useEyeDropper, useFocusWithin, useMergedRef } from '@mantine/hooks';
 import { type ElementRef, forwardRef, useRef } from 'react';
@@ -15,7 +19,7 @@ export interface ColorInputProps extends InputProps {
   setValue?: (value: string) => void;
 }
 
-const ColorInput = forwardRef<ElementRef<'input'>, ColorInputProps>(function ColorInput(
+export const ColorInput = forwardRef<ElementRef<'input'>, ColorInputProps>(function ColorInput(
   { colorKey, computedValue, rightNode, setValue, value, ...props },
   ref,
 ) {
@@ -40,7 +44,7 @@ const ColorInput = forwardRef<ElementRef<'input'>, ColorInputProps>(function Col
       const eyeDropper = await open();
       if (eyeDropper) setValue?.(eyeDropper.sRGBHex);
     } catch (e) {
-      toast.error(`Something went wrong! ${(e as Error).message}`);
+      toast.error((e as Error).message);
     } finally {
       inputRef.current?.focus();
       toast.dismiss(toastId);
@@ -78,5 +82,3 @@ const ColorInput = forwardRef<ElementRef<'input'>, ColorInputProps>(function Col
     />
   );
 });
-
-export default ColorInput;

@@ -1,23 +1,48 @@
 import type { ReactNode } from 'react';
-import { RiGithubFill, RiTwitchFill, RiTwitterFill, RiYoutubeFill } from 'react-icons/ri';
+import {
+  RiGithubFill,
+  RiGlobalFill,
+  RiTwitchFill,
+  RiTwitterXFill,
+  RiYoutubeFill,
+} from 'react-icons/ri';
+import { twJoin } from 'tailwind-merge';
+import { lexendDeca } from './fonts';
+import type { TableRow } from './supabase/database-extended';
 
-export const socialNames = ['monkeytype', 'github', 'twitter', 'youtube', 'twitch'] as const;
-export type Social = (typeof socialNames)[number];
-export const socialIcons: Record<Social, ReactNode> = {
-  monkeytype: (
-    <span className='flex h-[1.334em] w-[1.334em] items-center justify-center font-[var(--font-lexend-deca)] text-[0.75em]'>
-      mt
-    </span>
-  ),
-  github: <RiGithubFill />,
-  twitter: <RiTwitterFill />,
-  youtube: <RiYoutubeFill />,
-  twitch: <RiTwitchFill />,
-};
-export const socialURLs: Record<Social, string> = {
-  monkeytype: 'monkeytype.com/profile/',
-  github: 'github.com/',
-  twitter: 'twitter.com/',
-  youtube: 'youtube.com/@',
-  twitch: 'twitch.tv/',
+export type SocialKey = keyof TableRow<'users'>['socials'];
+export const socialsData: Record<SocialKey, { icon: ReactNode; url: string }> = {
+  monkeytype: {
+    icon: (
+      <span
+        className={twJoin(
+          'flex h-[1.334em] w-[1.334em] items-center justify-center text-[0.75em]',
+          lexendDeca.className,
+        )}
+      >
+        mt
+      </span>
+    ),
+    url: 'monkeytype.com/profile/',
+  },
+  x: {
+    icon: <RiTwitterXFill />,
+    url: 'x.com/',
+  },
+  github: {
+    icon: <RiGithubFill />,
+    url: 'github.com/',
+  },
+  youtube: {
+    icon: <RiYoutubeFill />,
+    url: 'youtube.com/@',
+  },
+  twitch: {
+    icon: <RiTwitchFill />,
+    url: 'twitch.tv/',
+  },
+  website: {
+    icon: <RiGlobalFill />,
+    url: '',
+  },
 };

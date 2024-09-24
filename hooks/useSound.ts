@@ -36,7 +36,7 @@ export function useSound(sound?: false | Sound | `${string}.webm`, config: Manag
     const index = keysLength > 1 ? getRandomNumber(keysLength - 1) : 0;
     const stack = manager.current.get(manager.current.keys[index]);
     stack?.on('state', setState);
-    stack?.prepare().then((sound) => sound?.play());
+    stack?.prepare().then((sound) => sound.play());
   }, []);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: not needed
@@ -46,10 +46,13 @@ export function useSound(sound?: false | Sound | `${string}.webm`, config: Manag
         ...config,
         request: { cache: 'force-cache', ...config.request },
       });
+      manager.current.unlock();
       if (sound in SOUNDS) manager.current.add(...soundStacks[sound as Sound]);
       else manager.current.add({ id: sound, path: `/sound/${sound}` });
     }
-    return () => void manager.current?.teardown();
+    return () => {
+      manager.current?.teardown();
+    };
   }, [sound]);
   useDidUpdate(() => {
     if (manager.current && config.volume) manager.current.volume = config.volume;

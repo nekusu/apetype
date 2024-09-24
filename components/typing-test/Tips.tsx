@@ -1,9 +1,10 @@
 'use client';
 
-import { Key, Text } from '@/components/core';
+import { Key } from '@/components/core/Key';
+import { Text } from '@/components/core/Text';
 import { useSettings } from '@/context/settingsContext';
 
-export default function Tips() {
+export function Tips() {
   const { mode, time, words, quickRestart } = useSettings();
 
   return (

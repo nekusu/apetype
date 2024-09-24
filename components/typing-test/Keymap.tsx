@@ -1,12 +1,14 @@
 'use client';
 
-import { Tooltip } from '@/components/core';
+import { Tooltip } from '@/components/core/Tooltip';
 import { useGlobal } from '@/context/globalContext';
 import { useSettings } from '@/context/settingsContext';
 import { useTypingTest } from '@/context/typingTestContext';
+import { layoutListOptions } from '@/queries/get-layout-list';
 import { replaceSpaces } from '@/utils/misc';
 import type { Settings } from '@/utils/settings';
 import { useDidUpdate, useMergedRef, useTimeout, useWindowEvent } from '@mantine/hooks';
+import { useQuery } from '@tanstack/react-query';
 import {
   type ComponentPropsWithoutRef,
   type ElementRef,
@@ -77,15 +79,16 @@ const Key = memo(
   }),
 );
 
-export default function Keymap() {
-  const { isUserTyping, keymapLayouts, commandLine } = useGlobal();
+export function Keymap() {
+  const { capsLock, isUserTyping, commandLine } = useGlobal();
   const { blindMode, keymap, keymapLayout, keymapStyle, keymapLegendStyle, keymapShowTopRow } =
     useSettings();
-  const { words, wordIndex, lastCharacter, currentStats } = useTypingTest();
-  const { characters, errors } = currentStats;
+  const { words, wordIndex, lastCharacter, stats } = useTypingTest();
+  const { characters, errors } = stats;
+  const { data: layouts = {} } = useQuery(layoutListOptions);
   const [pressed, setPressed] = useState<{ key?: string; error?: boolean } | null>(null);
-  const [{ capsLock, shift }, setModifiers] = useState({ capsLock: false, shift: false });
-  const layout = keymapLayouts[replaceSpaces(keymapLayout)];
+  const [shift, setShift] = useState(false);
+  const layout = layouts[replaceSpaces(keymapLayout)];
   const isMatrix = keymapStyle.includes('matrix');
   const isSplit = keymapStyle.includes('split');
   const hideTopRow =
@@ -93,8 +96,8 @@ export default function Keymap() {
   const lastCharacterCount = useRef(0);
   const lastErrorCount = useRef(0);
 
-  const handleCapsLockShift = (e: KeyboardEvent) => {
-    setModifiers({ capsLock: e.getModifierState('CapsLock'), shift: e.getModifierState('Shift') });
+  const handleShift = (e: KeyboardEvent) => {
+    setShift(e.shiftKey);
   };
   const getStatus = (key: string) => {
     if (pressed?.key && key.includes(pressed.key)) return pressed.error ? 'error' : true;
@@ -131,8 +134,8 @@ export default function Keymap() {
       setPressed({ key: nextKey });
     }
   }, [characters, keymap, words]);
-  useWindowEvent('keyup', handleCapsLockShift);
-  useWindowEvent('keydown', handleCapsLockShift);
+  useWindowEvent('keydown', handleShift);
+  useWindowEvent('keyup', handleShift);
 
   return (
     <div className='flex justify-center'>

@@ -1,41 +1,45 @@
 'use client';
 
-import { ReauthenticationModal } from '@/components/auth';
-import { Button, Group, Modal, Text } from '@/components/core';
+import { deleteUser } from '@/app/@auth/actions';
+import { Button } from '@/components/core/Button';
+import { Group } from '@/components/core/Group';
+import { Modal } from '@/components/core/Modal';
+import { Text } from '@/components/core/Text';
 import { useUser } from '@/context/userContext';
-import { getFirebaseAuth, getFirebaseFirestore } from '@/utils/firebase';
+import supabase from '@/utils/supabase/browser';
 import { useDisclosure } from '@mantine/hooks';
-import type { FirebaseError } from 'firebase/app';
+import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { toast } from 'react-hot-toast';
-import Setting from './Setting';
+import { Setting } from './Setting';
 
-export default function DeleteAccount() {
-  const { deleteCachedUserData } = useUser();
+export function DeleteAccount() {
+  const { user } = useUser();
+  const queryClient = useQueryClient();
   const [confirmationModalOpened, confirmationModalHandler] = useDisclosure(false);
-  const [reauthModalOpened, reauthModalHandler] = useDisclosure(false);
   const [isLoading, setIsLoading] = useState(false);
 
   const deleteAccount = async () => {
-    const [{ auth, deleteUser }, { deleteCollection, deleteDocument }] = await Promise.all([
-      getFirebaseAuth(),
-      getFirebaseFirestore(),
-    ]);
-    if (!auth.currentUser) return;
+    if (!user) return;
+    setIsLoading(true);
     try {
-      setIsLoading(true);
-      await Promise.all([
-        deleteDocument('users', auth.currentUser.uid),
-        deleteCollection(`users/${auth.currentUser.uid}/tests}`, 300),
-        deleteCachedUserData(),
-      ]);
+      const { error } = await supabase.storage
+        .from('users')
+        .remove([`avatars/${user.id}.png`, `banners/${user.id}.png`]);
+      if (error) throw error;
+      const res = await deleteUser(user.id);
+      if (res?.error) throw res.error;
+      queryClient.removeQueries({
+        predicate: ({ queryKey }) =>
+          queryKey.includes('users') ||
+          queryKey.includes('user_stats') ||
+          queryKey.includes('personal_bests') ||
+          queryKey.includes('tests'),
+      });
       confirmationModalHandler.close();
-      await deleteUser(auth.currentUser);
       toast.success('Your account has been successfully deleted.');
     } catch (e) {
-      const error = e as FirebaseError;
-      if (error.code === 'auth/requires-recent-login') reauthModalHandler.open();
-      else toast.error(`Something went wrong! ${error.message}`);
+      toast.error(`Failed to delete account! ${(e as Error).message}`);
     } finally {
       setIsLoading(false);
     }
@@ -64,17 +68,12 @@ export default function DeleteAccount() {
           </Text>
           <Group>
             <Button onClick={confirmationModalHandler.close}>cancel</Button>
-            <Button loading={isLoading} onClick={reauthModalHandler.open} variant='danger'>
+            <Button loading={isLoading} onClick={deleteAccount} variant='danger'>
               delete
             </Button>
           </Group>
         </div>
       </Modal>
-      <ReauthenticationModal
-        opened={reauthModalOpened}
-        onClose={reauthModalHandler.close}
-        onReauthenticate={deleteAccount}
-      />
     </>
   );
 }

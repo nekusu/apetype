@@ -1,6 +1,6 @@
 'use client';
 
-import { Transition } from '@/components/core';
+import { Transition } from '@/components/core/Transition';
 import { useGlobal } from '@/context/globalContext';
 import { useSettings } from '@/context/settingsContext';
 import { useTypingTest } from '@/context/typingTestContext';
@@ -12,10 +12,11 @@ import { getHotkeyHandler, useDidUpdate, useTimeout, useWindowEvent } from '@man
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { RiCursorFill } from 'react-icons/ri';
 import { twJoin } from 'tailwind-merge';
-import { Caret, Word } from '.';
+import { Caret } from './Caret';
+import { Word } from './Word';
 
-export default function Words() {
-  const { isTestFinished, modalOpened, setGlobalValues } = useGlobal();
+export function Words() {
+  const { modalOpened, setGlobalValues } = useGlobal();
   const {
     mode,
     time,
@@ -29,7 +30,8 @@ export default function Words() {
     fontSize,
     outOfFocusWarning,
   } = useSettings();
-  const { words, wordIndex, inputValue, isTestRunning, setValues } = useTypingTest();
+  const { words, wordIndex, inputValue, isTestRunning, isTestFinished, setValues, finishTest } =
+    useTypingTest();
   const wordsCollection = useWords();
   const { wordRef, letterRef, caretPosition } = useCaretPosition();
   const wrapperHeight = useMemo(() => fontSize * 26 * 3, [fontSize]);
@@ -38,14 +40,12 @@ export default function Words() {
   const [isBlurred, setIsBlurred] = useState(modalOpened);
   const { start: startBlur, clear: clearBlur } = useTimeout(() => setIsBlurred(true), 1000);
   const { start: startIdle, clear: clearIdle } = useTimeout(
-    () =>
-      setGlobalValues((draft) => {
-        draft.isUserTyping = false;
-      }),
+    () => setGlobalValues({ isUserTyping: false }),
     1000,
   );
   const inputRef = useRef<HTMLInputElement>(null);
   const highestWordIndex = useRef(0);
+
   const focusWords = useCallback(() => {
     clearBlur();
     setIsFocused(true);
@@ -65,19 +65,9 @@ export default function Words() {
         draft.isTestRunning = true;
       });
     wordsCollection.update(value);
-    setGlobalValues((draft) => {
-      draft.isUserTyping = true;
-    });
+    setGlobalValues({ isUserTyping: true });
     clearIdle();
     startIdle();
-  };
-  const finishTest = () => {
-    setValues((draft) => {
-      draft.isTestRunning = false;
-    });
-    setGlobalValues((draft) => {
-      draft.isTestFinished = true;
-    });
   };
 
   useDidMount(() => {

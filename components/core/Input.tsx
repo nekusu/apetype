@@ -7,10 +7,11 @@ import {
   type ReactNode,
   type RefObject,
   forwardRef,
+  useRef,
 } from 'react';
 import { RiErrorWarningLine } from 'react-icons/ri';
 import { twMerge } from 'tailwind-merge';
-import Tooltip from './Tooltip';
+import { Tooltip } from './Tooltip';
 
 export interface InputProps extends ComponentPropsWithoutRef<'input'> {
   error?: false | string;
@@ -22,7 +23,7 @@ export interface InputProps extends ComponentPropsWithoutRef<'input'> {
   wrapperRef?: RefObject<HTMLDivElement>;
 }
 
-const Input = forwardRef<ElementRef<'input'>, InputProps>(function Input(
+export const Input = forwardRef<ElementRef<'input'>, InputProps>(function Input(
   {
     className,
     disabled,
@@ -40,13 +41,15 @@ const Input = forwardRef<ElementRef<'input'>, InputProps>(function Input(
   ref,
 ) {
   const uuid = useId(id);
-  const { ref: inputRef, focused } = useFocusWithin<HTMLInputElement>();
-  const mergedRef = useMergedRef(ref, inputRef);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const { ref: wrapperFocusRef, focused } = useFocusWithin<HTMLDivElement>();
+  const mergedInputRef = useMergedRef(ref, inputRef);
+  const mergedWrapperRef = useMergedRef(wrapperRef, wrapperFocusRef);
   const isErrorVisible = !focused && error;
 
   return (
     <div
-      ref={wrapperRef}
+      ref={mergedWrapperRef}
       className={twMerge(
         'flex flex-col gap-1 text-sub transition focus-within:text-text',
         disabled && 'pointer-events-none opacity-50',
@@ -72,7 +75,7 @@ const Input = forwardRef<ElementRef<'input'>, InputProps>(function Input(
         >
           {leftNode}
           <input
-            ref={mergedRef}
+            ref={mergedInputRef}
             className={twMerge(
               'h-full w-full border-0 bg-transparent outline-0 placeholder:text-sub',
               error && 'text-error',
@@ -94,5 +97,3 @@ const Input = forwardRef<ElementRef<'input'>, InputProps>(function Input(
     </div>
   );
 });
-
-export default Input;

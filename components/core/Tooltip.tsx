@@ -1,11 +1,11 @@
 'use client';
 
 import {
+  FloatingPortal,
+  type Placement,
   autoUpdate,
   flip,
-  FloatingPortal,
   offset as offsetMiddleware,
-  type Placement,
   shift,
   useFloating,
   useFocus,
@@ -14,9 +14,9 @@ import {
 } from '@floating-ui/react';
 import { useMergedRef } from '@mantine/hooks';
 import { AnimatePresence, type HTMLMotionProps } from 'framer-motion';
-import { cloneElement, forwardRef, type ReactNode, useState } from 'react';
+import { type ReactNode, cloneElement, forwardRef, useState } from 'react';
 import { twMerge } from 'tailwind-merge';
-import Transition from './Transition';
+import { Transition } from './Transition';
 
 export interface TooltipProps extends HTMLMotionProps<'div'> {
   disabled?: boolean;
@@ -25,7 +25,7 @@ export interface TooltipProps extends HTMLMotionProps<'div'> {
   placement?: Placement;
 }
 
-const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(function Tooltip(
+export const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(function Tooltip(
   { children, className, disabled, label, offset = 4, style, placement = 'bottom', ...props },
   ref,
 ) {
@@ -72,5 +72,3 @@ const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(function Tooltip(
     </>
   );
 });
-
-export default Tooltip;

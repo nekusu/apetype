@@ -1,12 +1,17 @@
-'use client';
-
 import Loading from '@/app/loading';
-import { Button, Grid, Group, Input, Modal, Text, Tooltip, Transition } from '@/components/core';
-import type { ModalProps } from '@/components/core/Modal';
+import { Button } from '@/components/core/Button';
+import { Grid } from '@/components/core/Grid';
+import { Group } from '@/components/core/Group';
+import { Input } from '@/components/core/Input';
+import { Modal, type ModalProps } from '@/components/core/Modal';
+import { Text } from '@/components/core/Text';
+import { Tooltip } from '@/components/core/Tooltip';
+import { Transition } from '@/components/core/Transition';
 import { useColorPalette } from '@/hooks/useColorPalette';
 import type { CustomTheme, ThemeColors } from '@/utils/theme';
 import { valibotResolver } from '@hookform/resolvers/valibot';
 import { shallowEqual, useDidUpdate, useListState } from '@mantine/hooks';
+import type { Optional } from '@tanstack/react-query';
 import { colord } from 'colord';
 import { AnimatePresence } from 'framer-motion';
 import { useMemo, useState } from 'react';
@@ -58,10 +63,7 @@ const ThemeSchema = object({
 });
 type ThemeInput = InferInput<typeof ThemeSchema>;
 
-export default function AIThemeGenerationModal({
-  addTheme,
-  ...props
-}: AIThemeGenerationModalProps) {
+export function AIThemeGenerationModal({ addTheme, ...props }: AIThemeGenerationModalProps) {
   const { opened } = props;
   const {
     formState: { errors },
@@ -74,7 +76,7 @@ export default function AIThemeGenerationModal({
   const [model, setModel] = useState<Model>('transformer');
   const [creativity, setCreativity] = useState(1.5);
   const [lockedColors, lockedColorsHandler] = useListState<string>(DEFAULT_PALETTE);
-  const { generate, palettes, isLoading, lastUsedOptions } = useColorPalette();
+  const { generate, palettes, isPending, lastUsedOptions } = useColorPalette();
   const [activePalette, setActivePalette] = useState(0);
   const shouldRegenerate = useMemo(
     () =>
@@ -212,7 +214,7 @@ export default function AIThemeGenerationModal({
           </Button>
           <Button
             disabled={!palettes.length}
-            loading={!!palettes.length && isLoading}
+            loading={!!palettes.length && isPending}
             onClick={() => {
               const options = { model, creativity, palette: lockedColors };
               if (shouldRegenerate) {

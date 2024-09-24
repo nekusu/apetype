@@ -1,7 +1,10 @@
 'use client';
 
-import { Button, Grid, Modal, Text, Tooltip } from '@/components/core';
-import type { ModalProps } from '@/components/core/Modal';
+import { Button } from '@/components/core/Button';
+import { Grid } from '@/components/core/Grid';
+import { Modal, type ModalProps } from '@/components/core/Modal';
+import { Text } from '@/components/core/Text';
+import { Tooltip } from '@/components/core/Tooltip';
 import { useSettings } from '@/context/settingsContext';
 import { formatFileSize } from '@/utils/misc';
 import type { Settings, ValidationIssue } from '@/utils/settings';
@@ -17,7 +20,7 @@ import {
   RiSpam2Line,
 } from 'react-icons/ri';
 import { twJoin, twMerge } from 'tailwind-merge';
-import Setting from './Setting';
+import { Setting } from './Setting';
 
 interface WarningProps {
   icon: IconType;
@@ -145,8 +148,8 @@ function ImportSettingsModal({ className, ...props }: ModalProps) {
   );
 }
 
-export default function ImportExportSettings() {
-  const settings = useSettings();
+export function ImportExportSettings() {
+  const { settingsReference: _, ...settings } = useSettings();
   const [modalOpened, modalHandler] = useDisclosure(false);
 
   const exportSettings = () => {
@@ -154,7 +157,7 @@ export default function ImportExportSettings() {
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `apetype-settings_${dayjs().format('YYYY-MM-DD')}.json`;
+    link.download = `apetype-settings-${dayjs().format('YYYY-MM-DD')}.json`;
     link.click();
     URL.revokeObjectURL(url);
   };

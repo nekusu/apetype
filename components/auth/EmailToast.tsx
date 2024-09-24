@@ -1,6 +1,8 @@
 'use client';
 
-import { Button, Group, Text } from '@/components/core';
+import { Button } from '@/components/core/Button';
+import { Group } from '@/components/core/Group';
+import { Text } from '@/components/core/Text';
 import { type Toast, resolveValue, toast } from 'react-hot-toast';
 import { RiInformationFill } from 'react-icons/ri';
 
@@ -8,9 +10,8 @@ export interface EmailToastProps extends Toast {
   emailDomain: string;
 }
 
-export default function EmailToast({ emailDomain, ...t }: EmailToastProps) {
+export function EmailToast({ emailDomain, ...t }: EmailToastProps) {
   const resolvedValue = resolveValue(t.message, t);
-
   return (
     <div className='flex flex-col gap-2'>
       <div className='flex items-center gap-2.5'>

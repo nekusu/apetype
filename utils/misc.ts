@@ -1,5 +1,3 @@
-import type { Timestamp } from 'firebase/firestore';
-
 export function getRandomNumber(max = 1, min = 0) {
   if (arguments.length === 1) min = 0;
   if (min > max) [min, max] = [max, min];
@@ -24,22 +22,6 @@ export function formatFileSize(bytes: number, si = false, decimalPlaces = 1) {
   }
 
   return `${bytes.toFixed(decimalPlaces)} ${units[unitIndex]}`;
-}
-
-export function parseTimestamps<T extends Record<string, any>>(obj?: T) {
-  const replacedObj: Partial<T> = {};
-
-  for (const key in obj) {
-    const value = obj[key];
-
-    if (value && typeof value.toDate === 'function') {
-      const { nanoseconds, seconds } = value as Timestamp;
-      replacedObj[key] = { nanoseconds, seconds } as any;
-    } else if (typeof value === 'object') replacedObj[key] = parseTimestamps(value);
-    else replacedObj[key] = value;
-  }
-
-  return replacedObj as T;
 }
 
 export function getLocalStorageSize(...keys: string[]) {

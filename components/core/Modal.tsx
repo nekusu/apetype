@@ -7,7 +7,7 @@ import { AnimatePresence, type HTMLMotionProps } from 'framer-motion';
 import { type MouseEvent, useEffect } from 'react';
 import { RemoveScroll } from 'react-remove-scroll';
 import { twMerge } from 'tailwind-merge';
-import Transition from './Transition';
+import { Transition } from './Transition';
 
 export interface ModalProps extends HTMLMotionProps<'div'> {
   backdropClassName?: string;
@@ -23,7 +23,7 @@ export interface ModalProps extends HTMLMotionProps<'div'> {
   trapFocus?: boolean;
 }
 
-export default function Modal({
+export function Modal({
   backdropClassName,
   centered = true,
   className,
@@ -49,9 +49,7 @@ export default function Modal({
   };
 
   useEffect(() => {
-    setGlobalValues((draft) => {
-      draft.modalOpened = opened;
-    });
+    setGlobalValues({ modalOpened: opened });
   }, [opened, setGlobalValues]);
   useHotkeys([['Escape', handleEscapePress]], ['input']);
 

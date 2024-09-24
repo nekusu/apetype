@@ -1,75 +1,45 @@
 'use client';
 
-import { PasswordInput, PasswordStrength, ReauthenticationModal } from '@/components/auth';
-import { Button, Modal, Text } from '@/components/core';
-import type { ModalProps } from '@/components/core/Modal';
-import { useAuth } from '@/context/authContext';
-import { getFirebaseAuth } from '@/utils/firebase';
-import { valibotResolver } from '@hookform/resolvers/valibot';
+import { type PasswordAuthInput, passwordAuthResolver } from '@/app/@auth/schemas';
+import { PasswordInput } from '@/components/auth/PasswordInput';
+import { PasswordStrength } from '@/components/auth/PasswordStrength';
+import { Button } from '@/components/core/Button';
+import { Modal, type ModalProps } from '@/components/core/Modal';
+import { Text } from '@/components/core/Text';
+import { getAuthUser } from '@/queries/get-auth-user';
+import supabase from '@/utils/supabase/browser';
 import { useDisclosure } from '@mantine/hooks';
+import { useQuery } from '@tanstack/react-query';
 import type { ZxcvbnResult } from '@zxcvbn-ts/core';
-import type { FirebaseError } from 'firebase/app';
-import { useCallback, useDeferredValue, useEffect, useState } from 'react';
+import { useCallback, useDeferredValue, useEffect, useMemo, useState } from 'react';
 import { type SubmitHandler, useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
-import {
-  type InferInput,
-  check,
-  forward,
-  minLength,
-  nonEmpty,
-  number,
-  object,
-  pipe,
-  string,
-} from 'valibot';
-import Setting from './Setting';
+import { Setting } from './Setting';
 
 interface PasswordModalProps extends ModalProps {
   updatePassword: (password: string) => Promise<void>;
   passwordAuthenticated?: boolean;
+  userInputs?: string[];
 }
 
-const PasswordSchema = pipe(
-  object({
-    password: pipe(
-      string(),
-      nonEmpty('Password is required'),
-      minLength(8, 'Password must have at least 8 characters'),
-    ),
-    confirmPassword: pipe(string(), nonEmpty('Password confirmation is required')),
-    passwordStrength: number(),
-  }),
-  forward(
-    check(
-      ({ password, confirmPassword }) => password === confirmPassword,
-      'Passwords do not match',
-    ),
-    ['confirmPassword'],
-  ),
-  forward(
-    check(({ passwordStrength }) => passwordStrength >= 2, 'Password is too weak'),
-    ['password'],
-  ),
-);
-type PasswordInput = InferInput<typeof PasswordSchema>;
-
-function PasswordModal({ updatePassword, passwordAuthenticated, ...props }: PasswordModalProps) {
-  const { currentUser } = useAuth();
+function PasswordModal({
+  updatePassword,
+  passwordAuthenticated,
+  userInputs,
+  ...props
+}: PasswordModalProps) {
   const {
     formState: { errors },
     handleSubmit,
     register,
     setValue,
     watch,
-  } = useForm<PasswordInput>({
+  } = useForm<PasswordAuthInput>({
     defaultValues: { password: '', confirmPassword: '' },
-    resolver: valibotResolver(PasswordSchema),
+    resolver: passwordAuthResolver,
   });
-  const [reauthModalOpened, reauthModalHandler] = useDisclosure(false);
   const [visiblePassword, setVisiblePassword] = useState(false);
   const password = watch('password');
-  const [userInputs, setUserInputs] = useState(['', '']);
   const deferredPassword = useDeferredValue(password);
   const [isLoading, setIsLoading] = useState(false);
   const handleResult = useCallback(
@@ -77,23 +47,16 @@ function PasswordModal({ updatePassword, passwordAuthenticated, ...props }: Pass
     [setValue],
   );
 
-  const handlePassword = async (password: string) => {
+  const onSubmit: SubmitHandler<PasswordAuthInput> = async ({ password }) => {
+    setIsLoading(true);
     try {
-      setIsLoading(true);
       await updatePassword(password);
     } catch (e) {
-      const error = e as FirebaseError;
-      if (error.code === 'auth/requires-recent-login') reauthModalHandler.open();
-      else toast.error(`Something went wrong! ${error.message}`);
+      toast.error(`Failed to set password! ${(e as Error).message}`);
     } finally {
       setIsLoading(false);
     }
   };
-  const onSubmit: SubmitHandler<PasswordInput> = async ({ password }) => handlePassword(password);
-
-  useEffect(() => {
-    setUserInputs([currentUser?.displayName ?? '', currentUser?.email ?? '']);
-  }, [currentUser?.displayName, currentUser?.email]);
 
   return (
     <>
@@ -130,36 +93,35 @@ function PasswordModal({ updatePassword, passwordAuthenticated, ...props }: Pass
           </form>
         </div>
       </Modal>
-      <ReauthenticationModal
-        opened={reauthModalOpened}
-        onClose={reauthModalHandler.close}
-        onReauthenticate={() => handlePassword(password)}
-      />
     </>
   );
 }
 
-export default function PasswordAuthentication() {
-  const { currentUser } = useAuth();
+export function PasswordAuthentication() {
+  const { data: user, error, refetch } = useQuery(getAuthUser(supabase));
   const [passwordModalOpened, passwordModalHandler] = useDisclosure(false);
-  const [passwordAuthenticated, setPasswordAuthenticated] = useState(false);
-
+  const passwordAuthenticated = !!user?.user_metadata.password_authenticated;
+  const userInputs = useMemo(
+    () => [user?.user_metadata?.name ?? '', user?.user_metadata?.email ?? ''],
+    [user],
+  );
   const updatePassword = async (password: string) => {
-    const { auth, updatePassword: _updatePassword } = await getFirebaseAuth();
-    if (!auth.currentUser) return;
-    await _updatePassword(auth.currentUser, password);
+    const { error } = await supabase.auth.updateUser({
+      password,
+      // biome-ignore lint/style/useNamingConvention: metadata is not camelCase
+      data: { password_authenticated: true },
+    });
+    if (error) throw error;
+    await refetch();
     toast.success(
       `Your password has been successfully ${passwordAuthenticated ? 'changed' : 'added'}.`,
     );
-    setPasswordAuthenticated(true);
     passwordModalHandler.close();
   };
 
   useEffect(() => {
-    setPasswordAuthenticated(
-      !!currentUser?.providerData.some(({ providerId }) => providerId === 'password'),
-    );
-  }, [currentUser?.providerData]);
+    if (error) toast.error(`Failed to get user metadata! ${error.message}`);
+  }, [error]);
 
   return (
     <>
@@ -181,6 +143,7 @@ export default function PasswordAuthentication() {
         onClose={passwordModalHandler.close}
         updatePassword={updatePassword}
         passwordAuthenticated={passwordAuthenticated}
+        userInputs={userInputs}
       />
     </>
   );

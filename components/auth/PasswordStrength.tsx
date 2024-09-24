@@ -1,6 +1,7 @@
 'use client';
 
-import { Text, Tooltip } from '@/components/core';
+import { Text } from '@/components/core/Text';
+import { Tooltip } from '@/components/core/Tooltip';
 import type { ZxcvbnResult } from '@zxcvbn-ts/core';
 import { memo, useEffect, useState } from 'react';
 import { RiQuestionLine } from 'react-icons/ri';
@@ -16,7 +17,7 @@ export interface PasswordStrengthProps {
 const STRENGTH = ['Weak', 'Average', 'Good', 'Strong'];
 const PAGE_RELATED_WORDS = ['ape', 'apetype'];
 
-function PasswordStrength({
+export const PasswordStrength = memo(function PasswordStrength({
   minPasswordLength = 8,
   onResult,
   password = '',
@@ -95,6 +96,4 @@ function PasswordStrength({
       </div>
     </div>
   );
-}
-
-export default memo(PasswordStrength);
+});

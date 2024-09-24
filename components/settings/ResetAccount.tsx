@@ -1,43 +1,42 @@
 'use client';
 
-import { ReauthenticationModal } from '@/components/auth';
-import { Button, Group, Modal, Text } from '@/components/core';
+import { Button } from '@/components/core/Button';
+import { Group } from '@/components/core/Group';
+import { Modal } from '@/components/core/Modal';
+import { Text } from '@/components/core/Text';
 import { useUser } from '@/context/userContext';
-import { getFirebaseAuth, getFirebaseFirestore } from '@/utils/firebase';
-import { defaultUserDetails } from '@/utils/user';
+import supabase from '@/utils/supabase/browser';
 import { useDisclosure } from '@mantine/hooks';
-import type { FirebaseError } from 'firebase/app';
+import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { toast } from 'react-hot-toast';
-import Setting from './Setting';
+import { Setting } from './Setting';
 
-export default function ResetAccount() {
-  const { updateUser, deleteCachedUserData } = useUser();
+export function ResetAccount() {
+  const queryClient = useQueryClient();
+  const { user } = useUser();
   const [confirmationModalOpened, confirmationModalHandler] = useDisclosure(false);
-  const [reauthModalOpened, reauthModalHandler] = useDisclosure(false);
   const [isLoading, setIsLoading] = useState(false);
 
   const resetAccount = async () => {
-    const [{ auth }, { deleteCollection, deleteField }] = await Promise.all([
-      getFirebaseAuth(),
-      getFirebaseFirestore(),
-    ]);
-    if (!auth.currentUser) return;
+    if (!user) return;
+    setIsLoading(true);
     try {
-      setIsLoading(true);
       await Promise.all([
-        updateUser({
-          personalBests: deleteField(),
-          typingStats: defaultUserDetails.typingStats,
-        }),
-        deleteCollection(`users/${auth.currentUser.uid}/tests`, 300),
-        deleteCachedUserData('tests'),
+        supabase.from('user_stats').delete().eq('userId', user.id).throwOnError(),
+        supabase.from('personal_bests').delete().eq('userId', user.id).throwOnError(),
+        supabase.from('tests').delete().eq('userId', user.id).throwOnError(),
       ]);
+      queryClient.removeQueries({
+        predicate: ({ queryKey }) =>
+          queryKey.includes('user_stats') ||
+          queryKey.includes('personal_bests') ||
+          queryKey.includes('tests'),
+      });
       toast.success('Your account has been successfully reset.');
       confirmationModalHandler.close();
     } catch (e) {
-      const error = e as FirebaseError;
-      toast.error(`Something went wrong! ${error.message}`);
+      toast.error(`Failed to sign out! ${(e as Error).message}`);
     } finally {
       setIsLoading(false);
     }
@@ -66,17 +65,12 @@ export default function ResetAccount() {
           </Text>
           <Group>
             <Button onClick={confirmationModalHandler.close}>cancel</Button>
-            <Button loading={isLoading} onClick={reauthModalHandler.open} variant='danger'>
+            <Button loading={isLoading} onClick={resetAccount} variant='danger'>
               reset
             </Button>
           </Group>
         </div>
       </Modal>
-      <ReauthenticationModal
-        opened={reauthModalOpened}
-        onClose={reauthModalHandler.close}
-        onReauthenticate={resetAccount}
-      />
     </>
   );
 }

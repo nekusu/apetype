@@ -1,52 +1,33 @@
 'use client';
 
-import { Button, Modal, Tooltip } from '@/components/core';
-import { Chart } from '@/components/typing-test';
+import { Button } from '@/components/core/Button';
+import { DataTable } from '@/components/core/DataTable';
+import { Modal } from '@/components/core/Modal';
+import { Tooltip } from '@/components/core/Tooltip';
+import { Chart } from '@/components/typing-test/Chart';
 import type { ChartProps } from '@/components/typing-test/Chart';
-import { useUser } from '@/context/userContext';
-import type { TypingTest } from '@/utils/user';
-import { useDisclosure, useIntersection, useIsomorphicEffect } from '@mantine/hooks';
-import { useGetDocs } from '@tatsuokaniwa/swr-firestore';
+import { testsByUserIdOptions } from '@/queries/get-tests-by-user-id';
+import { getUserStatsById } from '@/queries/get-user-stats-by-id';
+import supabase from '@/utils/supabase/browser';
+import { useDisclosure } from '@mantine/hooks';
+import { useQuery } from '@supabase-cache-helpers/postgrest-react-query';
+import { useInfiniteQuery } from '@tanstack/react-query';
+import type { SortingState } from '@tanstack/react-table';
 import dayjs from 'dayjs';
-import type { OrderByDirection, Timestamp } from 'firebase/firestore';
-import { m } from 'framer-motion';
+import { capitalize } from 'radashi';
+import { type ComponentPropsWithoutRef, type ReactNode, useState } from 'react';
 import {
-  type ComponentPropsWithoutRef,
-  type Dispatch,
-  type ElementRef,
-  type ReactNode,
-  type SetStateAction,
-  createContext,
-  forwardRef,
-  useContext,
-  useRef,
-  useState,
-} from 'react';
-import {
-  RiArrowUpSFill,
-  RiEarthFill,
   RiEyeOffFill,
   RiLineChartFill,
-  RiLoaderLine,
-  RiVipCrown2Fill,
+  RiTranslate2,
+  RiVipCrownFill,
   RiZzzFill,
 } from 'react-icons/ri';
-import { twJoin, twMerge } from 'tailwind-merge';
 
 interface InfoIconProps extends ComponentPropsWithoutRef<'div'> {
   label: string;
   icon: ReactNode;
 }
-
-interface TableHeaderContext {
-  orderBy: OrderByProperty;
-  direction: OrderByDirection;
-  setOrderBy: Dispatch<SetStateAction<OrderByProperty>>;
-  setDirection: Dispatch<SetStateAction<OrderByDirection>>;
-  setLimit: Dispatch<SetStateAction<number>>;
-}
-
-type OrderByProperty = 'wpm' | 'raw' | 'accuracy' | 'consistency' | 'date';
 
 function InfoIcon({ label, icon, ...props }: InfoIconProps) {
   return (
@@ -56,186 +37,105 @@ function InfoIcon({ label, icon, ...props }: InfoIconProps) {
   );
 }
 
-type HeaderCellProps = (
-  | { property?: string; sortable?: false }
-  | { property: OrderByProperty; sortable: true }
-) &
-  ComponentPropsWithoutRef<'th'>;
-
-const HeaderCell = forwardRef<ElementRef<'th'>, HeaderCellProps>(function HeaderCell(
-  { children, className, property, sortable, ...props },
-  ref,
-) {
-  const context = useContext(TableHeaderContext);
-  if (!context) return null;
-  const { orderBy, direction, setOrderBy, setDirection, setLimit } = context;
-
-  return (
-    <th
-      ref={ref}
-      className={twMerge(
-        'group rounded-t-lg px-3 py-2 font-normal transition-colors',
-        sortable && 'cursor-pointer hover:bg-sub-alt hover:text-text',
-        className,
-      )}
-      scope='col'
-      onClick={() => {
-        if (!sortable) return;
-        if (orderBy === property) setDirection(direction === 'asc' ? 'desc' : 'asc');
-        else setDirection('desc');
-        setOrderBy(property);
-        setLimit(10);
-      }}
-      {...props}
-    >
-      {sortable ? (
-        <div className='flex items-center gap-1.5 transition-transform group-active:translate-y-0.5'>
-          {property ?? children}
-          <RiArrowUpSFill
-            className={twJoin(
-              'transition-[transform,opacity]',
-              orderBy !== property && 'opacity-0',
-              direction === 'desc' && 'rotate-180',
-            )}
-          />
-        </div>
-      ) : (
-        property ?? children
-      )}
-    </th>
+export function TestHistory({ userId }: { userId: string }) {
+  const [sorting, setSorting] = useState<SortingState>([{ id: 'createdAt', desc: true }]);
+  const { id: orderBy, desc } = sorting[0];
+  const { data: userStats } = useQuery(getUserStatsById(supabase, userId));
+  const { completedTests = 0 } = userStats ?? {};
+  const { data, fetchNextPage, isFetchingNextPage, isFetching } = useInfiniteQuery(
+    testsByUserIdOptions(supabase, userId, { orderBy, desc }),
   );
-});
-
-const TableHeaderContext = createContext<TableHeaderContext | null>(null);
-
-export default function TestHistory() {
-  const { user } = useUser();
-  const tableRef = useRef<HTMLTableElement>(null);
-  const { ref, entry } = useIntersection({ root: tableRef.current, threshold: 0.1 });
-  const [onScreen, setOnScreen] = useState(false);
-  const [orderBy, setOrderBy] = useState<OrderByProperty>('date');
-  const [direction, setDirection] = useState<OrderByDirection>('desc');
-  const [limit, setLimit] = useState(10);
-  const { data: tests, isLoading } = useGetDocs<TypingTest>(
-    user && onScreen
-      ? {
-          path: `users/${user.id}/tests`,
-          orderBy: [[orderBy === 'date' ? 'date' : `result.${orderBy}`, direction]],
-          limit,
-        }
-      : null,
-    { revalidateIfStale: false },
-  );
-  const [chartTest, setChartTest] = useState<ChartProps>();
+  const tests = data?.pages.flatMap((page) => page.data as NonNullable<typeof page.data>);
+  const [chartData, setChartData] = useState<ChartProps>();
   const [chartModalOpened, chartModalHandler] = useDisclosure(false);
 
-  useIsomorphicEffect(() => {
-    if (entry?.isIntersecting) setOnScreen(true);
-  }, [entry?.isIntersecting]);
+  if (!tests) return null;
 
   return (
-    <div className='flex flex-col items-center gap-4'>
-      <table ref={ref} className='w-full border-spacing-none cursor-default'>
-        <thead className='sticky top-0'>
-          <tr className='-top-[px -z-1 absolute inset-0 rounded-b-lg bg-bg transition-colors' />
-          <TableHeaderContext.Provider
-            value={{ orderBy, direction, setOrderBy, setDirection, setLimit }}
-          >
-            <tr className='text-left text-sm text-sub'>
-              <HeaderCell className='pr-0 pl-4'>
-                <RiLoaderLine
-                  className={twJoin(
-                    'text-main transition',
-                    isLoading ? 'animate-spin opacity-100' : 'opacity-0',
-                  )}
-                />
-              </HeaderCell>
-              <HeaderCell property='wpm' sortable />
-              <HeaderCell property='raw' sortable />
-              <HeaderCell property='accuracy' sortable />
-              <HeaderCell property='consistency' sortable />
+    <>
+      <DataTable
+        columns={[
+          {
+            id: 'pb',
+            header: '',
+            cell: ({
+              row: {
+                original: { isPb },
+              },
+            }) =>
+              isPb && (
+                <div className='flex justify-center text-main transition-colors'>
+                  <RiVipCrownFill />
+                </div>
+              ),
+          },
+          { accessorKey: 'wpm', enableSorting: true },
+          { accessorKey: 'raw', enableSorting: true },
+          {
+            id: 'accuracy',
+            accessorFn: ({ accuracy }) => `${accuracy}%`,
+            enableSorting: true,
+          },
+          {
+            id: 'consistency',
+            accessorFn: ({ consistency }) => `${consistency}%`,
+            enableSorting: true,
+          },
+          {
+            id: 'charStats',
+            header: () => (
               <Tooltip label='correct/incorrect/extra/missed' placement='top'>
-                <HeaderCell property='characters' />
+                <div className='-mx-3 -my-2 cursor-pointer p-[inherit]'>chars</div>
               </Tooltip>
-              <HeaderCell property='mode' />
-              <HeaderCell property='info' />
-              <HeaderCell className='rounded-r-lg' property='date' sortable />
-            </tr>
-          </TableHeaderContext.Provider>
-        </thead>
-        <tbody>
-          {tests?.map(
-            ({
-              id,
-              language,
-              date,
-              mode,
-              mode2,
-              result,
-              blindMode,
-              lazyMode,
-              isPb,
-              stats,
-              duration,
-            }) => {
-              const { wpm, raw, accuracy, consistency, characterStats } = result;
-              const { correct, incorrect, extra, missed } = characterStats;
-              return (
-                <m.tr
-                  key={id}
-                  className='align-middle text-text transition-colors odd:bg-sub-alt'
-                  layout
-                  layoutScroll
-                  initial={{ opacity: 0, y: 30 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.4, type: 'spring' }}
-                >
-                  <td className='rounded-l-xl py-3 pl-4 text-main transition-colors'>
-                    {isPb && <RiVipCrown2Fill />}
-                  </td>
-                  <td className='p-3'>{wpm.toFixed(2)}</td>
-                  <td className='p-3'>{raw.toFixed(2)}</td>
-                  <td className='p-3'>{accuracy.toFixed(2)}%</td>
-                  <td className='p-3'>{consistency.toFixed(2)}%</td>
-                  <td className='p-3'>
-                    {correct}/{incorrect}/{extra}/{missed}
-                  </td>
-                  <td className='p-3'>
-                    {mode} {mode2}
-                  </td>
-                  <td className='p-3'>
-                    <div className='flex gap-1.5'>
-                      <InfoIcon label={language} icon={<RiEarthFill />} />
-                      {blindMode && <InfoIcon label='blind mode' icon={<RiEyeOffFill />} />}
-                      {lazyMode && <InfoIcon label='lazy mode' icon={<RiZzzFill />} />}
-                      <Tooltip label='view chart'>
-                        <Button
-                          className='p-0 text-text'
-                          onClick={() => {
-                            setChartTest({ stats, elapsedTime: duration });
-                            chartModalHandler.open();
-                          }}
-                          variant='text'
-                        >
-                          <RiLineChartFill />
-                        </Button>
-                      </Tooltip>
-                    </div>
-                  </td>
-                  <td className='rounded-r-xl p-3'>
-                    {dayjs.unix((date as unknown as Timestamp).seconds).format('DD MMM YYYY HH:mm')}
-                  </td>
-                </m.tr>
-              );
-            },
-          )}
-        </tbody>
-      </table>
-      {user && tests && tests.length < user.typingStats.completedTests && (
+            ),
+            accessorFn: ({ charStats }) => charStats.join('/'),
+          },
+          { id: 'mode', accessorFn: ({ mode, mode2 }) => `${mode} ${mode2}` },
+          {
+            id: 'info',
+            header: 'info',
+            cell: ({
+              row: {
+                original: { language, blindMode, lazyMode, chartData, duration },
+              },
+            }) => (
+              <div className='flex gap-2'>
+                <InfoIcon label={capitalize(language)} icon={<RiTranslate2 />} />
+                {blindMode && <InfoIcon label='Blind mode' icon={<RiEyeOffFill />} />}
+                {lazyMode && <InfoIcon label='Lazy mode' icon={<RiZzzFill />} />}
+                <Tooltip label='View chart'>
+                  <Button
+                    className='p-0 text-text hover:text-main focus-visible:text-main'
+                    onClick={() => {
+                      setChartData({ chartData, elapsedTime: duration });
+                      chartModalHandler.open();
+                    }}
+                    variant='text'
+                  >
+                    <RiLineChartFill />
+                  </Button>
+                </Tooltip>
+              </div>
+            ),
+          },
+          {
+            id: 'createdAt',
+            header: 'date',
+            accessorFn: ({ createdAt }) => dayjs(createdAt).format('DD MMM YYYY HH:mm'),
+            enableSorting: true,
+          },
+        ]}
+        data={tests}
+        state={{ sorting }}
+        onSortingChange={setSorting}
+        loading={isFetching && !isFetchingNextPage}
+        stickyHeader
+      />
+      {tests.length < completedTests && (
         <Button
-          className='min-w-[25%]'
-          loading={isLoading}
-          onClick={() => setLimit((value) => value + 10)}
+          className='-mt-4 mx-auto min-w-[25%]'
+          loading={isFetchingNextPage}
+          onClick={() => fetchNextPage()}
         >
           load more
         </Button>
@@ -248,8 +148,8 @@ export default function TestHistory() {
         overflow='outside'
         trapFocus={false}
       >
-        {chartTest && <Chart {...chartTest} />}
+        {chartData && <Chart {...chartData} />}
       </Modal>
-    </div>
+    </>
   );
 }

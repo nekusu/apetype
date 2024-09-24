@@ -1,12 +1,15 @@
 'use client';
 
-import { Button, Group, Modal, Text } from '@/components/core';
+import { Button } from '@/components/core/Button';
+import { Group } from '@/components/core/Group';
+import { Modal } from '@/components/core/Modal';
+import { Text } from '@/components/core/Text';
 import { useSettings } from '@/context/settingsContext';
 import { defaultSettings } from '@/utils/settings';
 import { useDisclosure } from '@mantine/hooks';
-import Setting from './Setting';
+import { Setting } from './Setting';
 
-export default function ResetSettings() {
+export function ResetSettings() {
   const { setSettings } = useSettings();
   const [modalOpened, modalHandler] = useDisclosure(false);
 

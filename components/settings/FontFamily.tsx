@@ -1,17 +1,18 @@
 'use client';
 
-import { Button, Input, Modal, Text } from '@/components/core';
-import { useGlobal } from '@/context/globalContext';
+import { Button } from '@/components/core/Button';
+import { Input } from '@/components/core/Input';
+import { Modal } from '@/components/core/Modal';
+import { Text } from '@/components/core/Text';
 import { useSettings } from '@/context/settingsContext';
 import fonts from '@/utils/fonts';
 import { useDisclosure, useInputState } from '@mantine/hooks';
 import { RiFontSize } from 'react-icons/ri';
-import Setting from './Setting';
+import { Setting } from './Setting';
 
-export default function FontFamily() {
-  const { settingsList } = useGlobal();
-  const { options } = settingsList.fontFamily;
-  const { fontFamily, setSettings } = useSettings();
+export function FontFamily() {
+  const { settingsReference, fontFamily, setSettings } = useSettings();
+  const { options } = settingsReference.fontFamily;
   const [modalOpened, modalHandler] = useDisclosure(false);
   const [customFont, setCustomFont] = useInputState('');
   const isCustomFont = !options.map(({ value }) => value).includes(fontFamily);
@@ -32,9 +33,7 @@ export default function FontFamily() {
           className='flex flex-col gap-3.5'
           onSubmit={(event) => {
             event.preventDefault();
-            setSettings((draft) => {
-              draft.fontFamily = customFont;
-            });
+            setSettings({ fontFamily: customFont });
             modalHandler.close();
           }}
         >

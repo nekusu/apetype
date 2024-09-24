@@ -70,3 +70,16 @@ export function consistency(numbers: number[]) {
   const cov = coefficientOfVariation(numbers);
   return 100 * (1 - Math.tanh(cov + cov ** 3 / 3 + cov ** 5 / 5));
 }
+
+export function calculateCharStats(words: Word[]) {
+  return words.reduce(
+    (characters, { isCorrect, letters }) => {
+      for (const { status } of letters)
+        if (status === 'correct') {
+          if (isCorrect) characters.correct++;
+        } else if (status) characters[status]++;
+      return characters;
+    },
+    { correct: 0, incorrect: 0, extra: 0, missed: 0 },
+  );
+}

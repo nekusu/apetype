@@ -4,7 +4,7 @@ import { useId, useUncontrolled } from '@mantine/hooks';
 import { type ComponentPropsWithoutRef, type ElementRef, type ReactNode, forwardRef } from 'react';
 import { RiCheckLine } from 'react-icons/ri';
 import { twJoin, twMerge } from 'tailwind-merge';
-import Button, { type ButtonProps } from './Button';
+import { Button, type ButtonProps } from './Button';
 
 export interface CheckboxProps extends ComponentPropsWithoutRef<'input'> {
   label?: ReactNode;
@@ -15,7 +15,7 @@ export interface CheckboxProps extends ComponentPropsWithoutRef<'input'> {
   wrapperClassName?: string;
 }
 
-const Checkbox = forwardRef<ElementRef<'input'>, CheckboxProps>(function Checkbox(
+export const Checkbox = forwardRef<ElementRef<'input'>, CheckboxProps>(function Checkbox(
   {
     checked,
     className,
@@ -85,5 +85,3 @@ const Checkbox = forwardRef<ElementRef<'input'>, CheckboxProps>(function Checkbo
     </div>
   );
 });
-
-export default Checkbox;

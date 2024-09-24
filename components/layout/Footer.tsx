@@ -1,14 +1,17 @@
 'use client';
 
-import { Button, Key, Tooltip, Transition } from '@/components/core';
+import { Button } from '@/components/core/Button';
+import { Key } from '@/components/core/Key';
+import { Tooltip } from '@/components/core/Tooltip';
+import { Transition } from '@/components/core/Transition';
 import { useGlobal } from '@/context/globalContext';
 import { useSettings } from '@/context/settingsContext';
 import { useTheme } from '@/context/themeContext';
 import { useMemo } from 'react';
 import { RiGithubFill, RiLoaderLine, RiPaletteFill } from 'react-icons/ri';
-import Version from './Version';
+import { Version } from './Version';
 
-export default function Footer() {
+export function Footer() {
   const { commandLine } = useGlobal();
   const {
     themeType,
@@ -18,7 +21,7 @@ export default function Footer() {
     keyTips,
     setSettings,
   } = useSettings();
-  const { isLoading } = useTheme();
+  const { isFetching } = useTheme();
   const customTheme = useMemo(
     () => customThemes.find(({ id }) => id === customThemeId),
     [customThemeId, customThemes],
@@ -50,14 +53,14 @@ export default function Footer() {
               className='p-0 text-sm'
               onClick={(e) => {
                 if (e.shiftKey)
-                  setSettings((draft) => {
-                    draft.themeType = themeType === 'preset' ? 'custom' : 'preset';
-                  });
+                  setSettings(({ themeType }) => ({
+                    themeType: themeType === 'preset' ? 'custom' : 'preset',
+                  }));
                 else commandLine.handler.open(themeType === 'preset' ? 'theme' : 'customTheme');
               }}
               variant='text'
             >
-              {isLoading ? <RiLoaderLine className='animate-spin' /> : <RiPaletteFill />}
+              {isFetching ? <RiLoaderLine className='animate-spin' /> : <RiPaletteFill />}
               {themeType === 'custom' && customTheme ? `custom (${customTheme.name})` : theme}
             </Button>
           </Tooltip>

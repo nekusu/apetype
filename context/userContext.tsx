@@ -1,168 +1,111 @@
 'use client';
 
-import { getFirebaseAuth, getFirebaseFirestore } from '@/utils/firebase';
-import { type TypingTest, type User, isPersonalBest, parseDates } from '@/utils/user';
-import { flatto } from '@alizeait/flatto';
-import { useLocalStorage } from '@mantine/hooks';
-import { type KeyParams, useDoc } from '@tatsuokaniwa/swr-firestore';
-import dayjs from 'dayjs';
-import type { UpdateData } from 'firebase/firestore';
-import { produce } from 'immer';
-import { type ReactNode, createContext, useCallback, useContext, useEffect } from 'react';
-import SuperJSON from 'superjson';
-import { useSWRConfig } from 'swr';
-import type { Updater } from 'use-immer';
-import { useAuth } from './authContext';
-
-interface PendingData {
-  tests: Omit<TypingTest, 'id'>[];
-  typingStats: Omit<User['typingStats'], 'average'> & {
-    accumulated: {
-      wpm: number;
-      raw: number;
-      accuracy: number;
-      consistency: number;
-    };
-  };
-}
+import { getUserById } from '@/queries/get-user-by-id';
+import { userStatsByIdQueryKey } from '@/queries/get-user-stats-by-id';
+import supabase from '@/utils/supabase/browser';
+import type {
+  Database,
+  TableInsert,
+  TableRow,
+  TableUpdate,
+} from '@/utils/supabase/database-extended';
+import {
+  useQuery,
+  useUpdateMutation,
+  useUpsertItem,
+} from '@supabase-cache-helpers/postgrest-react-query';
+import { useQueryClient } from '@tanstack/react-query';
+import { mapValues } from 'radashi';
+import { type ReactNode, createContext, useContext } from 'react';
+import { toast } from 'react-hot-toast';
 
 export interface UserContext {
-  user?: User;
-  updateUser: (data: UpdateData<Omit<User, 'id' | 'joinedAt'>>) => Promise<void>;
-  pendingData: PendingData;
-  setPendingData: Updater<PendingData>;
-  removePendingData: () => void;
-  savePendingData: () => Promise<void>;
-  deleteCachedUserData: (path?: string) => Promise<void>;
+  user?: TableRow<'users'> | null;
+  updateUser: (data: Omit<TableUpdate<'users'>, 'id'>) => Promise<void>;
+  incrementStats: (
+    data: Omit<Database['public']['Functions']['increment_stats']['Args'], 'id'>,
+  ) => Promise<void>;
+  insertTest: (data: Omit<TableInsert<'tests'>, 'userId'>) => Promise<boolean | undefined>;
+}
+
+export interface UserProviderProps {
+  id?: string;
+  children: ReactNode;
 }
 
 export const UserContext = createContext<UserContext | null>(null);
 
-const defaultPendingData: PendingData = {
-  tests: [],
-  typingStats: {
-    startedTests: 0,
-    completedTests: 0,
-    timeTyping: 0,
-    highest: { wpm: 0, raw: 0, accuracy: 0, consistency: 0 },
-    accumulated: { wpm: 0, raw: 0, accuracy: 0, consistency: 0 },
-  },
-};
-
-export function UserProvider({ children }: { children: ReactNode }) {
-  const { mutate } = useSWRConfig();
-  const { currentUser } = useAuth();
-  const { data: user } = useDoc<User>(
-    currentUser ? { path: `users/${currentUser.uid}`, parseDates } : null,
-    { keepPreviousData: false },
-  );
-  const [pendingData, _setPendingData, removePendingData] = useLocalStorage<PendingData>({
-    key: 'pendingData',
-    defaultValue: defaultPendingData,
-    serialize: SuperJSON.stringify,
-    deserialize: (str) => (str === undefined ? defaultPendingData : SuperJSON.parse(str)),
-  });
-  const [testsLastUpdatedAt, setTestsLastUpdatedAt] = useLocalStorage<Date | undefined>({
-    key: 'testsLastUpdatedAt',
+export function UserProvider({ children, id }: UserProviderProps) {
+  const queryClient = useQueryClient();
+  const { data: user } = useQuery(getUserById(supabase, id), { enabled: !!id });
+  const { mutateAsync: _updateUser } = useUpdateMutation(supabase.from('users'), ['id']);
+  const upsertStats = useUpsertItem<TableUpdate<'user_stats'>>({
+    primaryKeys: ['userId'],
+    table: 'user_stats',
+    schema: 'public',
   });
 
-  const updateUser: UserContext['updateUser'] = useCallback(
-    async (data) => {
-      const [{ updateProfile }, { updateDocument }] = await Promise.all([
-        getFirebaseAuth(),
-        getFirebaseFirestore(),
-      ]);
-      if (!(currentUser && user)) return;
-      if (data.name !== user.name)
-        await updateProfile(currentUser, { displayName: data.name as string });
-      return await updateDocument<User>('users', currentUser.uid, data);
-    },
-    [currentUser, user],
-  );
-  const setPendingData: UserContext['setPendingData'] = useCallback(
-    (draft) =>
-      _setPendingData((prevState) =>
-        typeof draft === 'function' ? produce(prevState, draft) : prevState,
-      ),
-    [_setPendingData],
-  );
-  const savePendingData = useCallback(async () => {
-    if (!(currentUser && localStorage.getItem('pendingData'))) return;
-    const { collection, db, doc, increment, runTransaction } = await getFirebaseFirestore();
-    const incrementalKeys = ['startedTests', 'completedTests', 'timeTyping'];
-    const { tests, ...data } = pendingData;
-    const userRef = doc(db, 'users', currentUser.uid);
-    // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: todo
-    await runTransaction(db, async (transaction) => {
-      const userDoc = await transaction.get(userRef);
-      if (!userDoc.exists()) throw 'User not found';
-      const user = userDoc.data() as User;
-      const newData: UpdateData<User> = {};
-      const flattenedData: Record<string, number> = flatto(data);
-      for (const [_key, value] of Object.entries(flattenedData)) {
-        const key = _key as keyof UpdateData<Pick<User, 'typingStats'>>;
-        if (incrementalKeys.some((k) => key.includes(k))) newData[key] = increment(value);
-        else if (key.includes('highest')) {
-          const lastKey = key.split('.').at(-1) as keyof User['typingStats']['highest'];
-          if (user.typingStats.highest[lastKey] < value) newData[key] = value;
-        } else if (key.includes('accumulated')) {
-          const lastKey = key.split('.').at(-1) as keyof User['typingStats']['average'];
-          const { completedTests } = user.typingStats;
-          const oldAverage = user.typingStats.average[lastKey] * completedTests;
-          newData[`typingStats.average.${lastKey}`] =
-            (oldAverage + value) / (completedTests + data.typingStats.completedTests);
-        } else newData[key] = value;
-      }
-      if (tests.length > 0)
-        for (const test of tests) {
-          const isPb = test.isPb || isPersonalBest(user, test, tests);
-          if (isPb) {
-            const { characterStats, ...stats } = test.result;
-            newData[`personalBests.${test.mode}`] = {
-              ...user.personalBests?.[test.mode],
-              [test.mode2]: { ...stats, date: new Date() },
-            };
-          }
-          transaction.set(doc(collection(userRef, 'tests')), { ...test, isPb });
-        }
-      newData.testsLastUpdatedAt = new Date();
-      transaction.update(userRef, newData);
-    });
-    removePendingData();
-  }, [currentUser, pendingData, removePendingData]);
-  const deleteCachedUserData = useCallback(
-    async (path?: string) => {
-      if (!currentUser) return;
-      await mutate((key?: string | KeyParams<unknown>) => {
-        if (!key) return;
-        const item = typeof key === 'string' ? key : key.path;
-        return item.includes(`users/${currentUser.uid}`) && (path ? item.includes(path) : true);
-      }, undefined);
-    },
-    [currentUser, mutate],
-  );
-
-  useEffect(() => {
-    if (
-      user &&
-      (!testsLastUpdatedAt || dayjs(user.testsLastUpdatedAt).isAfter(testsLastUpdatedAt))
-    ) {
-      deleteCachedUserData('tests');
-      if (user.testsLastUpdatedAt) setTestsLastUpdatedAt(user.testsLastUpdatedAt);
+  const updateUser: UserContext['updateUser'] = async (data) => {
+    if (!id) return;
+    try {
+      await _updateUser({ id, ...data });
+    } catch (e) {
+      toast.error(`Failed to update user data! ${(e as Error).message}`);
     }
-  }, [deleteCachedUserData, setTestsLastUpdatedAt, testsLastUpdatedAt, user]);
+  };
+  const incrementCacheStats: UserContext['incrementStats'] = async (data) => {
+    if (!id) return;
+    const { data: userStats } = queryClient.getQueryData(userStatsByIdQueryKey(supabase, id)) as {
+      data: TableRow<'user_stats'> | null;
+    };
+    if (userStats)
+      await upsertStats({ userId: id, ...mapValues(data, (value, key) => userStats[key] + value) });
+    else
+      await queryClient.invalidateQueries({
+        predicate: ({ queryKey }) => queryKey.includes('user_stats'),
+      });
+  };
+  const incrementStats: UserContext['incrementStats'] = async (data) => {
+    if (!id) return;
+    try {
+      await supabase.rpc('increment_stats', { id, ...data }).throwOnError();
+      await incrementCacheStats(data);
+    } catch (e) {
+      toast.error(`Failed to update user stats! ${(e as Error).message}`);
+    }
+  };
+  const insertTest: UserContext['insertTest'] = async (data) => {
+    if (!id) return;
+    try {
+      const { data: test } = await supabase
+        .from('tests')
+        .insert({ userId: id, ...data })
+        .select('isPb')
+        .throwOnError()
+        .single();
+      const { isPb = false } = test ?? {};
+      queryClient.setQueriesData(
+        { predicate: ({ queryKey }) => queryKey.includes('tests') },
+        (data) => {
+          const { pages, pageParams } = data as { pages: unknown[]; pageParams: unknown[] };
+          return { pages: pages.slice(0, 1), pageParams: pageParams.slice(0, 1) };
+        },
+      );
+      await queryClient.invalidateQueries({
+        predicate: ({ queryKey }) =>
+          queryKey.includes('user_stats') ||
+          queryKey.includes('tests') ||
+          (isPb && queryKey.includes('personal_bests')),
+      });
+      return isPb;
+    } catch (e) {
+      toast.error(`Failed to upload test result! ${(e as Error).message}`);
+    }
+  };
 
   return (
     <UserContext.Provider
-      value={{
-        user,
-        updateUser,
-        pendingData,
-        setPendingData,
-        removePendingData,
-        savePendingData,
-        deleteCachedUserData,
-      }}
+      value={{ user: id ? user : null, updateUser, incrementStats, insertTest }}
     >
       {children}
     </UserContext.Provider>
