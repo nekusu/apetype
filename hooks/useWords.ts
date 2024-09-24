@@ -1,7 +1,7 @@
 import { useSettings } from '@/context/settingsContext';
 import { useTypingTest } from '@/context/typingTestContext';
 import { getRandomWords, parseWords } from '@/utils/typingTest';
-import { useCallback, useMemo } from 'react';
+import { useCallback } from 'react';
 
 export function useWords() {
   const { mode, freedomMode, strictSpace, stopOnError, quickEnd, lazyMode } = useSettings();
@@ -149,5 +149,5 @@ export function useWords() {
     [freedomMode, mode, quickEnd, setValues, strictSpace, stopOnError],
   );
 
-  return useMemo(() => ({ add, update }), [add, update]);
+  return { add, update };
 }
