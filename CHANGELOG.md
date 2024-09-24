@@ -1,5 +1,61 @@
 # Changelog
 
+## [0.8.0](https://github.com/nekusu/apetype/compare/v0.7.1...v0.8.0) (2024-09-24)
+
+
+### New Features
+
+* add account page ([#41](https://github.com/nekusu/apetype/issues/41)) ([7838673](https://github.com/nekusu/apetype/commit/7838673ace68e1b68abb83e8bb985a57e0540463))
+* add blur effect to user page background ([32fc5d1](https://github.com/nekusu/apetype/commit/32fc5d18308969f7be5412efdce544259ae7bc02))
+* add personal best tables ([a4a05cc](https://github.com/nekusu/apetype/commit/a4a05ccd5fd3c2affb6222ee5d186fb069ad9a7c))
+* add user page ([#42](https://github.com/nekusu/apetype/issues/42)) ([86e1a06](https://github.com/nekusu/apetype/commit/86e1a0601a568f5d672de9107bdd2a764bce7e15))
+* image compression ([cedf7cd](https://github.com/nekusu/apetype/commit/cedf7cd31a4a004b1377ca3a1ef634d01a625820))
+* save user data before logging out ([210e987](https://github.com/nekusu/apetype/commit/210e98782abaaee83f493ac02adc0ed54c6eb5a5))
+* use provider photo as profile picture when registering ([87aab70](https://github.com/nekusu/apetype/commit/87aab70fc6f8e1c0b804ecbdba9ef1203906d3d3))
+* **settings:** add reset account setting ([ac7e7c2](https://github.com/nekusu/apetype/commit/ac7e7c251a3dbfdef5f2b37831919f39a93d0af4))
+* **settings:** add reset personal bests setting ([0a7c678](https://github.com/nekusu/apetype/commit/0a7c67882cbedf939fbee258c889cdafceca6a04))
+* **test:** add sign in button in test result ([7e76d13](https://github.com/nekusu/apetype/commit/7e76d139f831e7e8b099987cf70c46066675103c))
+* **test:** add warning for RTL languages ([2289bb7](https://github.com/nekusu/apetype/commit/2289bb7a23eb25188e701b22cca2fafdfd22d9f4))
+* **test:** afk detection ([d18c7a6](https://github.com/nekusu/apetype/commit/d18c7a61adfae13e9fea002d5697e2788c18f485))
+
+
+### Bug Fixes
+
+* check for used names when changing username ([fe806cb](https://github.com/nekusu/apetype/commit/fe806cbe4cf2e0d0d0c4795bf5b6fd8aacfcf411))
+* crash when user finishes test ([7910fac](https://github.com/nekusu/apetype/commit/7910fac7c97643f5918dc9831c2160892c726dec))
+* error deleting cached data ([a253da8](https://github.com/nekusu/apetype/commit/a253da8321ec5281bd82fb71767b34a58310e546))
+* id generation not working in android browsers ([96b453c](https://github.com/nekusu/apetype/commit/96b453c06fb8a0a738b32e8cfd1129efd838f70d))
+* persistent cache not clearing when option was enabled ([3816ea2](https://github.com/nekusu/apetype/commit/3816ea2736a8de8d949630dcc1353a004b8790ef))
+* test history not deleted from the server when a user account is deleted ([5333b8b](https://github.com/nekusu/apetype/commit/5333b8bfefabbd70b8623e33b3db5ba79cc06b4d))
+* use a different name when registering with providers if the username is already in use ([3c119e6](https://github.com/nekusu/apetype/commit/3c119e69e4fde9ba278b7ea96a63687c9a4b5f77))
+* wrong personal bests and table order ([fef41c3](https://github.com/nekusu/apetype/commit/fef41c3a16bb9976a6d1a8e9494cb43be27347d5))
+
+
+### Internal Updates
+
+* create LICENSE ([eb89484](https://github.com/nekusu/apetype/commit/eb894840283a13f77659bdfafc6fb0c8f16a73e0))
+* replace pnpm with bun package manager ([3c2296d](https://github.com/nekusu/apetype/commit/3c2296d776b4aac3dc488cd57617b9ca9d25e39f))
+* update dependencies ([471107e](https://github.com/nekusu/apetype/commit/471107ef5517a45540d2bd9b8f81111bd811c49e))
+* **deps:** replace prettier with biome ([4da30d1](https://github.com/nekusu/apetype/commit/4da30d1257514ad8ee59c288082c4aba626a1951))
+* **deps:** update dependencies ([6cf2f5a](https://github.com/nekusu/apetype/commit/6cf2f5afd18674e03eeb610f2640557a9a61a5a7))
+* **deps:** update dependencies ([#43](https://github.com/nekusu/apetype/issues/43)) ([e03861d](https://github.com/nekusu/apetype/commit/e03861d7d64ff539932fb543d0a2a65ac45cb82a))
+* change SWR global config ([9164aa7](https://github.com/nekusu/apetype/commit/9164aa7bf5e9fe8476c84f25ea0ae80ef9071b2c))
+* clean code ([2e92320](https://github.com/nekusu/apetype/commit/2e92320f9cad88186d6111b03ab5127115f3b823))
+* fix and improve user data saving ([#44](https://github.com/nekusu/apetype/issues/44)) ([5f8b6be](https://github.com/nekusu/apetype/commit/5f8b6bef4a87abc8ac16ec903e530ce1f5b7e8da))
+* improve firebase utils ([be68df2](https://github.com/nekusu/apetype/commit/be68df2ecf6887fc04d13e9aa60b0bc50252b582))
+* improve removal of cached user data ([0a945ac](https://github.com/nekusu/apetype/commit/0a945ac0acac76412382dfdeb0a6ba4b08a879ea))
+* migrate from Firebase to Supabase ([#47](https://github.com/nekusu/apetype/issues/47)) ([b5fd725](https://github.com/nekusu/apetype/commit/b5fd725efddb8bcb2c4e6e5f6d3e0fd45d76c019))
+* minor refactoring ([fdbe9e6](https://github.com/nekusu/apetype/commit/fdbe9e6f65f6fc17fd6d3f4dbc6b650d99b9458f))
+* redirect to account route if user signs in ([a448d36](https://github.com/nekusu/apetype/commit/a448d36f9840677c09a92ef2e0f1856c91fd5cbe))
+* remove Group component from `core` and improve its structure ([eec74c5](https://github.com/nekusu/apetype/commit/eec74c5f111abfb877318818db76349caef416cc))
+* remove unnecessary useMemo in useWords ([5e571e3](https://github.com/nekusu/apetype/commit/5e571e3ced2c391c2b7f2964c3853bb0dc917bd3))
+* replace eslint with biome ([8cf3d20](https://github.com/nekusu/apetype/commit/8cf3d20662e6e677a0ed922cccaddbe46cae7615))
+* replace unocss with tailwindcss v4 ([527d30c](https://github.com/nekusu/apetype/commit/527d30c8f3b077b63e73b047be0fdad2f31793ab))
+* replace zod with valibot ([9380d09](https://github.com/nekusu/apetype/commit/9380d09993ca3aa6be88f80aee01b51b13bf2f68))
+* **core:** change modal border radius ([4a929e5](https://github.com/nekusu/apetype/commit/4a929e57dbf964cd7777f7844e825b5da6a98c77))
+* **test:** lazy load chart ([bcefe38](https://github.com/nekusu/apetype/commit/bcefe38155c59d8ac315a157210edc2ccb9819df))
+* **test:** make Chart component reusable ([ef31cb7](https://github.com/nekusu/apetype/commit/ef31cb7d173006616e1d25f3e189208106de21af))
+
 ## [0.7.1](https://github.com/nekusu/apetype/compare/v0.7.0...v0.7.1) (2023-08-30)
 
 
