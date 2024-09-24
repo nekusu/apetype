@@ -32,7 +32,9 @@ export function DataTable<TData>({
     getCoreRowModel: getCoreRowModel(),
     getRowId: (row) => idPrefix + row[idProperty],
     manualSorting: true,
+    enableSortingRemoval: false,
     enableMultiSort: false,
+    sortDescFirst: true,
     ...options,
   });
   const { ref: intersectionRef, entry } = useIntersection({ threshold: 1 });
@@ -72,8 +74,7 @@ export function DataTable<TData>({
                         'rounded-t-none first:rounded-bl-xl last:rounded-br-xl',
                     )}
                     onClick={() =>
-                      enableSorting &&
-                      column.toggleSorting(isSorted === false || isSorted === 'asc')
+                      enableSorting && column.toggleSorting(undefined, options.enableMultiSort)
                     }
                     onMouseEnter={() =>
                       enableSorting && (i === 0 || i === headers.length - 1) && setThHoveredIndex(i)
@@ -81,7 +82,12 @@ export function DataTable<TData>({
                     onMouseLeave={() => setThHoveredIndex(undefined)}
                   >
                     {isSorted ? (
-                      <div className='-my-2 -mx-3 flex items-center gap-1.5 p-[inherit] transition-transform active:translate-y-0.5'>
+                      <div
+                        className={twJoin(
+                          '-my-2 -mx-3 flex items-center gap-1.5 p-[inherit]',
+                          enableSorting && 'transition-transform active:translate-y-0.5',
+                        )}
+                      >
                         {header ? flexRender(header, getContext()) : column.id}
                         <RiArrowDownLine
                           className={twJoin(

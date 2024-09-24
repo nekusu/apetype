@@ -13,7 +13,7 @@ import { useDisclosure } from '@mantine/hooks';
 import { useQuery } from '@supabase-cache-helpers/postgrest-react-query';
 import { getSortedRowModel } from '@tanstack/react-table';
 import dayjs from 'dayjs';
-import { objectify } from 'radashi';
+import { max, objectify } from 'radashi';
 import { useMemo, useState } from 'react';
 import { RiCheckFill, RiMore2Fill } from 'react-icons/ri';
 import { twJoin } from 'tailwind-merge';
@@ -25,7 +25,7 @@ type PersonalBest = Exclude<
 interface PersonalBestProps {
   mode: (typeof MODES)[number];
   amount: number;
-  data?: PersonalBest;
+  data?: PersonalBest | null;
 }
 
 const MODES = ['time', 'words'] as const;
@@ -95,13 +95,13 @@ export function PersonalBests({ userId }: { userId: string }) {
         {MODES.map((mode) => (
           <Group key={mode} className='relative gap-4 rounded-xl bg-sub-alt p-4 transition-colors'>
             {settingsReference[mode].options.map(({ value }) => {
-              const personalBest = personalBests[mode].find(({ mode2 }) => +mode2 === value);
+              const filtered = personalBests[mode].filter(({ mode2 }) => +mode2 === value);
               return (
                 <PersonalBest
                   key={`${mode}-${value}`}
                   mode={mode}
                   amount={value}
-                  data={personalBest}
+                  data={max(filtered, ({ wpm }) => wpm)}
                 />
               );
             })}
@@ -133,6 +133,7 @@ export function PersonalBests({ userId }: { userId: string }) {
               accessorKey: 'mode2',
               header: selectedMode,
               enableSorting: true,
+              sortDescFirst: false,
               sortingFn: 'alphanumeric',
             },
             { accessorKey: 'wpm', enableSorting: true, sortingFn: 'alphanumeric' },
@@ -171,7 +172,12 @@ export function PersonalBests({ userId }: { userId: string }) {
           idPrefix='pb'
           idProperty='testId'
           manualSorting={false}
-          initialState={{ sorting: [{ id: 'mode2', desc: false }] }}
+          initialState={{
+            sorting: [
+              { id: 'mode2', desc: false },
+              { id: 'wpm', desc: true },
+            ],
+          }}
           getSortedRowModel={getSortedRowModel()}
         />
       </Modal>
