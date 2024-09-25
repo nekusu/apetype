@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.1](https://github.com/nekusu/apetype/compare/v0.8.0...v0.8.1) (2024-09-25)
+
+
+### Internal Updates
+
+* fix production workflow ([5f209b9](https://github.com/nekusu/apetype/commit/5f209b94896ebddc31a39e86907abe6af739be9f))
+
 ## [0.8.0](https://github.com/nekusu/apetype/compare/v0.7.1...v0.8.0) (2024-09-24)
 
 
